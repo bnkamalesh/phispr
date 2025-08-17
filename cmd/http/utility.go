@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"net/http"
 	"net/url"
 	"strings"
@@ -15,62 +14,12 @@ import (
 	"github.com/naughtygopher/webgo/v7"
 )
 
-func pushCSS(pusher http.Pusher, r *http.Request, path string) {
-	cssOpts := &http.PushOptions{
-		Header: http.Header{
-			"Accept-Encoding": r.Header["Accept-Encoding"],
-			"Content-Type":    []string{"text/css; charset=UTF-8"},
-		},
-	}
-	err := pusher.Push(path, cssOpts)
-	if err != nil {
-		webgo.LOGHANDLER.Error(err)
-	}
-}
-
-func pushJS(pusher http.Pusher, r *http.Request, path string) {
-	cssOpts := &http.PushOptions{
-		Header: http.Header{
-			"Accept-Encoding": r.Header["Accept-Encoding"],
-			"Content-Type":    []string{"application/javascript"},
-		},
-	}
-	err := pusher.Push(path, cssOpts)
-	if err != nil {
-		webgo.LOGHANDLER.Error(err)
-	}
-}
-
-func pushCommon(r *http.Request, w http.ResponseWriter) http.Pusher {
-	pusher, ok := w.(http.Pusher)
-	if !ok {
-		return nil
-	}
-
-	cp, _ := r.Cookie("pusher")
-	if cp != nil {
-		return pusher
-	}
-
-	cookie := &http.Cookie{
-		Name:   "pusher",
-		Value:  "css,js",
-		MaxAge: 300,
-	}
-
-	http.SetCookie(w, cookie)
-	pushCSS(pusher, r, "/static/css/main.css")
-	pushCSS(pusher, r, "/static/css/normalize.css")
-	pushJS(pusher, r, "/static/js/sse.js")
-	pushJS(pusher, r, "/static/js/common.js")
-	return pusher
-}
-
-func errorHandler(tmpl *template.Template, w http.ResponseWriter, err error) {
+func errorHandler(tmpl templateExecutor, w http.ResponseWriter, err error) {
 	code, msg, _ := errors.HTTPStatusCodeMessage(err)
 	if code >= http.StatusInternalServerError {
 		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
 	}
+	webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
 
 	w.WriteHeader(code)
 	if tmpl == nil {
@@ -123,13 +72,6 @@ func roomIDFromReq(r *http.Request) string {
 	return roomID
 }
 
-func pushHomepage(r *http.Request, w http.ResponseWriter) {
-	pusher := pushCommon(r, w)
-	if pusher != nil {
-		pushJS(pusher, r, "/static/js/room.js")
-	}
-}
-
 func setMemberCookies(
 	member *rooms.Member,
 	roomID string,
@@ -137,9 +79,10 @@ func setMemberCookies(
 	w http.ResponseWriter,
 ) {
 	jb, _ := json.Marshal(member)
+
 	cookieExpiry := time.Now().Add(240 * time.Hour) // Set cookie expiry to 24 hours
 	http.SetCookie(w, &http.Cookie{
-		Name:     base64.StdEncoding.EncodeToString([]byte(roomID)),
+		Name:     roomID,
 		Value:    base64.StdEncoding.EncodeToString(jb),
 		Path:     roomPath,
 		HttpOnly: true,
@@ -147,16 +90,9 @@ func setMemberCookies(
 	})
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    base64.StdEncoding.EncodeToString([]byte(roomID + "_js")),
+		Name:    roomID + "_js",
 		Value:   base64.StdEncoding.EncodeToString(jb),
 		Path:    roomPath,
 		Expires: cookieExpiry,
 	})
-}
-
-func pushRoompage(r *http.Request, w http.ResponseWriter) {
-	pusher := pushCommon(r, w)
-	if pusher != nil {
-		pushJS(pusher, r, "/static/js/main.js")
-	}
 }

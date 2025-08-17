@@ -79,16 +79,17 @@ const messagesHandler = (roomID, authorID) => {
 
 const memberHandler = (roomID) => {
   const membersList = document.getElementById("members-list");
-  const cookieParts = document?.cookie.split("; ");
+  console.log("roomID", roomID);
+  const cookieParts = document?.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${roomID + "_js"}=`))
+    ?.split("=");
   let cookieValue = "";
-  if (cookieParts.length > 1) {
-    cookieValue = cookieParts
-      .find((row) => row.startsWith(`${btoa(roomID + "_js")}=`))
-      ?.split("=")[1];
+  if (cookieParts?.length > 1) {
+    cookieValue = cookieParts[1];
   }
 
   let parsed = {};
-
   if (!cookieValue) {
     return parsed;
   }
@@ -104,7 +105,6 @@ const memberHandler = (roomID) => {
     // AddMember is used to add a new member to the room
     AddMember: function (member) {
       if (!membersList) return;
-      console.log("new member joined", member);
       const li = document.createElement("li");
       const span = document.createElement("span");
       span.innerText = member?.User?.Name;
@@ -260,8 +260,7 @@ const room = async () => {
           });
         });
     } catch (e) {
-      // console.error(e);
-      console.log(JSON.stringify(e));
+      console.error(JSON.stringify(e));
     }
 
     callback?.();

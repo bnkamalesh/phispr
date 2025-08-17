@@ -83,6 +83,7 @@ input {
 }
 
 #members {
+  max-width: 20em;
   padding: 1em 2em;
   margin: 0 0 1em;
   border: 1px solid #ddd;
@@ -131,26 +132,19 @@ footer.note {
   border-radius: 8px;
 }
 
-ul {
+.nolist {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-ul li {
+.nolist li {
   padding: 0.25em 0.5em;
 }
 
-ul li:nth-child(even),
+#public-chat-rooms li:nth-child(even),
 ol li:nth-child(even) {
   background: #eee;
-}
-
-li.msg:has(~ li.init) {
-  display: none;
-}
-li.msg ~ li.init {
-  display: none;
 }
 
 #live-rooms-count {
@@ -218,13 +212,11 @@ span#sse-status.active {
   color: #7adaa5;
 }
 span#sse-status.inactive,
-.error-message {
+.error-message,
+.critical {
   color: #d92c54;
 }
 
-#joinform {
-  float: left;
-}
 #messages .author,
 #messages .datetime {
   display: inline-block;
@@ -255,7 +247,16 @@ span#room-name {
   height: 1em;
 }
 
+#joinform button {
+  max-width: 5em;
+}
+
+.joinform-container.flex-container > form {
+  max-width: 26em;
+}
+
 .phantom {
+  cursor: default;
   color: #f6ae06;
 }
 
@@ -269,6 +270,7 @@ button {
   padding: 0.5em 0.75em;
   cursor: pointer;
   border-radius: 4px;
+  max-height: 2.5em;
 }
 
 button:hover {
@@ -280,30 +282,28 @@ button:active {
 }
 
 .flex-container {
-  display: flex; /* enable flex layout */
-  width: 100%; /* take full width */
+  display: flex;
+  width: 100%;
 }
 
-.flex-container .left {
-  flex: 0 0 70%;
-}
-.flex-container .right {
-  flex: 0 0 30%;
+.flex-container > * {
+  flex: 1;
 }
 
-@media screen and (max-width: 940px) {
-  .flex-container,
-  .flex-container .left,
-  .flex-container .right {
-    display: block;
+@media screen and (max-width: 420px) {
+  .flex-container {
+    flex-direction: column; /* stack items vertically */
   }
-  #members {
-    height: 10em;
+  .flex-container > * {
+    margin-bottom: 0.5em;
+  }
+  #sse-status {
+    font-size: 0.5em;
   }
 }
 
-@media screen and (max-width: 460px) {
-  span#room-name {
-    max-width: 27%;
+@media screen and (max-width: 520px) {
+  #sse-status {
+    font-size: 0.5em;
   }
 }

@@ -43,29 +43,23 @@
             <h3>New room</h3>
             <section id="new-room">
                 <form action="/rooms" method="POST">
-                    <table>
-                        <tr>
-                            <td><label for="room-name">Name</label></td>
-                            <td><input type="text" name="name" id="room-name" placeholder="cosmos" maxlength="512" />
-                            </td>
-                            <!-- <td>
-                                <input type="checkbox" name="private" id="private" value="true" />
-                                <label for="private">Private</label>
-                            </td> -->
-                            <td>
-                                <input type="checkbox" name="phantom" id="phantom" value="true" />
-                                <label for="phantom">phantom</label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="username">Username</label></td>
-                            <td><input type="text" name="username" id="username" placeholder="maakri" maxlength="256" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><button type="submit">Create & Join</button></td>
-                        </tr>
-                    </table>
+                    <ul class="nolist">
+                        <li class="flex-container">
+                            <label for="room-name">Name</label>
+                            <input type="text" name="name" id="room-name" placeholder="cosmos" maxlength="512" />
+                        </li>
+                        <li class="flex-container">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" id="username" placeholder="maakri" maxlength="256" />
+                        </li>
+                        <li style="text-align: right;">
+                            <input type="checkbox" name="phantom" id="phantom" value="true" />
+                            <label for="phantom">phantom</label>
+                        </li>
+                        <li>
+                            <button type="submit">Create & Join</button>
+                        </li>
+                    </ul>
                 </form>
             </section>
         </section>
@@ -74,7 +68,7 @@
             <p>
                 Phispr is where whispers live briefly, then vanish into the void. No logins, no history, just fleeting
                 conversations that disappear like phantoms.
-                <a href="https://github.com/bnkamalesh">Github</a>
+                <a href="https://github.com/bnkamalesh/phispr">Github</a>
             </p>
         </footer>
     </section>

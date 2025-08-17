@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Phispr - {{.RoomID}} {{if .Phantom}}☠{{end}}</title>
+    <title>Phispr - {{if .Phantom}}☠{{end}} {{.RoomName}}</title>
     <meta name="description"
         content="Phispr is an ephemeral chat app for phantom whispers. Anonymous, throwaway rooms where conversations vanish without a trace.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,36 +21,35 @@
 <body>
     <section class="main">
         <h1>
-            <span id="room-name" title="{{.RoomID}}">
-                {{.RoomID}} {{if .Phantom}}<span class="phantom" title="phantom channel">☠</span>{{end}}
+            <span id="room-name" title="{{.RoomName}}">
+                {{if .Phantom}}<span class="phantom" title="phantom channel">☠</span>{{end}}
+                {{.RoomName}}
             </span>
             <!-- <span class="members">({{.Live}} / {{.Capacity}})</span> -->
 
             <div class="sub-header">
                 <span id="sse-status" title="establishing SSE for live messages"></span>
-                {{if .Requestor}}
-                <span class="author you" title="{{.Requestor}}">{{.Requestor}}</span>
-                {{end}}
             </div>
         </h1>
-        <div style="text-align: right; margin-bottom: 1em;">
+        <div style="margin-bottom: 1em;" class="joinform-container flex-container">
             {{if not .Requestor}}
             <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
-                <table>
-                    <tr>
-                        <td><label for="username">Username</label></td>
-                        <td><input type="text" name="username" id="username" placeholder="maakri" maxlength="256" />
-                        </td>
-                        <td><button type="submit">Join</button></td>
-                    </tr>
-                </table>
+                <ul class="nolist">
+                    <li class="flex-container">
+                        <label for="username">
+                            Username&nbsp;
+                            <input type="text" name="username" id="username" placeholder="maakri" maxlength="256" />
+                        </label>
+
+                        <button type="submit">Join</button>
+                    </li>
+                </ul>
             </form>
-            <div style="clear: both;"></div>
             {{end}}
         </div>
         <section class="flex-container">
-            <section id="messages" class="{{if .Requestor}}left{{end}}" style="{{if not .Requestor}}width: 100%{{end}}">
-                <ul id="messages-list">
+            <section id="messages" style="{{if not .Requestor}}width: 100%{{end}}">
+                <ul id="messages-list" class="nolist">
                     <li class="init" style="{{if .Messages}}display: none;{{end}}">No messages ...</li>
                     {{range .Messages}}
                     <li class="msg">
@@ -63,11 +62,12 @@
                 </ul>
             </section>
             {{if .Requestor}}
-            <section id="members" class="right">
+            <section id="members">
                 <h4>Members</h4>
                 <ol id="members-list">
                     {{range .Members}}
-                    <li><span title="{{.User.Name}}">{{.User.Name}}</span></li>
+                    <li><span class="author {{if eq .User.Name $.Requestor}}you{{end}}"
+                            title="{{.User.Name}}">{{.User.Name}}</span></li>
                     {{end}}
                 </ol>
             </section>
@@ -83,6 +83,9 @@
             </form>
         </section>
         <footer>
+            {{if .Phantom }}
+            <p class="critical">Note: Any message sent by other members, when you're disconnected are lost forever.</p>
+            {{end}}
             <a href="/">Home</a>
         </footer>
     </section>

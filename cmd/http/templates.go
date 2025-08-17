@@ -2,6 +2,7 @@ package http
 
 import (
 	"html/template"
+	"io"
 	"os"
 
 	"github.com/bnkamalesh/phispr/internal/messages"
@@ -30,7 +31,7 @@ func readFile(path string) (string, error) {
 	return string(out), nil
 }
 
-func loadTemplate(path, name string) *template.Template {
+func loadRawTemplate(path, name string) templateExecutor {
 	out, err := readFile(path)
 	if err != nil {
 		panic(err)
@@ -40,8 +41,17 @@ func loadTemplate(path, name string) *template.Template {
 	if err != nil {
 		panic(errors.Wrapf(err, "failed to parse template(%s:%s)", path, name))
 	}
-
 	return tmpl
+}
+
+func loadTemplate(path, name string, livereload bool) templateExecutor {
+	if !livereload {
+		return loadRawTemplate(path, name)
+	}
+
+	return templateExecutorFunc(func(wr io.Writer, data any) error {
+		return loadRawTemplate(path, name).Execute(wr, data)
+	})
 }
 
 type homePayload struct {
@@ -53,6 +63,7 @@ type homePayload struct {
 
 type roomPayload struct {
 	RoomID    string
+	RoomName  string
 	Live      uint
 	Capacity  uint
 	Requestor string

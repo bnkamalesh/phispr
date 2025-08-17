@@ -18,9 +18,10 @@ type Config struct {
 		ReadTimeout  time.Duration
 		WriteTimeout time.Duration
 
-		TemplateHome  string
-		TemplateRoom  string
-		TemplateError string
+		TemplateHome       string
+		TemplateRoom       string
+		TemplateError      string
+		LiveReloadTemplate bool
 
 		EnableAccessLog bool
 	}
@@ -45,6 +46,7 @@ func Load(path string) *Config {
 	cfg.HTTP.TemplateRoom = k.MustString("http.template_room")
 	cfg.HTTP.TemplateError = k.MustString("http.template_error")
 	cfg.HTTP.EnableAccessLog = k.Bool("http.enable_access_log")
+	cfg.HTTP.LiveReloadTemplate = k.Bool("http.live_reload_template")
 	cfg.Rooms.Capacity = uint(k.MustInt("rooms.capacity"))
 	cfg.Rooms.MemberCapacity = uint(k.Int("rooms.member_capacity"))
 

@@ -9,6 +9,7 @@ import (
 	"github.com/bnkamalesh/phispr/internal/messages"
 	"github.com/bnkamalesh/phispr/internal/users"
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"github.com/naughtygopher/errors"
 )
 
@@ -34,16 +35,12 @@ type Room struct {
 }
 
 func (rm *Room) Sanitize() {
-	rm.ID = strings.TrimSpace(rm.ID)
 	rm.Name = strings.TrimSpace(rm.Name)
-
 	if rm.Capacity == 0 {
 		rm.Capacity = 250
 	}
 
-	if rm.ID == "" {
-		rm.ID = rm.Name
-	}
+	rm.ID = slug.Make(rm.Name)
 
 	if rm.Members == nil {
 		rm.Members = make(map[string]*Member, rm.Capacity)
@@ -82,7 +79,7 @@ func (rm *Room) SanitizeValidate() error {
 func (rm *Room) AddMember(usr *users.User) (*Member, error) {
 	_, exists := rm.nameUsed[usr.Name]
 	if exists {
-		return nil, errors.Duplicatef("member %q already in the room %q", usr.Name, rm.ID)
+		return nil, errors.Duplicatef("member %q is already in the room %q", usr.Name, rm.ID)
 	}
 
 	member := &Member{
@@ -221,7 +218,7 @@ func (rs *Rooms) List() ([]*Room, error) {
 
 	rooms := make([]*Room, 0, len(rs.rooms))
 	for _, room := range rs.rooms {
-		if room.Public {
+		if room.Public && len(room.Members) > 0 {
 			rooms = append(rooms, room)
 		}
 	}

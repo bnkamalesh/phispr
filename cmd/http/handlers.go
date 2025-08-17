@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -24,12 +24,22 @@ var (
 	lastModified = time.Now().Format(http.TimeFormat)
 )
 
+type templateExecutor interface {
+	Execute(wr io.Writer, data any) error
+}
+
+type templateExecutorFunc func(wr io.Writer, data any) error
+
+func (f templateExecutorFunc) Execute(wr io.Writer, data any) error {
+	return f(wr, data)
+}
+
 type HTTP struct {
 	sse          *sse.SSE
 	api          *api.API
-	templateHome *template.Template
-	templateRoom *template.Template
-	templateErr  *template.Template
+	templateHome templateExecutor
+	templateRoom templateExecutor
+	templateErr  templateExecutor
 }
 
 // StaticFilesHandler is used to serve static files
@@ -50,7 +60,7 @@ func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pushHomepage(r, w)
+	// pushHomepage(r, w)
 	h.templateHome.Execute(w, &homePayload{
 		TotalRooms:  h.api.Capacity(),
 		PublicRooms: uint(len(rooms)),
@@ -87,6 +97,7 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 
 	rp := &roomPayload{
 		RoomID:    room.ID,
+		RoomName:  room.Name,
 		Capacity:  room.Capacity,
 		Live:      liveUsers,
 		Requestor: requestor,
@@ -95,7 +106,7 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 		Phantom:   room.Phantom,
 	}
 
-	pushRoompage(r, w)
+	// pushRoompage(r, w)
 	h.templateRoom.Execute(w, rp)
 }
 
@@ -117,8 +128,7 @@ func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTP) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
-	wctx := webgo.Context(r)
-	roomID := wctx.URIParams["roomID"]
+	roomID := roomIDFromReq(r)
 	username := r.PostFormValue("username")
 
 	member, err := h.api.Join(roomID, username)
@@ -145,8 +155,7 @@ func (h *HTTP) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTP) NewMessage(w http.ResponseWriter, r *http.Request) {
-	wctx := webgo.Context(r)
-	roomID := wctx.URIParams["roomID"]
+	roomID := roomIDFromReq(r)
 	member, err := h.memberFromCookie(r)
 	if err != nil {
 		errorHandler(nil, w, err)
@@ -206,23 +215,20 @@ func (h *HTTP) SSEHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
-	wctx := webgo.Context(r)
-
-	roomID := wctx.URIParams["roomID"]
-	base64RoomID := base64.StdEncoding.EncodeToString([]byte(roomID))
-	cookie, err := r.Cookie(base64RoomID)
+	roomID := roomIDFromReq(r)
+	cookie, err := r.Cookie(roomID)
 	if err != nil {
 		return nil, errors.UnauthenticatedErrf(err, "you're not a member of the room %q", roomID)
 	}
 	decoded, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in %q", roomID)
+		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in the room %q", roomID)
 	}
 
 	member := &rooms.Member{}
 	err = json.Unmarshal(decoded, member)
 	if err != nil {
-		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in %q", roomID)
+		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in the room %q", roomID)
 	}
 
 	member, err = ht.api.ValidateMember(member)

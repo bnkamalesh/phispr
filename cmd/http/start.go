@@ -84,9 +84,9 @@ func setup(cfg *configs.Config) *webgo.Router {
 	ht := HTTP{
 		api:          api,
 		sse:          sse.New(),
-		templateHome: loadTemplate(cfg.HTTP.TemplateHome, "home"),
-		templateRoom: loadTemplate(cfg.HTTP.TemplateRoom, "room"),
-		templateErr:  loadTemplate(cfg.HTTP.TemplateError, "error"),
+		templateHome: loadTemplate(cfg.HTTP.TemplateHome, "home", cfg.HTTP.LiveReloadTemplate),
+		templateRoom: loadTemplate(cfg.HTTP.TemplateRoom, "room", cfg.HTTP.LiveReloadTemplate),
+		templateErr:  loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate),
 	}
 	routes := getRoutes(&ht)
 
@@ -109,7 +109,7 @@ func Start() {
 	cfg := configs.Load("./config.yaml")
 	router := setup(cfg)
 
-	errTmpl := loadTemplate(cfg.HTTP.TemplateError, "error")
+	errTmpl := loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate)
 	router.NotFound = func(w http.ResponseWriter, r *http.Request) {
 		errorHandler(errTmpl, w, errors.NotFoundf(`Here, take your URL back please (つ•᷄᎑•᷅)  %q.`, r.URL.Path))
 	}
