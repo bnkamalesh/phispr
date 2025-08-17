@@ -3,11 +3,13 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Silly public chat {{.RoomID}}</title>
-    <meta name="description" content="A silly public chat">
+    <title>Phispr - {{.RoomID}}</title>
+    <meta name="description"
+        content="Phispr is an ephemeral chat app for phantom whispers. Anonymous, throwaway rooms where conversations vanish without a trace.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta property="og:title" content="Silly public chat">
+    <meta property="og:title"
+        content="Step into Phispr: anonymous, temporary chat rooms where every whisper fades into nothingness." />
     <meta property="og:type" content="website">
 
     <link rel="stylesheet" href="/static/css/normalize.css">
@@ -19,21 +21,19 @@
 <body>
     <section class="main">
         <h1>
-            <span id="room-name">
+            <span id="room-name" title="{{.RoomID}}">
                 {{.RoomID}}
             </span>
-            <span class="members">({{.Live}} / {{.Capacity}})</span>
+            <!-- <span class="members">({{.Live}} / {{.Capacity}})</span> -->
 
             <div class="sub-header">
                 <span id="sse-status" title="establishing SSE for live messages"></span>
                 {{if .Requestor}}
-                <span class="author you">{{.Requestor}}</span>
+                <span class="author you" title="{{.Requestor}}">{{.Requestor}}</span>
                 {{end}}
             </div>
         </h1>
         <div style="text-align: right; margin-bottom: 1em;">
-            <button id="clear-messages">Clear Messages</button>
-
             {{if not .Requestor}}
             <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
                 <table>
@@ -41,25 +41,37 @@
                         <td><label for="username">Username</label></td>
                         <td><input type="text" name="username" id="username" placeholder="maakri" maxlength="256" />
                         </td>
-                        <td><input type="submit" value="Join" /></td>
+                        <td><button type="submit">Join</button></td>
                     </tr>
                 </table>
             </form>
             <div style="clear: both;"></div>
             {{end}}
         </div>
-        <section id="messages">
-            <ul id="messages-list">
-                <li class="init" style="{{if .Messages}}display: none;{{end}}">No messages ...</li>
-                {{range .Messages}}
-                <li class="msg">
-                    <!-- Golang template, access variable Requestor which is in the root -->
-                    <span class="author {{if eq .Author.Name $.Requestor}}you{{end}}">{{.Author.Name}}</span>
-                    <span class="datetime" data-datetime="{{.ServerReceivedAt}}"></span>
-                    <p>{{.Content}}</p>
-                </li>
-                {{end}}
-            </ul>
+        <section class="flex-container">
+            <section id="messages" class="{{if .Requestor}}left{{end}}" style="{{if not .Requestor}}width: 100%{{end}}">
+                <ul id="messages-list">
+                    <li class="init" style="{{if .Messages}}display: none;{{end}}">No messages ...</li>
+                    {{range .Messages}}
+                    <li class="msg">
+                        <!-- Golang template, access variable Requestor which is in the root -->
+                        <span class="author {{if eq .Author.Name $.Requestor}}you{{end}}">{{.Author.Name}}</span>
+                        <span class="datetime" data-datetime="{{.ServerReceivedAt}}"></span>
+                        <p>{{.Content}}</p>
+                    </li>
+                    {{end}}
+                </ul>
+            </section>
+            {{if .Requestor}}
+            <section id="members" class="right">
+                <h4>Members</h4>
+                <ol id="members-list">
+                    {{range .Members}}
+                    <li><span title="{{.User.Name}}">{{.User.Name}}</span></li>
+                    {{end}}
+                </ol>
+            </section>
+            {{end}}
         </section>
 
         <section style="{{if not .Requestor }}display: none;{{end}}">
@@ -67,6 +79,7 @@
                 <textarea name="message" id="message" placeholder="Type your message here..."
                     maxlength="2048"></textarea>
                 <button type="submit">Send</button>
+                <button type="" id="clear-messages" title="only locally on your browser">Clear Messages</button>
             </form>
         </section>
         <footer>

@@ -3,11 +3,13 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Silly chat</title>
-    <meta name="description" content="Silly public chat with chat rooms">
+    <title>Phispr - Phantom whispers</title>
+    <meta name="description"
+        content="Phispr is an ephemeral chat app for phantom whispers. Anonymous, throwaway rooms where conversations vanish without a trace.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta property="og:title" content="Silly public chats">
+    <meta property="og:title"
+        content="Step into Phispr: anonymous, temporary chat rooms where every whisper fades into nothingness." />
     <meta property="og:type" content="website">
 
     <link rel="stylesheet" href="/static/css/normalize.css">
@@ -18,9 +20,9 @@
 
 <body>
     <section class="main">
-        <h1>Silly chat</h1>
+        <h1>Phispr</h1>
         <section class="container small">
-            <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}} (public: {{.PublicRooms}})</span>
+            <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
             </h3>
             <ol id="public-chat-rooms">
                 {{if not .Rooms}}
@@ -56,12 +58,20 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><input type="submit" value="Create & Join" /></td>
+                            <td><button type="submit">Create & Join</button></td>
                         </tr>
                     </table>
                 </form>
             </section>
         </section>
+        <footer class="note">
+            <h3>Phispr - Phantom Whispers</h3>
+            <p>
+                Phispr is where whispers live briefly, then vanish into the void. No logins, no history, just fleeting
+                conversations that disappear like phantoms.
+                <a href="https://github.com/bnkamalesh">Github</a>
+            </p>
+        </footer>
     </section>
 </body>
 

@@ -99,6 +99,18 @@ func (rm *Room) Messages() []messages.Message {
 	return rm.msgs.All()
 }
 
+func (rm *Room) MembersList() []Member {
+	list := make([]Member, 0, len(rm.Members))
+	for key := range rm.Members {
+		member := rm.Members[key]
+		list = append(list, *member)
+	}
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].User.Joined.Before(list[j].User.Joined)
+	})
+	return list
+}
+
 func NewRoom(id, name string, public bool, capacity uint) (*Room, error) {
 	room := &Room{
 		ID:        id,

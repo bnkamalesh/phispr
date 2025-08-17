@@ -26,7 +26,10 @@ ol {
 
 h1,
 h2,
-h3 {
+h3,
+h4,
+h5,
+h6 {
   margin: 0 0 1em 0;
   padding: 0;
 }
@@ -49,7 +52,7 @@ section.main {
 
 section.container.small {
   margin: 0 auto;
-  width: 512px;
+  max-width: 512px;
 }
 
 td {
@@ -79,6 +82,30 @@ input {
   overflow: auto;
 }
 
+#members {
+  padding: 1em 2em;
+  margin: 0 0 1em;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  height: 50vh;
+  min-height: 180px;
+  overflow: auto;
+}
+
+#members-list {
+  border: none;
+}
+
+#members-list li span {
+  width: 100%;
+  height: 1.5em;
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-wrap: nowrap;
+}
+
 textarea {
   width: 100%;
   height: 64px;
@@ -94,6 +121,16 @@ footer {
   right: 0;
 }
 
+footer.note {
+  font-size: 1em;
+  max-width: 512px;
+  padding: 1em 1.5em;
+  background-color: #eee;
+  margin: auto;
+  text-align: left;
+  border-radius: 8px;
+}
+
 ul {
   list-style: none;
   padding: 0;
@@ -104,7 +141,8 @@ ul li {
   padding: 0.25em 0.5em;
 }
 
-ul li:nth-child(even) {
+ul li:nth-child(even),
+ol li:nth-child(even) {
   background: #eee;
 }
 
@@ -144,6 +182,9 @@ li.msg ~ li.init {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+#clear-messages {
+  float: right;
+}
 .room-members-count {
   font-size: 0.75em;
   float: right;
@@ -161,6 +202,12 @@ li.msg ~ li.init {
   text-align: center;
   font-size: 0.75em;
   margin-top: 0.25em;
+  max-width: 12em;
+  height: 1.5em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-wrap: nowrap;
 }
 h1 .members {
   color: #999;
@@ -176,7 +223,6 @@ span#sse-status.inactive,
 }
 
 #joinform {
-  display: inline-block;
   float: left;
 }
 #messages .author,
@@ -205,6 +251,7 @@ span#room-name {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  text-wrap: nowrap;
   height: 1em;
 }
 
@@ -221,6 +268,29 @@ button:hover {
 }
 button:active {
   background: #888;
+}
+
+.flex-container {
+  display: flex; /* enable flex layout */
+  width: 100%; /* take full width */
+}
+
+.flex-container .left {
+  flex: 0 0 70%;
+}
+.flex-container .right {
+  flex: 0 0 30%;
+}
+
+@media screen and (max-width: 940px) {
+  .flex-container,
+  .flex-container .left,
+  .flex-container .right {
+    display: block;
+  }
+  #members {
+    height: 10em;
+  }
 }
 
 @media screen and (max-width: 460px) {

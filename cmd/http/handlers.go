@@ -91,6 +91,7 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 		Live:      liveUsers,
 		Requestor: requestor,
 		Messages:  room.Messages(),
+		Members:   room.MembersList(),
 	}
 
 	pushRoompage(r, w)
@@ -128,6 +129,18 @@ func (h *HTTP) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 	roomPath := "/rooms/" + roomID
 	setMemberCookies(member, roomID, roomPath, w)
 	http.Redirect(w, r, roomPath, http.StatusSeeOther)
+
+	h.sse.Clients.Range(func(client *sse.Client) {
+		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
+		if roomID != member.RoomID {
+			return
+		}
+
+		jb, _ := json.Marshal(member)
+		client.Msg <- &sse.Message{
+			Data: string(jb),
+		}
+	})
 }
 
 func (h *HTTP) NewMessage(w http.ResponseWriter, r *http.Request) {

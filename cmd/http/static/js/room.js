@@ -73,6 +73,7 @@ const messagesHandler = (roomID, authorID) => {
 };
 
 const memberHandler = (roomID) => {
+  const membersList = document.getElementById("members-list");
   const cookieParts = document?.cookie.split("; ");
   let cookieValue = "";
   if (cookieParts.length > 1) {
@@ -95,6 +96,17 @@ const memberHandler = (roomID) => {
 
   return {
     member: parsed,
+    // AddMember is used to add a new member to the room
+    AddMember: function (member) {
+      if (!membersList) return;
+      console.log("new member joined", member);
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.innerText = member?.User?.Name;
+      span.setAttribute("title", span.innerText);
+      li.appendChild(span);
+      membersList.appendChild(li);
+    },
   };
 };
 
@@ -171,7 +183,7 @@ const SSE = async (roomID, onMessage) => {
 
 const room = async () => {
   const roomID = window.location.pathname.split("/").pop();
-  const { member } = memberHandler(roomID);
+  const { member, AddMember } = memberHandler(roomID);
 
   const authorID = member?.User?.Name || "anonymous";
   const messages = messagesHandler(roomID, authorID);
@@ -251,11 +263,16 @@ const room = async () => {
   };
 
   SSE(roomID, (data) => {
-    messages.Push(roomID, {
-      content: data.Content,
-      at: data.ServerReceivedAt,
-      author: data.Author.Name,
-    });
+    // if the payload has Token in its root, it's a message for new joinee in the room
+    if (data?.Token) {
+      AddMember(data);
+    } else if (data?.Content) {
+      messages.Push(roomID, {
+        content: data.Content,
+        at: data.ServerReceivedAt,
+        author: data.Author.Name,
+      });
+    }
   });
 };
 room();

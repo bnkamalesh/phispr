@@ -57,6 +57,7 @@ type roomPayload struct {
 	Capacity  uint
 	Requestor string
 	Messages  []messages.Message
+	Members   []rooms.Member
 }
 
 type errorPayload struct {
