@@ -92,6 +92,7 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 		Requestor: requestor,
 		Messages:  room.Messages(),
 		Members:   room.MembersList(),
+		Phantom:   room.Phantom,
 	}
 
 	pushRoompage(r, w)
@@ -101,7 +102,7 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 	room, member, err := h.api.AddAndJoin(
 		r.PostFormValue("name"),
-		true,
+		r.PostFormValue("phantom") == "true",
 		r.PostFormValue("username"),
 	)
 	if err != nil {

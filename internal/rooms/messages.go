@@ -9,10 +9,15 @@ import (
 type Messages struct {
 	capacity uint
 	queue    chan<- *messages.Message
+	// Phantom if true, messages are not retained on server at all
+	Phantom  bool
 	Messages []messages.Message
 }
 
 func (msgs *Messages) Add(msg *messages.Message) error {
+	if msgs.Phantom {
+		return nil
+	}
 	msgs.queue <- msg
 	return nil
 }
@@ -40,12 +45,13 @@ func (msgs *Messages) listener(queue <-chan *messages.Message) {
 	}
 }
 
-func NewMessages(capacity uint) *Messages {
+func NewMessages(capacity uint, phantom bool) *Messages {
 	queue := make(chan *messages.Message, capacity)
 	msgs := &Messages{
 		capacity: capacity,
 		Messages: make([]messages.Message, 0, capacity),
 		queue:    queue,
+		Phantom:  phantom,
 	}
 
 	go msgs.listener(queue)

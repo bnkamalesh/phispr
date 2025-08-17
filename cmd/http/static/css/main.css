@@ -255,6 +255,15 @@ span#room-name {
   height: 1em;
 }
 
+.phantom {
+  color: #f6ae06;
+}
+
+.phantom {
+  font-size: 1.25em;
+  font-weight: bold;
+}
+
 button {
   border: 1px solid #ddd;
   padding: 0.5em 0.75em;

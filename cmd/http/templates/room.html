@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Phispr - {{.RoomID}}</title>
+    <title>Phispr - {{.RoomID}} {{if .Phantom}}☠{{end}}</title>
     <meta name="description"
         content="Phispr is an ephemeral chat app for phantom whispers. Anonymous, throwaway rooms where conversations vanish without a trace.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,7 +22,7 @@
     <section class="main">
         <h1>
             <span id="room-name" title="{{.RoomID}}">
-                {{.RoomID}}
+                {{.RoomID}} {{if .Phantom}}<span class="phantom" title="phantom channel">☠</span>{{end}}
             </span>
             <!-- <span class="members">({{.Live}} / {{.Capacity}})</span> -->
 

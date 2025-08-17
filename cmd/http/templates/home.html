@@ -32,6 +32,7 @@
                 {{range .Rooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
+                        {{if .Phantom}}<span class="phantom" title="phantom channel">☠</span>{{end}}
                         <span class="room-name">{{.Name}}</span>
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
@@ -51,6 +52,10 @@
                                 <input type="checkbox" name="private" id="private" value="true" />
                                 <label for="private">Private</label>
                             </td> -->
+                            <td>
+                                <input type="checkbox" name="phantom" id="phantom" value="true" />
+                                <label for="phantom">phantom</label>
+                            </td>
                         </tr>
                         <tr>
                             <td><label for="username">Username</label></td>

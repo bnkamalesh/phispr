@@ -28,7 +28,9 @@ type Room struct {
 	SecretHashKey string
 	msgs          *Messages
 	Public        bool
-	CreatedAt     time.Time
+	// Phantom if enabled would not retain messages on the server
+	Phantom   bool
+	CreatedAt time.Time
 }
 
 func (rm *Room) Sanitize() {
@@ -111,7 +113,7 @@ func (rm *Room) MembersList() []Member {
 	return list
 }
 
-func NewRoom(id, name string, public bool, capacity uint) (*Room, error) {
+func NewRoom(id, name string, public, phantom bool, capacity uint) (*Room, error) {
 	room := &Room{
 		ID:        id,
 		Name:      name,
@@ -119,6 +121,7 @@ func NewRoom(id, name string, public bool, capacity uint) (*Room, error) {
 		Members:   make(map[string]*Member, capacity),
 		Public:    public,
 		CreatedAt: time.Now(),
+		Phantom:   phantom,
 	}
 
 	err := room.SanitizeValidate()
@@ -126,7 +129,7 @@ func NewRoom(id, name string, public bool, capacity uint) (*Room, error) {
 		return nil, err
 	}
 
-	room.msgs = NewMessages(room.Capacity * 3)
+	room.msgs = NewMessages(room.Capacity*3, phantom)
 
 	return room, nil
 }
@@ -192,8 +195,8 @@ func (rs *Rooms) Join(roomID string, username string) (*Member, error) {
 	return rs.AddMember(room, username)
 }
 
-func (rs *Rooms) AddAndJoin(roomID string, public bool, username string) (*Room, *Member, error) {
-	room, err := NewRoom(roomID, roomID, public, 250)
+func (rs *Rooms) AddAndJoin(roomID string, phantom bool, username string) (*Room, *Member, error) {
+	room, err := NewRoom(roomID, roomID, true, phantom, 250)
 	if err != nil {
 		return nil, nil, err
 	}

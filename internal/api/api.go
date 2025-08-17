@@ -6,7 +6,7 @@ import (
 )
 
 type chatrooms interface {
-	AddAndJoin(roomID string, public bool, username string) (*rooms.Room, *rooms.Member, error)
+	AddAndJoin(roomID string, phantom bool, username string) (*rooms.Room, *rooms.Member, error)
 	Join(roomID string, username string) (*rooms.Member, error)
 	List() ([]*rooms.Room, error)
 	Capacity() uint

@@ -58,6 +58,7 @@ type roomPayload struct {
 	Requestor string
 	Messages  []messages.Message
 	Members   []rooms.Member
+	Phantom   bool
 }
 
 type errorPayload struct {
