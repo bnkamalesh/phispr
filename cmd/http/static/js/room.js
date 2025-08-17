@@ -189,6 +189,7 @@ const SSE = async (roomID, onMessage) => {
 const room = async () => {
   const roomID = window.location.pathname.split("/").pop();
   const { member, AddMember } = memberHandler(roomID);
+  const loading = document.getElementById("loading");
 
   const authorID = member?.User?.Name || "anonymous";
   const messages = messagesHandler(roomID, authorID);
@@ -218,6 +219,7 @@ const room = async () => {
   prepAndSendMessage = () => {
     const message = messageTextarea.value.trim();
     if (!message) return;
+    loading.style.opacity = "1";
     // clear container only if sendmessage was successful
     sendMessage(message, (response) => {
       if (response) {
@@ -235,6 +237,7 @@ const room = async () => {
         messageTextarea.textContent = "";
         messageTextarea.focus();
         messageTextarea.click();
+        loading.style.opacity = "0";
       }, 5);
     });
   };

@@ -1,6 +1,6 @@
 * {
   transition: color 0.25s, margin 0.25s, padding 0.25s, width 0.25s,
-    height 0.25s, background-color 0.25s, scroll 0.25s;
+    height 0.25s, background-color 0.25s, scroll 0.25s, opacity 0.25s;
   box-sizing: border-box;
 }
 
@@ -62,6 +62,13 @@ td {
 input {
   border: 1px solid #ddd;
   padding: 0.25em 0.5em;
+}
+
+#loading {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
 }
 
 #new-room {
