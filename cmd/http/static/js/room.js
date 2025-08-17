@@ -58,6 +58,11 @@ const messagesHandler = (roomID, authorID) => {
           behavior: "smooth",
         });
       }
+
+      // this feels silly, but I couldn't find an easier way to do it.
+      messagesList
+        .querySelector(".init")
+        .setAttribute("style", "display: none");
     },
     RenderMessageTimestamps: function () {
       messageContainer.querySelectorAll("li.msg .datetime").forEach((el) => {
