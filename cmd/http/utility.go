@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/bnkamalesh/chat/internal/rooms"
 	"github.com/naughtygopher/errors"
@@ -67,9 +68,7 @@ func pushCommon(r *http.Request, w http.ResponseWriter) http.Pusher {
 
 func errorHandler(tmpl *template.Template, w http.ResponseWriter, err error) {
 	code, msg, _ := errors.HTTPStatusCodeMessage(err)
-	switch code {
-	case http.StatusUnauthorized:
-	default:
+	if code >= http.StatusInternalServerError {
 		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
 	}
 
@@ -86,34 +85,6 @@ func errorHandler(tmpl *template.Template, w http.ResponseWriter, err error) {
 	if terr != nil {
 		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", terr))
 	}
-}
-
-func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
-	wctx := webgo.Context(r)
-
-	roomID := wctx.URIParams["roomID"]
-	base64RoomID := base64.StdEncoding.EncodeToString([]byte(roomID))
-	cookie, err := r.Cookie(base64RoomID)
-	if err != nil {
-		return nil, errors.UnauthenticatedErrf(err, "you're not a member of the room %q", roomID)
-	}
-	decoded, err := base64.StdEncoding.DecodeString(cookie.Value)
-	if err != nil {
-		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in %q", roomID)
-	}
-
-	member := &rooms.Member{}
-	err = json.Unmarshal(decoded, member)
-	if err != nil {
-		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in %q", roomID)
-	}
-
-	member, err = ht.api.ValidateMember(member)
-	if err != nil {
-		return nil, err
-	}
-
-	return member, nil
 }
 
 func sseClientID(member *rooms.Member) string {
@@ -150,4 +121,42 @@ func roomIDFromReq(r *http.Request) string {
 	roomID := wctx.URIParams["roomID"]
 	roomID, _ = url.QueryUnescape(roomID)
 	return roomID
+}
+
+func pushHomepage(r *http.Request, w http.ResponseWriter) {
+	pusher := pushCommon(r, w)
+	if pusher != nil {
+		pushJS(pusher, r, "/static/js/room.js")
+	}
+}
+
+func setMemberCookies(
+	member *rooms.Member,
+	roomID string,
+	roomPath string,
+	w http.ResponseWriter,
+) {
+	jb, _ := json.Marshal(member)
+	cookieExpiry := time.Now().Add(240 * time.Hour) // Set cookie expiry to 24 hours
+	http.SetCookie(w, &http.Cookie{
+		Name:     base64.StdEncoding.EncodeToString([]byte(roomID)),
+		Value:    base64.StdEncoding.EncodeToString(jb),
+		Path:     roomPath,
+		HttpOnly: true,
+		Expires:  cookieExpiry,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    base64.StdEncoding.EncodeToString([]byte(roomID + "_js")),
+		Value:   base64.StdEncoding.EncodeToString(jb),
+		Path:    roomPath,
+		Expires: cookieExpiry,
+	})
+}
+
+func pushRoompage(r *http.Request, w http.ResponseWriter) {
+	pusher := pushCommon(r, w)
+	if pusher != nil {
+		pushJS(pusher, r, "/static/js/main.js")
+	}
 }

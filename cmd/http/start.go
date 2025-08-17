@@ -1,23 +1,17 @@
 package http
 
 import (
-	"context"
+	"fmt"
 	"net/http"
-	"os"
-	"strings"
-	"time"
 
 	"github.com/bnkamalesh/chat/internal/api"
+	"github.com/bnkamalesh/chat/internal/configs"
 	"github.com/bnkamalesh/chat/internal/rooms"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"
 	"github.com/naughtygopher/webgo/v7/extensions/sse"
 	"github.com/naughtygopher/webgo/v7/middleware/accesslog"
 	"github.com/naughtygopher/webgo/v7/middleware/cors"
-)
-
-var (
-	lastModified = time.Now().Format(http.TimeFormat)
 )
 
 func getRoutes(ht *HTTP) []*webgo.Route {
@@ -53,21 +47,21 @@ func getRoutes(ht *HTTP) []*webgo.Route {
 			FallThroughPostResponse: true,
 		},
 		{
-			Name:          "join room",
+			Name:          "join-room",
 			Method:        http.MethodPost,
 			Pattern:       "/rooms/:roomID",
 			Handlers:      []http.HandlerFunc{ht.JoinRoomHandler},
 			TrailingSlash: true,
 		},
 		{
-			Name:          "room subscription",
+			Name:          "room-subscription",
 			Method:        http.MethodGet,
 			Pattern:       "/rooms/:roomID/messages",
-			Handlers:      []http.HandlerFunc{ht.SSEHandler()},
+			Handlers:      []http.HandlerFunc{ht.SSEHandler},
 			TrailingSlash: true,
 		},
 		{
-			Name:          "send message",
+			Name:          "send-message",
 			Method:        http.MethodPost,
 			Pattern:       "/rooms/:roomID/messages",
 			Handlers:      []http.HandlerFunc{ht.NewMessage},
@@ -76,64 +70,49 @@ func getRoutes(ht *HTTP) []*webgo.Route {
 	}
 }
 
-func setup(env string) (*webgo.Router, *sse.SSE) {
-	port := strings.TrimSpace(os.Getenv("HTTP_PORT"))
-	if port == "" {
-		port = "8080"
-	}
-	cfg := &webgo.Config{
-		Host:         "",
-		Port:         port,
-		HTTPSPort:    "9595",
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 1 * time.Hour,
-		CertFile:     "./certs/localhost.crt",
-		KeyFile:      "./certs/localhost.decrypted.key",
+func setup(cfg *configs.Config) *webgo.Router {
+	wcfg := &webgo.Config{
+		Host:         cfg.HTTP.Host,
+		Port:         fmt.Sprintf("%d", cfg.HTTP.Port),
+		ReadTimeout:  cfg.HTTP.ReadTimeout,
+		WriteTimeout: cfg.HTTP.WriteTimeout,
 	}
 
-	webgo.GlobalLoggerConfig(
-		nil, nil,
-		webgo.LogCfgDisableDebug,
-	)
+	webgo.GlobalLoggerConfig(nil, nil, webgo.LogCfgDisableDebug)
 
-	sseService := sse.New()
-
-	api := api.NewAPI(rooms.NewRooms(100))
+	api := api.NewAPI(rooms.NewRooms(cfg.Rooms.Capacity))
 	ht := HTTP{
 		api:          api,
-		sse:          sseService,
-		templateHome: templateHomepage(),
-		templateRoom: templateRoom(),
-		templateErr:  templateError(),
+		sse:          sse.New(),
+		templateHome: loadTemplate(cfg.HTTP.TemplateHome, "home"),
+		templateRoom: loadTemplate(cfg.HTTP.TemplateRoom, "room"),
+		templateErr:  loadTemplate(cfg.HTTP.TemplateError, "error"),
 	}
 	routes := getRoutes(&ht)
 
-	router := webgo.NewRouter(cfg, routes...)
+	router := webgo.NewRouter(wcfg, routes...)
 	router.Use(
 		cors.CORS(&cors.Config{
-			AllowedOrigins: []string{"chat.maakri.space"},
-			AllowedHeaders: []string{"*"},
+			AllowedOrigins: cfg.HTTP.AllowedOrigins,
+			AllowedHeaders: cfg.HTTP.AllowedHeaders,
 		}),
 	)
-	if env == "dev" {
+
+	if cfg.HTTP.EnableAccessLog {
 		router.Use(accesslog.AccessLog)
 	}
 
-	return router, sseService
+	return router
 }
 
 func Start() {
-	router, sseService := setup("dev")
-	clients := []*sse.Client{}
-	sseService.OnCreateClient = func(ctx context.Context, client *sse.Client, count int) {
-		clients = append(clients, client)
-	}
+	cfg := configs.Load("./config.yaml")
+	router := setup(cfg)
 
-	errTmpl := templateError()
+	errTmpl := loadTemplate(cfg.HTTP.TemplateError, "error")
 	router.NotFound = func(w http.ResponseWriter, r *http.Request) {
 		errorHandler(errTmpl, w, errors.NotFoundf(`Here, take your URL back please (つ•᷄᎑•᷅)  %q.`, r.URL.Path))
 	}
 
-	go router.StartHTTPS()
 	router.Start()
 }

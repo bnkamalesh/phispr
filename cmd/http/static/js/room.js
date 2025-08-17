@@ -44,7 +44,20 @@ const messagesHandler = (roomID, authorID) => {
       msgLi.appendChild(at);
       msgLi.appendChild(content);
       messagesList.appendChild(msgLi);
-      messageContainer.scrollTop = messageContainer.scrollHeight;
+
+      /*
+      The minus 64 is a buffer zone to identify if the scroll top is close to 
+      the max possible, so that it auto scrolls when there are new messages.
+      */
+      const maxPossibleScrollTop =
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 64;
+
+      if (messageContainer.scrollTop >= maxPossibleScrollTop) {
+        messageContainer.scrollTo({
+          top: messageContainer.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     },
     RenderMessageTimestamps: function () {
       messageContainer.querySelectorAll("li.msg .datetime").forEach((el) => {
@@ -180,7 +193,7 @@ const room = async () => {
   };
 
   msgForm.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" && e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       prepAndSendMessage();
     }
   });

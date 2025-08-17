@@ -30,18 +30,18 @@ func readFile(path string) (string, error) {
 	return string(out), nil
 }
 
-func loadTemplate(path, name string) (*template.Template, error) {
+func loadTemplate(path, name string) *template.Template {
 	out, err := readFile(path)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	tmpl, err := template.New(name).Parse(out)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse template(%s:%s)", path, name)
+		panic(errors.Wrapf(err, "failed to parse template(%s:%s)", path, name))
 	}
 
-	return tmpl, nil
+	return tmpl
 }
 
 type homePayload struct {
@@ -49,14 +49,6 @@ type homePayload struct {
 	LiveRooms   uint
 	PublicRooms uint
 	Rooms       []*rooms.Room
-}
-
-func templateHomepage() *template.Template {
-	tmpl, err := loadTemplate("./cmd/http/static/home.html", "home")
-	if err != nil {
-		panic(err)
-	}
-	return tmpl
 }
 
 type roomPayload struct {
@@ -67,23 +59,7 @@ type roomPayload struct {
 	Messages  []messages.Message
 }
 
-func templateRoom() *template.Template {
-	tmpl, err := loadTemplate("./cmd/http/static/room.html", "room")
-	if err != nil {
-		panic(err)
-	}
-	return tmpl
-}
-
 type errorPayload struct {
 	Code    int
 	Message string
-}
-
-func templateError() *template.Template {
-	tmpl, err := loadTemplate("./cmd/http/static/error.html", "error")
-	if err != nil {
-		panic(err)
-	}
-	return tmpl
 }

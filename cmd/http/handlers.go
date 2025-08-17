@@ -20,6 +20,10 @@ import (
 	"github.com/naughtygopher/webgo/v7/extensions/sse"
 )
 
+var (
+	lastModified = time.Now().Format(http.TimeFormat)
+)
+
 type HTTP struct {
 	sse          *sse.SSE
 	api          *api.API
@@ -68,41 +72,29 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		requestor = member.User.Name
 	}
+	// starts from one because if room handler is executed, assume it's a user looking at it
+	liveUsers := uint(0)
+	h.sse.Clients.Range(func(c *sse.Client) {
+		rid, uID := roomIDUserNameFromSSEClientID(c.ID)
+		if rid == roomID && uID != requestor {
+			liveUsers++
+		}
+	})
+
+	if requestor != "" {
+		liveUsers++
+	}
 
 	rp := &roomPayload{
 		RoomID:    room.ID,
 		Capacity:  room.Capacity,
-		Live:      uint(len(room.Members)),
+		Live:      liveUsers,
 		Requestor: requestor,
 		Messages:  room.Messages(),
 	}
 
 	pushRoompage(r, w)
 	h.templateRoom.Execute(w, rp)
-}
-
-func setMemberCookies(
-	member *rooms.Member,
-	roomID string,
-	roomPath string,
-	w http.ResponseWriter,
-) {
-	jb, _ := json.Marshal(member)
-	cookieExpiry := time.Now().Add(240 * time.Hour) // Set cookie expiry to 24 hours
-	http.SetCookie(w, &http.Cookie{
-		Name:     base64.StdEncoding.EncodeToString([]byte(roomID)),
-		Value:    base64.StdEncoding.EncodeToString(jb),
-		Path:     roomPath,
-		HttpOnly: true,
-		Expires:  cookieExpiry,
-	})
-
-	http.SetCookie(w, &http.Cookie{
-		Name:    base64.StdEncoding.EncodeToString([]byte(roomID + "_js")),
-		Value:   base64.StdEncoding.EncodeToString(jb),
-		Path:    roomPath,
-		Expires: cookieExpiry,
-	})
 }
 
 func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
@@ -173,44 +165,56 @@ func (h *HTTP) NewMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func pushHomepage(r *http.Request, w http.ResponseWriter) {
-	pusher := pushCommon(r, w)
-	if pusher != nil {
-		pushJS(pusher, r, "/static/js/room.js")
+func (h *HTTP) SSEHandler(w http.ResponseWriter, r *http.Request) {
+	member, _ := h.memberFromCookie(r)
+	if member == nil {
+		roomID := roomIDFromReq(r)
+		// assume user is anonymous and has not joined the room yet
+		member = &rooms.Member{
+			RoomID: roomID,
+			User:   &users.User{Name: "anon-" + uuid.New().String()},
+		}
+	}
+
+	clientID := sseClientID(member)
+
+	cli := h.sse.Clients.Client(clientID)
+	if cli != nil {
+		h.sse.RemoveClient(r.Context(), clientID)
+	}
+
+	r.Header.Set(h.sse.ClientIDHeader, clientID)
+	err := h.sse.Handler(w, r)
+	if err != nil && !errors.Is(err, context.Canceled) {
+		log.Println("errorLogger:", err.Error())
+		return
 	}
 }
 
-func pushRoompage(r *http.Request, w http.ResponseWriter) {
-	pusher := pushCommon(r, w)
-	if pusher != nil {
-		pushJS(pusher, r, "/static/js/main.js")
+func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
+	wctx := webgo.Context(r)
+
+	roomID := wctx.URIParams["roomID"]
+	base64RoomID := base64.StdEncoding.EncodeToString([]byte(roomID))
+	cookie, err := r.Cookie(base64RoomID)
+	if err != nil {
+		return nil, errors.UnauthenticatedErrf(err, "you're not a member of the room %q", roomID)
 	}
-}
-
-func (h *HTTP) SSEHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		member, _ := h.memberFromCookie(r)
-		if member == nil {
-			roomID := roomIDFromReq(r)
-			// assume user is anonymous and has not joined the room yet
-			member = &rooms.Member{
-				RoomID: roomID,
-				User:   &users.User{Name: "anon-" + uuid.New().String()},
-			}
-		}
-
-		clientID := sseClientID(member)
-
-		cli := h.sse.Clients.Client(clientID)
-		if cli != nil {
-			h.sse.RemoveClient(r.Context(), clientID)
-		}
-
-		r.Header.Set(h.sse.ClientIDHeader, clientID)
-		err := h.sse.Handler(w, r)
-		if err != nil && !errors.Is(err, context.Canceled) {
-			log.Println("errorLogger:", err.Error())
-			return
-		}
+	decoded, err := base64.StdEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in %q", roomID)
 	}
+
+	member := &rooms.Member{}
+	err = json.Unmarshal(decoded, member)
+	if err != nil {
+		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in %q", roomID)
+	}
+
+	member, err = ht.api.ValidateMember(member)
+	if err != nil {
+		return nil, err
+	}
+
+	return member, nil
 }
