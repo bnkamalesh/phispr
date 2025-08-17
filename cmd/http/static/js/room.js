@@ -79,7 +79,6 @@ const messagesHandler = (roomID, authorID) => {
 
 const memberHandler = (roomID) => {
   const membersList = document.getElementById("members-list");
-  console.log("roomID", roomID);
   const cookieParts = document?.cookie
     .split("; ")
     .find((row) => row.startsWith(`${roomID + "_js"}=`))
@@ -224,6 +223,7 @@ const room = async () => {
     sendMessage(message, (response) => {
       if (response) {
         alert(response);
+        loading.style.opacity = "0";
         return;
       }
 
