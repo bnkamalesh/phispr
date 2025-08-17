@@ -1,0 +1,27 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title>Error {{.Code}}</title>
+    <meta name="description" content="{{.Message}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:title" content="{{.Message}}">
+    <meta property="og:type" content="website">
+
+    <link rel="stylesheet" href="/static/css/normalize.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+    <section class="main">
+        <h1 class="error-message" style="text-align: center;">(╯°□°）╯︵ {{.Code}}</h1>
+        <p style="text-align: center;">{{.Message}}</p>
+        <a href="/"><strong>( っ˶´ ˘ `)っ</strong> Home</a>
+    </section>
+</body>
+
+</html>

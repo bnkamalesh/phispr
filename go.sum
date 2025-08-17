@@ -1,0 +1,10 @@
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/naughtygopher/errors v1.3.1 h1:iiNCqEVxYNcthBivnEwEZ7nx8ukLqhrn9bP9ibqCGP8=
+github.com/naughtygopher/errors v1.3.1/go.mod h1:9kpR1BD8eBxRATLSDLrUnl4Hmfn3GC8YR8yDbS6oEdc=
+github.com/naughtygopher/webgo/v7 v7.0.5 h1:r2OClxPRpUQ1/Fym6LmuQzaiLPsp7EOTAH7cdO23C1o=
+github.com/naughtygopher/webgo/v7 v7.0.5/go.mod h1:3hA4miAfHnQuqfDKjipepFyOiAGDRRFoqj5ydZc7frE=
+golang.org/x/sys v0.35.0 h1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=
+golang.org/x/sys v0.35.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
+google.golang.org/grpc v1.74.2 h1:WoosgB65DlWVC9FqI82dGsZhWFNBSLjQ84bjROOpMu4=
+google.golang.org/grpc v1.74.2/go.mod h1:CtQ+BGjaAIXHs/5YS3i473GqwBBa1zGQNevxdeBEXrM=
