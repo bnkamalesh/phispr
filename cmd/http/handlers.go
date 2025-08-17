@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bnkamalesh/chat/internal/api"
-	"github.com/bnkamalesh/chat/internal/rooms"
-	"github.com/bnkamalesh/chat/internal/users"
+	"github.com/bnkamalesh/phispr/internal/api"
+	"github.com/bnkamalesh/phispr/internal/rooms"
+	"github.com/bnkamalesh/phispr/internal/users"
 	"github.com/google/uuid"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"

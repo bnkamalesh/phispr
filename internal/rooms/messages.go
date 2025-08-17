@@ -3,7 +3,7 @@ package rooms
 import (
 	"sort"
 
-	"github.com/bnkamalesh/chat/internal/messages"
+	"github.com/bnkamalesh/phispr/internal/messages"
 )
 
 type Messages struct {

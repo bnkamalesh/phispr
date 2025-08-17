@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/bnkamalesh/chat/internal/messages"
-	"github.com/bnkamalesh/chat/internal/rooms"
+	"github.com/bnkamalesh/phispr/internal/messages"
+	"github.com/bnkamalesh/phispr/internal/rooms"
 )
 
 type chatrooms interface {

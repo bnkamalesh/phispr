@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/bnkamalesh/chat/internal/api"
-	"github.com/bnkamalesh/chat/internal/configs"
-	"github.com/bnkamalesh/chat/internal/rooms"
+	"github.com/bnkamalesh/phispr/internal/api"
+	"github.com/bnkamalesh/phispr/internal/configs"
+	"github.com/bnkamalesh/phispr/internal/rooms"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"
 	"github.com/naughtygopher/webgo/v7/extensions/sse"

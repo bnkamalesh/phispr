@@ -1,6 +1,6 @@
 package main
 
-import "github.com/bnkamalesh/chat/cmd/http"
+import "github.com/bnkamalesh/phispr/cmd/http"
 
 func main() {
 	http.Start()

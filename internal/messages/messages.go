@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bnkamalesh/chat/internal/users"
+	"github.com/bnkamalesh/phispr/internal/users"
 	"github.com/naughtygopher/errors"
 )
 

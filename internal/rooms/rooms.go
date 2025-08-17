@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bnkamalesh/chat/internal/messages"
-	"github.com/bnkamalesh/chat/internal/users"
+	"github.com/bnkamalesh/phispr/internal/messages"
+	"github.com/bnkamalesh/phispr/internal/users"
 	"github.com/google/uuid"
 	"github.com/naughtygopher/errors"
 )

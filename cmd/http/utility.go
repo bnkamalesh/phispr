@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bnkamalesh/chat/internal/rooms"
+	"github.com/bnkamalesh/phispr/internal/rooms"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"
 )
