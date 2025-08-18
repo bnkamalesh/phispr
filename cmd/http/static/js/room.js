@@ -4,8 +4,38 @@ const messagesHandler = (roomID, authorID) => {
   const store = JSON.parse(localStorage.getItem(localstoreKey)) || {};
   const messagesList = document.getElementById("messages-list");
   const messageContainer = document.getElementById("messages");
+  const loading = document.getElementById("loading");
+  const messageTextarea = document.getElementById("message");
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
+
+  sendMessage = async (message, callback) => {
+    const formData = new FormData();
+    formData.append("message", message);
+    try {
+      fetch("/rooms/" + roomID + "/messages", {
+        method: "POST",
+        // Set the FormData instance as the request body
+        body: formData,
+      })
+        .catch((reason) => {
+          callback?.(reason);
+        })
+        .then((response) => {
+          if (response.ok) {
+            return;
+          }
+          response.text().then((obj) => {
+            callback?.(obj);
+          });
+        });
+    } catch (e) {
+      console.error(JSON.stringify(e));
+    }
+
+    callback?.();
+  };
+
   return {
     All: function (roomID) {
       return store[roomID] || [];
@@ -73,6 +103,31 @@ const messagesHandler = (roomID, authorID) => {
     Clear: function (roomID) {
       messagesList.querySelectorAll("li.msg").forEach((li) => li.remove());
       messagesList.querySelector(".init").setAttribute("style", "");
+    },
+    Send: function () {
+      loading.style.opacity = "1";
+      const message = messageTextarea.value.trim();
+      // clear container only if sendmessage was successful
+      sendMessage(message, (response) => {
+        if (response) {
+          alert(response);
+          loading.style.opacity = "0";
+          return;
+        }
+
+        // clear container only if sendmessage was successful
+        // since the submission can be triggered by shift+enter, there's a new line
+        // entered after prepAndSendMessage is executed. Setting a timeout helps
+        // clear the text area properly. This can otherwise be handled using promises
+        // and such to async clear this whole thing.
+        window.setTimeout(() => {
+          messageTextarea.value = "";
+          messageTextarea.textContent = "";
+          messageTextarea.focus();
+          messageTextarea.click();
+          loading.style.opacity = "0";
+        }, 5);
+      });
     },
   };
 };
@@ -188,12 +243,8 @@ const SSE = async (roomID, onMessage) => {
 const room = async () => {
   const roomID = window.location.pathname.split("/").pop();
   const { member, AddMember } = memberHandler(roomID);
-  const loading = document.getElementById("loading");
-
   const authorID = member?.User?.Name || "anonymous";
   const messages = messagesHandler(roomID, authorID);
-
-  const messageTextarea = document.getElementById("message");
   const clearMessages = document.getElementById("clear-messages");
   const msgForm = document.getElementById("message-form");
   msgForm.setAttribute("action", "/rooms/" + roomID + "/messages");
@@ -205,69 +256,15 @@ const room = async () => {
   messages.RenderMessageTimestamps();
 
   msgForm.onsubmit = () => {
-    prepAndSendMessage();
+    messages.Send();
     return false;
   };
 
   msgForm.addEventListener("keypress", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      prepAndSendMessage();
+      messages.Send();
     }
   });
-
-  prepAndSendMessage = () => {
-    const message = messageTextarea.value.trim();
-    if (!message) return;
-    loading.style.opacity = "1";
-    // clear container only if sendmessage was successful
-    sendMessage(message, (response) => {
-      if (response) {
-        alert(response);
-        loading.style.opacity = "0";
-        return;
-      }
-
-      // clear container only if sendmessage was successful
-      // since the submission can be triggered by shift+enter, there's a new line
-      // entered after prepAndSendMessage is executed. Setting a timeout helps
-      // clear the text area properly. This can otherwise be handled using promises
-      // and such to async clear this whole thing.
-      window.setTimeout(() => {
-        messageTextarea.value = "";
-        messageTextarea.textContent = "";
-        messageTextarea.focus();
-        messageTextarea.click();
-        loading.style.opacity = "0";
-      }, 5);
-    });
-  };
-
-  sendMessage = async (message, callback) => {
-    const formData = new FormData();
-    formData.append("message", message);
-    try {
-      fetch("/rooms/" + roomID + "/messages", {
-        method: "POST",
-        // Set the FormData instance as the request body
-        body: formData,
-      })
-        .catch((reason) => {
-          callback?.(reason);
-        })
-        .then((response) => {
-          if (response.ok) {
-            return;
-          }
-          response.text().then((obj) => {
-            callback?.(obj);
-          });
-        });
-    } catch (e) {
-      console.error(JSON.stringify(e));
-    }
-
-    callback?.();
-  };
 
   SSE(roomID, (data) => {
     // if the payload has Token in its root, it's a message for new joinee in the room

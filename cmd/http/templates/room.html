@@ -25,7 +25,6 @@
                 {{if .Phantom}}<span class="phantom" title="phantom channel">☠</span>{{end}}
                 {{.RoomName}}
             </span>
-            <!-- <span class="members">({{.Live}} / {{.Capacity}})</span> -->
 
             <div class="sub-header">
                 <span id="sse-status" title="establishing SSE for live messages"></span>
@@ -55,7 +54,7 @@
                     <li class="msg">
                         <!-- Golang template, access variable Requestor which is in the root -->
                         <span class="author {{if eq .Author.Name $.Requestor}}you{{end}}">{{.Author.Name}}</span>
-                        <span class="datetime" data-datetime="{{.ServerReceivedAt}}"></span>
+                        <span class="datetime" data-datetime="{{ .ServerReceivedAt.UTC }}"></span>
                         <p>{{.Content}}</p>
                     </li>
                     {{end}}
