@@ -251,6 +251,7 @@ section.container.small {
   color: #f6ae06;
   float: right;
   margin-right: 1em;
+  text-align: center;
 }
 
 .sub-header .author {

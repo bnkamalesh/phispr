@@ -20,6 +20,19 @@ import (
 	"github.com/naughtygopher/webgo/v7/extensions/sse"
 )
 
+type ssePType string
+
+const (
+	ssePTypeRoomViewers ssePType = "room_viewers"
+	ssePTypeRoomMessage ssePType = "room_message"
+	ssePTypeRoomJoin    ssePType = "room_join"
+)
+
+type ssePayload struct {
+	Type ssePType
+	Data any
+}
+
 var (
 	lastModified = time.Now().Format(http.TimeFormat)
 )
@@ -81,18 +94,15 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		requestor = member.User.Name
 	}
-	// starts from one because if room handler is executed, assume it's a user looking at it
-	liveUsers := uint(0)
-	h.sse.Clients.Range(func(c *sse.Client) {
-		rid, uID := roomIDUserNameFromSSEClientID(c.ID)
-		if rid == roomID && uID != requestor {
-			liveUsers++
-		}
-	})
 
-	if requestor != "" {
+	liveUsers := uint(0)
+	h.sse.Clients.Range(func(client *sse.Client) {
+		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
+		if member != nil && roomID != member.RoomID {
+			return
+		}
 		liveUsers++
-	}
+	})
 
 	rp := &roomPayload{
 		RoomID:    room.ID,
@@ -147,7 +157,10 @@ func (h *HTTP) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		jb, _ := json.Marshal(member)
+		jb, _ := json.Marshal(ssePayload{
+			Type: ssePTypeRoomJoin,
+			Data: member,
+		})
 		client.Msg <- &sse.Message{
 			Data: string(jb),
 		}
@@ -181,7 +194,10 @@ func (h *HTTP) NewMessage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		jb, _ := json.Marshal(msg)
+		jb, _ := json.Marshal(ssePayload{
+			Type: ssePTypeRoomMessage,
+			Data: msg,
+		})
 		client.Msg <- &sse.Message{
 			Data: string(jb),
 		}

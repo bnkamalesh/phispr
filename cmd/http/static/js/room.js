@@ -36,7 +36,7 @@ const SSE = async (roomID, onMessage) => {
       setStatus("active");
       try {
         const parsed = JSON.parse(data);
-        onMessage?.(parsed);
+        onMessage?.(parsed.Type, parsed.Data);
       } catch (e) {}
     },
     onError: (err) => {
@@ -241,6 +241,7 @@ const room = async () => {
   const roomID = window.location.pathname.split("/").pop();
   const { member, AddMember } = memberHandler(roomID);
   const authorID = member?.User?.Name || "anonymous";
+  const viewerCount = document.getElementById("live-viewers");
   const messages = messagesHandler(roomID, authorID);
   const msgForm = document.getElementById("message-form");
   msgForm.setAttribute("action", "/rooms/" + roomID + "/messages");
@@ -265,16 +266,25 @@ const room = async () => {
     }
   });
 
-  SSE(roomID, (data) => {
-    // if the payload has Token in its root, it's a message for new joinee in the room
-    if (data?.Token) {
-      AddMember(data);
-    } else if (data?.Content) {
-      messages.push({
-        content: data.Content,
-        at: data.ServerReceivedAt,
-        author: data.Author.Name,
-      });
+  SSE(roomID, (type, data) => {
+    switch (type) {
+      case "room_join":
+        AddMember(data);
+        break;
+      case "room_message":
+        messages.push({
+          content: data.Content,
+          at: data.ServerReceivedAt,
+          author: data.Author.Name,
+        });
+        break;
+      case "room_viewers":
+        viewerCount.innerText = data.Viewers;
+        viewerCount.setAttribute(
+          "title",
+          `${data.Viewers} user(s) are viewing this room`
+        );
+        break;
     }
   });
 };
