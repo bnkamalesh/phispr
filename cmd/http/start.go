@@ -1,11 +1,8 @@
 package http
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/bnkamalesh/phispr/internal/api"
 	"github.com/bnkamalesh/phispr/internal/configs"
@@ -103,43 +100,6 @@ func setup(cfg *configs.Config) *webgo.Router {
 
 	if cfg.HTTP.EnableAccessLog {
 		router.Use(accesslog.AccessLog)
-	}
-
-	boradcastRoomCount := func(_ context.Context, sseClientID string, count int) {
-		changedRoom, _ := roomIDUserNameFromSSEClientID(sseClientID)
-		ht.sse.Clients.Range(func(c *sse.Client) {
-			croom, _ := roomIDUserNameFromSSEClientID(c.ID)
-			if croom != changedRoom {
-				return
-			}
-
-			payload := map[string]any{
-				"RoomID":  croom,
-				"Viewers": count,
-			}
-			jb, _ := json.Marshal(ssePayload{
-				Type: ssePTypeRoomViewers,
-				Data: payload,
-			})
-			c.Msg <- &sse.Message{
-				Data: string(jb),
-			}
-		})
-	}
-	ht.sse.OnCreateClient = func(ctx context.Context, client *sse.Client, count int) {
-		go func() {
-			// disgusting hack to work around sse mutex dead locks
-			time.Sleep(time.Second * 3)
-			boradcastRoomCount(ctx, client.ID, count)
-		}()
-
-	}
-	ht.sse.OnRemoveClient = func(ctx context.Context, clientID string, count int) {
-		go func() {
-			// disgusting hack to work around sse mutex dead locks
-			time.Sleep(time.Second * 3)
-			boradcastRoomCount(ctx, clientID, count)
-		}()
 	}
 
 	return router
