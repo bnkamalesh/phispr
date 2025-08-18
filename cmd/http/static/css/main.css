@@ -311,11 +311,7 @@ span#room-name .phantom {
   font-variant-emoji: text;
   cursor: default;
   color: #f6ae06;
-}
-
-.phantom {
   font-size: 1.25em;
-  font-weight: bold;
 }
 
 .flex-container {
