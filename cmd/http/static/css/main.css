@@ -130,6 +130,21 @@ section.container.small {
   background: #fafafa;
 }
 
+#new-room #phantom {
+  display: none;
+}
+
+#new-room #phantom ~ label {
+  font-size: 2em;
+  line-height: 1em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#new-room #phantom:checked ~ label {
+  color: #f6ae06;
+}
+
 #messages {
   padding: 1em 2em;
   margin: 0 1em 1em 0;
@@ -302,7 +317,7 @@ span#room-name .phantom {
   flex: 1;
 }
 
-@media screen and (max-width: 420px) {
+@media screen and (max-width: 460px) {
   .flex-container {
     flex-direction: column; /* stack items vertically */
   }
