@@ -158,7 +158,7 @@ func (rs *Rooms) Add(room *Room) (*Room, error) {
 	}
 
 	if _, exists := rs.rooms[room.ID]; exists {
-		return nil, errors.Errorf("room %q already exists", room.ID)
+		return nil, errors.Duplicatef("room %q already exists", room.ID)
 	}
 
 	rs.rooms[room.ID] = room
@@ -218,7 +218,7 @@ func (rs *Rooms) List() ([]*Room, error) {
 
 	rooms := make([]*Room, 0, len(rs.rooms))
 	for _, room := range rs.rooms {
-		if room.Public && len(room.Members) > 0 {
+		if room.Public {
 			rooms = append(rooms, room)
 		}
 	}

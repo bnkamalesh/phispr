@@ -59,7 +59,6 @@ func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		errorHandler(h.templateErr, w, err)
 		return
 	}
-
 	// pushHomepage(r, w)
 	h.templateHome.Execute(w, &homePayload{
 		TotalRooms:  h.api.Capacity(),
