@@ -1,119 +1,3 @@
-const messagesHandler = (roomID, authorID) => {
-  const localstoreKey = "stored_messages";
-  // TODO: implement local storage later
-  const store = JSON.parse(localStorage.getItem(localstoreKey)) || {};
-  const messagesList = document.getElementById("messages-list");
-  const messageContainer = document.getElementById("messages");
-
-  messageContainer.scrollTop = messageContainer.scrollHeight;
-  return {
-    All: function (roomID) {
-      return store[roomID] || [];
-    },
-    // Load is used for bulk load messages to a room storage
-    Load: function (roomID, messages) {
-      store[roomID] = messages;
-    },
-    Push: function (roomID, message, callback) {
-      this.RenderSingleMessage(message);
-      callback?.();
-    },
-    RenderSingleMessage: function (message) {
-      if (!message) return;
-
-      const msgLi = document.createElement("li");
-      msgLi.className = "msg";
-      const author = document.createElement("span");
-      const at = document.createElement("span");
-      const content = document.createElement("p");
-      content.className = "content";
-      author.classList.add(
-        "author",
-        authorID === message?.author ? "you" : "other"
-      );
-      at.className = "datetime";
-      author.innerText = message?.author + ", ";
-      if (message?.at) {
-        at.dataset.datetime = message.at;
-        const timestamp = new Date(message.at);
-        at.innerText = timestamp.toLocaleString();
-      }
-
-      content.innerText = message?.content;
-      msgLi.appendChild(author);
-      msgLi.appendChild(at);
-      msgLi.appendChild(content);
-      messagesList.appendChild(msgLi);
-
-      /*
-      The minus 64 is a buffer zone to identify if the scroll top is close to 
-      the max possible, so that it auto scrolls when there are new messages.
-      */
-      const maxPossibleScrollTop =
-        messageContainer.scrollHeight - messageContainer.offsetHeight - 64;
-
-      if (messageContainer.scrollTop >= maxPossibleScrollTop) {
-        messageContainer.scrollTo({
-          top: messageContainer.scrollHeight,
-          behavior: "smooth",
-        });
-      }
-
-      // this feels silly, but I couldn't find an easier way to do it.
-      messagesList
-        .querySelector(".init")
-        .setAttribute("style", "display: none");
-    },
-    RenderMessageTimestamps: function () {
-      messageContainer.querySelectorAll("li.msg .datetime").forEach((el) => {
-        const timestamp = new Date(el.dataset.datetime);
-        el.innerText = timestamp.toLocaleString();
-      });
-    },
-    Clear: function (roomID) {
-      messagesList.querySelectorAll("li.msg").forEach((li) => li.remove());
-      messagesList.querySelector(".init").setAttribute("style", "");
-    },
-  };
-};
-
-const memberHandler = (roomID) => {
-  const membersList = document.getElementById("members-list");
-  const cookieParts = document?.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${roomID + "_js"}=`))
-    ?.split("=");
-  let cookieValue = "";
-  if (cookieParts?.length > 1) {
-    cookieValue = cookieParts[1];
-  }
-
-  let parsed = {};
-  if (!cookieValue) {
-    return parsed;
-  }
-
-  try {
-    parsed = JSON.parse(atob(cookieValue));
-  } catch (e) {
-    console.error("Failed to parse cookie:", e);
-  }
-
-  return {
-    member: parsed,
-    // AddMember is used to add a new member to the room
-    AddMember: function (member) {
-      if (!membersList) return;
-      const li = document.createElement("li");
-      const span = document.createElement("span");
-      span.innerText = member?.User?.Name;
-      span.setAttribute("title", span.innerText);
-      li.appendChild(span);
-      membersList.appendChild(li);
-    },
-  };
-};
-
 const SSE = async (roomID, onMessage) => {
   const statusContent = {
     inactive: {
@@ -185,62 +69,16 @@ const SSE = async (roomID, onMessage) => {
   });
 };
 
-const room = async () => {
-  const roomID = window.location.pathname.split("/").pop();
-  const { member, AddMember } = memberHandler(roomID);
+const messagesHandler = (roomID, authorID) => {
+  const localstoreKey = "stored_messages";
+  // TODO: implement local storage later
+  const store = JSON.parse(localStorage.getItem(localstoreKey)) || {};
+  const messagesList = document.getElementById("messages-list");
+  const messageContainer = document.getElementById("messages");
   const loading = document.getElementById("loading");
-
-  const authorID = member?.User?.Name || "anonymous";
-  const messages = messagesHandler(roomID, authorID);
-
   const messageTextarea = document.getElementById("message");
-  const clearMessages = document.getElementById("clear-messages");
-  const msgForm = document.getElementById("message-form");
-  msgForm.setAttribute("action", "/rooms/" + roomID + "/messages");
 
-  clearMessages.onclick = () => {
-    messages.Clear(roomID);
-  };
-
-  messages.RenderMessageTimestamps();
-
-  msgForm.onsubmit = () => {
-    prepAndSendMessage();
-    return false;
-  };
-
-  msgForm.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      prepAndSendMessage();
-    }
-  });
-
-  prepAndSendMessage = () => {
-    const message = messageTextarea.value.trim();
-    if (!message) return;
-    loading.style.opacity = "1";
-    // clear container only if sendmessage was successful
-    sendMessage(message, (response) => {
-      if (response) {
-        alert(response);
-        loading.style.opacity = "0";
-        return;
-      }
-
-      // clear container only if sendmessage was successful
-      // since the submission can be triggered by shift+enter, there's a new line
-      // entered after prepAndSendMessage is executed. Setting a timeout helps
-      // clear the text area properly. This can otherwise be handled using promises
-      // and such to async clear this whole thing.
-      window.setTimeout(() => {
-        messageTextarea.value = "";
-        messageTextarea.textContent = "";
-        messageTextarea.focus();
-        messageTextarea.click();
-        loading.style.opacity = "0";
-      }, 5);
-    });
-  };
+  messageContainer.scrollTop = messageContainer.scrollHeight;
 
   sendMessage = async (message, callback) => {
     const formData = new FormData();
@@ -269,12 +107,165 @@ const room = async () => {
     callback?.();
   };
 
+  return {
+    // push a message to the messages and render
+    push: function (message, callback) {
+      this.renderSingleMessage(message);
+      callback?.();
+    },
+    renderSingleMessage: function (message) {
+      if (!message) return;
+
+      const msgLi = document.createElement("li");
+      msgLi.className = "msg";
+      const author = document.createElement("span");
+      const at = document.createElement("span");
+      const content = document.createElement("p");
+      content.className = "content";
+      author.classList.add(
+        "author",
+        authorID === message?.author ? "you" : "other"
+      );
+      at.className = "datetime";
+      author.innerText = message?.author + ", ";
+      if (message?.at) {
+        at.dataset.datetime = message.at;
+        const timestamp = new Date(message.at);
+        at.innerText = timestamp.toLocaleString();
+      }
+
+      content.innerText = message?.content;
+      msgLi.appendChild(author);
+      msgLi.appendChild(at);
+      msgLi.appendChild(content);
+      messagesList.appendChild(msgLi);
+
+      /*
+      The minus 64 is a buffer zone to identify if the scroll top is close to 
+      the max possible, so that it auto scrolls when there are new messages.
+      */
+      const maxPossibleScrollTop =
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 64;
+
+      if (messageContainer.scrollTop >= maxPossibleScrollTop) {
+        messageContainer.scrollTo({
+          top: messageContainer.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+
+      // this feels silly, but I couldn't find an easier way to do it.
+      messagesList
+        .querySelector(".init")
+        .setAttribute("style", "display: none");
+    },
+    renderMessageTimestamps: function () {
+      messageContainer.querySelectorAll("li.msg .datetime").forEach((el) => {
+        const timestamp = new Date(el.dataset.datetime);
+        el.innerText = timestamp.toLocaleString();
+      });
+    },
+    clear: function (roomID) {
+      messagesList.querySelectorAll("li.msg").forEach((li) => li.remove());
+      messagesList.querySelector(".init").setAttribute("style", "");
+    },
+    send: function () {
+      loading.className = "active";
+      const message = messageTextarea.value.trim();
+      // clear container only if sendmessage was successful
+      sendMessage(message, (response) => {
+        if (response) {
+          alert(response);
+          loading.className = "";
+          return;
+        }
+
+        // clear container only if sendmessage was successful
+        // since the submission can be triggered by shift+enter, there's a new line
+        // entered after prepAndSendMessage is executed. Setting a timeout helps
+        // clear the text area properly. This can otherwise be handled using promises
+        // and such to async clear this whole thing.
+        window.setTimeout(() => {
+          messageTextarea.value = "";
+          messageTextarea.textContent = "";
+          messageTextarea.focus();
+          messageTextarea.click();
+          loading.className = "";
+        }, 5);
+      });
+    },
+  };
+};
+
+const memberHandler = (roomID) => {
+  const membersList = document.getElementById("members-list");
+  const cookieParts = document?.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${roomID + "_js"}=`))
+    ?.split("=");
+  let cookieValue = "";
+  if (cookieParts?.length > 1) {
+    cookieValue = cookieParts[1];
+  }
+
+  let parsed = {};
+  if (!cookieValue) {
+    return parsed;
+  }
+
+  try {
+    parsed = JSON.parse(atob(cookieValue));
+  } catch (e) {
+    console.error("Failed to parse cookie:", e);
+  }
+
+  return {
+    member: parsed,
+    // AddMember is used to add a new member to the room
+    AddMember: function (member) {
+      if (!membersList) return;
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.innerText = member?.User?.Name;
+      span.setAttribute("title", span.innerText);
+      li.appendChild(span);
+      membersList.appendChild(li);
+    },
+  };
+};
+
+const room = async () => {
+  const roomID = window.location.pathname.split("/").pop();
+  const { member, AddMember } = memberHandler(roomID);
+  const authorID = member?.User?.Name || "anonymous";
+  const messages = messagesHandler(roomID, authorID);
+  const clearMessages = document.getElementById("clear-messages");
+  const msgForm = document.getElementById("message-form");
+  msgForm.setAttribute("action", "/rooms/" + roomID + "/messages");
+
+  clearMessages.onclick = () => {
+    messages.clear(roomID);
+  };
+
+  messages.renderMessageTimestamps();
+
+  msgForm.onsubmit = () => {
+    messages.send();
+    return false;
+  };
+
+  msgForm.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      messages.send();
+    }
+  });
+
   SSE(roomID, (data) => {
     // if the payload has Token in its root, it's a message for new joinee in the room
     if (data?.Token) {
       AddMember(data);
     } else if (data?.Content) {
-      messages.Push(roomID, {
+      messages.push({
         content: data.Content,
         at: data.ServerReceivedAt,
         author: data.Author.Name,

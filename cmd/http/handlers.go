@@ -116,6 +116,7 @@ func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 		r.PostFormValue("phantom") == "true",
 		r.PostFormValue("username"),
 	)
+
 	if err != nil {
 		errorHandler(h.templateErr, w, err)
 		return
