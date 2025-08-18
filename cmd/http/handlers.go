@@ -72,13 +72,16 @@ func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		errorHandler(h.templateErr, w, err)
 		return
 	}
-	// pushHomepage(r, w)
-	h.templateHome.Execute(w, &homePayload{
+
+	terr := h.templateHome.Execute(w, &homePayload{
 		TotalRooms:  h.api.Capacity(),
 		PublicRooms: uint(len(rooms)),
 		LiveRooms:   uint(len(rooms)),
 		Rooms:       rooms,
 	})
+	if terr != nil {
+		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", terr))
+	}
 }
 
 func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
@@ -116,7 +119,10 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// pushRoompage(r, w)
-	h.templateRoom.Execute(w, rp)
+	terr := h.templateRoom.Execute(w, rp)
+	if terr != nil {
+		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", terr))
+	}
 }
 
 func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
@@ -188,6 +194,7 @@ func (h *HTTP) NewMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	webgo.SendResponse(w, msg, http.StatusOK)
+
 	h.sse.Clients.Range(func(client *sse.Client) {
 		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
 		if roomID != member.RoomID {
