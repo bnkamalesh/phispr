@@ -132,12 +132,31 @@ section.container.small {
 
 #messages {
   padding: 1em 2em;
-  margin: 0 0 1em;
+  margin: 0 1em 1em 0;
   border: 1px solid #ddd;
   border-radius: 8px;
   height: 50vh;
   min-height: 180px;
   overflow: auto;
+}
+#messages .author,
+#messages .datetime {
+  display: inline-block;
+  margin: 0 0.5em 0 0;
+  font-size: 0.8em;
+  border-bottom: 1px dashed #aaa;
+}
+
+#messages .author {
+  font-weight: bold;
+}
+.author.you {
+  color: #f6ae06;
+}
+
+#messages p {
+  margin: 0.25em 0 0.5em 0;
+  padding: 0 0 0 0.25em;
 }
 
 #members {
@@ -239,26 +258,6 @@ span#sse-status.inactive,
 .error-message,
 .critical {
   color: #d92c54;
-}
-
-#messages .author,
-#messages .datetime {
-  display: inline-block;
-  margin: 0 0.5em 0 0;
-  font-size: 0.8em;
-  border-bottom: 1px dashed #aaa;
-}
-
-#messages .author {
-  font-weight: bold;
-}
-.author.you {
-  color: #f6ae06;
-}
-
-#messages p {
-  margin: 0.25em 0 0.5em 0;
-  padding: 0 0 0 0.25em;
 }
 
 span#room-name {
