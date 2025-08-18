@@ -165,9 +165,23 @@ const messagesHandler = (roomID, authorID) => {
         el.innerText = timestamp.toLocaleString();
       });
     },
+    clearTextArea: function () {
+      // clear container only if sendmessage was successful
+      // since the submission can be triggered by shift+enter, there's a new line
+      // entered after prepAndSendMessage is executed. Setting a timeout helps
+      // clear the text area properly. This can otherwise be handled using promises
+      // and such to async clear this whole thing.
+      window.setTimeout(() => {
+        messageTextarea.value = "";
+        messageTextarea.textContent = "";
+        messageTextarea.focus();
+        messageTextarea.click();
+      }, 5);
+    },
     clear: function (roomID) {
       messagesList.querySelectorAll("li.msg").forEach((li) => li.remove());
       messagesList.querySelector(".init").setAttribute("style", "");
+      this.clearTextArea();
     },
     send: function () {
       loading.className = "active";
@@ -179,19 +193,8 @@ const messagesHandler = (roomID, authorID) => {
           loading.className = "";
           return;
         }
-
-        // clear container only if sendmessage was successful
-        // since the submission can be triggered by shift+enter, there's a new line
-        // entered after prepAndSendMessage is executed. Setting a timeout helps
-        // clear the text area properly. This can otherwise be handled using promises
-        // and such to async clear this whole thing.
-        window.setTimeout(() => {
-          messageTextarea.value = "";
-          messageTextarea.textContent = "";
-          messageTextarea.focus();
-          messageTextarea.click();
-          loading.className = "";
-        }, 5);
+        loading.className = "";
+        this.clearTextArea();
       });
     },
   };
@@ -239,13 +242,8 @@ const room = async () => {
   const { member, AddMember } = memberHandler(roomID);
   const authorID = member?.User?.Name || "anonymous";
   const messages = messagesHandler(roomID, authorID);
-  const clearMessages = document.getElementById("clear-messages");
   const msgForm = document.getElementById("message-form");
   msgForm.setAttribute("action", "/rooms/" + roomID + "/messages");
-
-  clearMessages.onclick = () => {
-    messages.clear(roomID);
-  };
 
   messages.renderMessageTimestamps();
 
@@ -256,7 +254,14 @@ const room = async () => {
 
   msgForm.addEventListener("keypress", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      messages.send();
+      // if shift+enter is pressed, just add a new line
+      if (
+        document.getElementById("message").value.trim().startsWith("/clear")
+      ) {
+        messages.clear(roomID);
+      } else {
+        messages.send();
+      }
     }
   });
 

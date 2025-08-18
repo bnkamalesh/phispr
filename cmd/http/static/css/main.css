@@ -201,10 +201,6 @@ section.container.small {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-#clear-messages {
-  float: right;
-}
-
 .room-members-count {
   font-size: 0.75em;
   float: right;
