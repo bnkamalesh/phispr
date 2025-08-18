@@ -145,7 +145,7 @@ const messagesHandler = (roomID, authorID) => {
       the max possible, so that it auto scrolls when there are new messages.
       */
       const maxPossibleScrollTop =
-        messageContainer.scrollHeight - messageContainer.offsetHeight - 64;
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 128;
 
       if (messageContainer.scrollTop >= maxPossibleScrollTop) {
         messageContainer.scrollTo({
