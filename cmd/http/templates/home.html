@@ -14,13 +14,13 @@
 
     <link rel="stylesheet" href="/static/css/normalize.css">
     <link rel="stylesheet" href="/static/css/main.css">
-
+    <link rel="icon" type="image/svg+xml" href="/static/images/phrispr.svg">
     <meta name="theme-color" content="#fafafa">
 </head>
 
 <body>
     <section class="main">
-        <h1>Phispr</h1>
+        <h1><span class="phantom"></span> Phispr</h1>
         <section class="container small">
             <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
             </h3>
@@ -32,7 +32,7 @@
                 {{range .Rooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
-                        {{if .Phantom}}<span class="phantom" title="phantom channel">☠</span>{{end}}
+                        {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
@@ -54,7 +54,7 @@
                         </li>
                         <li style="text-align: right;">
                             <input type="checkbox" name="phantom" id="phantom" value="true" checked />
-                            <label for="phantom" title="enable phantom mode">☠</label>
+                            <label for="phantom" title="enable phantom mode" class="phantom"></label>
                         </li>
                         <li>
                             <button type="submit">Create & Join</button>
@@ -68,7 +68,7 @@
             <p>
                 Phispr is where whispers live briefly, then vanish into the void. No logins, no history, just fleeting
                 conversations that disappear like phantoms. By default rooms are created with phantom mode
-                (<span class="phantom" style="font-size: 1.5em; line-height: 1em;">☠</span>) enabled.
+                (<span class="phantom" style="font-size: 1em; line-height: 1em;"></span>) enabled.
                 <a href="https://github.com/bnkamalesh/phispr">Github</a>
             </p>
         </footer>

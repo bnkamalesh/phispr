@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Phispr - {{if .Phantom}}☠{{end}} {{.RoomName}}</title>
+    <title>Phispr - {{.RoomName}}</title>
     <meta name="description"
         content="Phispr is an ephemeral chat app for phantom whispers. Anonymous, throwaway rooms where conversations vanish without a trace.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,9 @@
 
     <link rel="stylesheet" href="/static/css/normalize.css">
     <link rel="stylesheet" href="/static/css/main.css">
-
+    {{if .Phantom}}
+    <link rel="icon" type="image/svg+xml" href="/static/images/phrispr.svg">
+    {{end}}
     <meta name="theme-color" content="#fafafa">
 </head>
 
@@ -22,7 +24,7 @@
     <section class="main">
         <h1>
             <span id="room-name" title="{{.RoomName}}">
-                {{if .Phantom}}<span class="phantom" title="phantom channel">☠</span>{{end}}
+                {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
                 {{.RoomName}}
             </span>
 

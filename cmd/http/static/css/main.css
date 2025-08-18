@@ -145,11 +145,6 @@ section.container.small {
   border-radius: 50%;
 }
 
-#new-room #phantom:checked ~ label {
-  color: #f6ae06;
-  border-color: #ddd;
-}
-
 #messages {
   padding: 1em 2em;
   margin: 0 1em 1em 0;
@@ -311,6 +306,21 @@ span#room-name .phantom {
   cursor: default;
   color: #f6ae06;
   font-size: 1.25em;
+}
+.phantom::after,
+#new-room .phantom:hover::after {
+  content: " ";
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1em;
+  background: url("/static/images/phrispr.svg") no-repeat center center;
+  background-size: cover;
+}
+
+.phantom:hover::after,
+#new-room #phantom:checked ~ .phantom::after {
+  background-image: url("/static/images/phrispr-active.svg");
 }
 
 .flex-container {
