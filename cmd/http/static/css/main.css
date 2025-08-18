@@ -39,6 +39,59 @@ h1 {
   border-bottom: 1px solid #ddd;
 }
 
+textarea {
+  width: 100%;
+  height: 64px;
+  margin: 0 0 1em 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.25em;
+}
+
+input {
+  border: 1px solid #ddd;
+  padding: 0.25em 0.5em;
+}
+
+button {
+  /* #f09819 */
+  background: rgba(240, 152, 25, 0.8);
+  border: 1px solid #ccc;
+  box-shadow: 1px 1px 0px #ccc;
+  padding: 0.5em 0.75em;
+  cursor: pointer;
+  border-radius: 4px;
+  max-height: 2.5em;
+  cursor: pointer;
+  touch-action: manipulation;
+  font-weight: 600;
+  color: #fff;
+}
+
+button:hover {
+  background: rgba(240, 152, 25, 1);
+}
+button:active {
+  background: #888;
+  transform: scale(0.95);
+}
+
+footer {
+  margin-top: 1em;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+footer.note {
+  font-size: 1em;
+  max-width: 512px;
+  padding: 1em 1.5em;
+  background-color: #eee;
+  margin: auto;
+  text-align: left;
+  border-radius: 8px;
+}
+
 section.main {
   background: #fff;
   width: 90%;
@@ -53,15 +106,6 @@ section.main {
 section.container.small {
   margin: 0 auto;
   max-width: 512px;
-}
-
-td {
-  padding: 0 1em 1em 0;
-}
-
-input {
-  border: 1px solid #ddd;
-  padding: 0.25em 0.5em;
 }
 
 #loading {
@@ -107,6 +151,7 @@ input {
 
 #members-list {
   border: none;
+  padding: 0 1em 0;
 }
 
 #members-list li span {
@@ -119,34 +164,6 @@ input {
   text-wrap: nowrap;
 }
 
-textarea {
-  width: 100%;
-  height: 64px;
-  margin: 0 0 1em 0;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0.25em;
-}
-
-footer {
-  font-size: 0.8em;
-  text-align: center;
-  position: bottom;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
-
-footer.note {
-  font-size: 1em;
-  max-width: 512px;
-  padding: 1em 1.5em;
-  background-color: #eee;
-  margin: auto;
-  text-align: left;
-  border-radius: 8px;
-}
-
 .nolist {
   list-style: none;
   padding: 0;
@@ -155,11 +172,6 @@ footer.note {
 
 .nolist li {
   padding: 0.25em 0.5em;
-}
-
-#public-chat-rooms li:nth-child(even),
-ol li:nth-child(even) {
-  background: #eee;
 }
 
 #live-rooms-count {
@@ -177,14 +189,12 @@ ol li:nth-child(even) {
 #public-chat-rooms .room-link {
   display: block;
   border-bottom: 1px solid #ddd;
+  padding: 0.5em 0.75em;
+  text-decoration: none;
 }
 
 #public-chat-rooms li:last-child .room-link {
   border-bottom: none;
-}
-
-#public-chat-rooms .room {
-  padding: 0.5em 0.75em;
 }
 
 #public-chat-rooms .room:hover {
@@ -194,6 +204,7 @@ ol li:nth-child(even) {
 #clear-messages {
   float: right;
 }
+
 .room-members-count {
   font-size: 0.75em;
   float: right;
@@ -218,6 +229,7 @@ ol li:nth-child(even) {
   white-space: nowrap;
   text-wrap: nowrap;
 }
+
 h1 .members {
   color: #999;
   font-size: 0.35em;
@@ -226,6 +238,7 @@ h1 .members {
 span#sse-status.active {
   color: #7adaa5;
 }
+
 span#sse-status.inactive,
 .error-message,
 .critical {
@@ -283,22 +296,6 @@ span#room-name .phantom {
 .phantom {
   font-size: 1.25em;
   font-weight: bold;
-}
-
-button {
-  border: 1px solid #ddd;
-  padding: 0.5em 0.75em;
-  cursor: pointer;
-  border-radius: 4px;
-  max-height: 2.5em;
-}
-
-button:hover {
-  background: #aaa;
-  color: #fff;
-}
-button:active {
-  background: #888;
 }
 
 .flex-container {
