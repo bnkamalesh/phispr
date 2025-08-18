@@ -56,8 +56,8 @@ input {
 button {
   /* #f09819 */
   background: rgba(240, 152, 25, 0.8);
-  border: 1px solid #ccc;
-  box-shadow: 1px 1px 0px #ccc;
+  border: none;
+  box-shadow: none;
   padding: 0.5em 0.75em;
   cursor: pointer;
   border-radius: 4px;
