@@ -19,7 +19,6 @@ func errorHandler(tmpl templateExecutor, w http.ResponseWriter, err error) {
 	if code >= http.StatusInternalServerError {
 		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
 	}
-	webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
 
 	w.WriteHeader(code)
 	if tmpl == nil {
