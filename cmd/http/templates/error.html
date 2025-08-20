@@ -19,9 +19,18 @@
 <body>
     <section class="main">
         <h1 class="error-message" style="text-align: center;">(╯°□°）╯︵ {{.Code}}</h1>
-        <p style="text-align: center;">{{.Message}}</p>
-        <a href="/"><strong>( っ˶´ ˘ `)っ</strong> Home</a>
+        <p style="text-align: center;" id="message">{{.Message}}</p>
+        <p style="text-align: center; margin-top:2em;"><a href="/"><strong>( っ˶´ ˘ `)っ</strong> Home</a></p>
     </section>
 </body>
+<script>
+    (function () {
+        const container = document.getElementById("message");
+        const text = container.innerText.trim();
+        container.innerHTML = text.replace(/^room "([^"]+)" already exists$/, (match, word) => {
+            return `room <a href="/rooms/${encodeURIComponent(word)}"><strong>${word}</strong></a> already exists`;
+        });
+    }());
+</script>
 
 </html>

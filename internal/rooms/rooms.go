@@ -192,8 +192,8 @@ func (rs *Rooms) Join(roomID string, username string) (*Member, error) {
 	return rs.AddMember(room, username)
 }
 
-func (rs *Rooms) AddAndJoin(roomID string, phantom bool, username string) (*Room, *Member, error) {
-	room, err := NewRoom(roomID, roomID, true, phantom, 250)
+func (rs *Rooms) AddAndJoin(roomID string, private, phantom bool, username string) (*Room, *Member, error) {
+	room, err := NewRoom(roomID, roomID, private, phantom, 250)
 	if err != nil {
 		return nil, nil, err
 	}

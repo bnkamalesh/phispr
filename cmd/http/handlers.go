@@ -6,18 +6,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/bnkamalesh/phispr/internal/api"
-	"github.com/bnkamalesh/phispr/internal/rooms"
-	"github.com/bnkamalesh/phispr/internal/users"
 	"github.com/google/uuid"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"
 	"github.com/naughtygopher/webgo/v7/extensions/sse"
+
+	"github.com/bnkamalesh/phispr/internal/api"
+	"github.com/bnkamalesh/phispr/internal/rooms"
+	"github.com/bnkamalesh/phispr/internal/users"
 )
 
 type ssePType string
@@ -48,11 +49,12 @@ func (f templateExecutorFunc) Execute(wr io.Writer, data any) error {
 }
 
 type HTTP struct {
-	sse          *sse.SSE
-	api          *api.API
-	templateHome templateExecutor
-	templateRoom templateExecutor
-	templateErr  templateExecutor
+	sse             *sse.SSE
+	api             *api.API
+	templateHome    templateExecutor
+	templateRoom    templateExecutor
+	templateErr     templateExecutor
+	roomLiveViewers sync.Map
 }
 
 // StaticFilesHandler is used to serve static files
@@ -98,24 +100,18 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 		requestor = member.User.Name
 	}
 
-	liveUsers := uint(0)
-	h.sse.Clients.Range(func(client *sse.Client) {
-		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
-		if member != nil && roomID != member.RoomID {
-			return
-		}
-		liveUsers++
-	})
-
+	val, _ := h.roomLiveViewers.Load(roomID)
+	liveUsers, _ := val.(int)
 	rp := &roomPayload{
 		RoomID:    room.ID,
 		RoomName:  room.Name,
 		Capacity:  room.Capacity,
-		Live:      liveUsers,
+		Live:      uint(liveUsers),
 		Requestor: requestor,
 		Messages:  room.Messages(),
 		Members:   room.MembersList(),
 		Phantom:   room.Phantom,
+		Public:    room.Public,
 	}
 
 	// pushRoompage(r, w)
@@ -128,6 +124,7 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 	room, member, err := h.api.AddAndJoin(
 		r.PostFormValue("name"),
+		r.PostFormValue("unlisted") != "true",
 		r.PostFormValue("phantom") == "true",
 		r.PostFormValue("username"),
 	)
@@ -137,10 +134,10 @@ func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomPath := "/rooms/" + room.ID
-	setMemberCookies(member, room.ID, roomPath, w)
+	rp := roomPath(room.ID)
+	setMemberCookies(cookieName, member, rp, w)
 
-	http.Redirect(w, r, roomPath, http.StatusSeeOther)
+	http.Redirect(w, r, rp, http.StatusSeeOther)
 }
 
 func (h *HTTP) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
@@ -153,9 +150,9 @@ func (h *HTTP) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomPath := "/rooms/" + roomID
-	setMemberCookies(member, roomID, roomPath, w)
-	http.Redirect(w, r, roomPath, http.StatusSeeOther)
+	rp := roomPath(roomID)
+	setMemberCookies(cookieName, member, rp, w)
+	http.Redirect(w, r, rp, http.StatusSeeOther)
 
 	h.sse.Clients.Range(func(client *sse.Client) {
 		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
@@ -209,10 +206,11 @@ func (h *HTTP) NewMessage(w http.ResponseWriter, r *http.Request) {
 			Data: string(jb),
 		}
 	})
+
 }
 
 func (h *HTTP) SSEHandler(w http.ResponseWriter, r *http.Request) {
-	member, _ := h.memberFromCookie(r)
+	member, _ := h.memberOrAnonFromCookie(r)
 	if member == nil {
 		roomID := roomIDFromReq(r)
 		// assume user is anonymous and has not joined the room yet
@@ -220,6 +218,7 @@ func (h *HTTP) SSEHandler(w http.ResponseWriter, r *http.Request) {
 			RoomID: roomID,
 			User:   &users.User{Name: "anon-" + uuid.New().String()},
 		}
+		setAnonCookie(member, roomPath(roomID), w)
 	}
 
 	clientID := sseClientID(member)
@@ -232,14 +231,12 @@ func (h *HTTP) SSEHandler(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set(h.sse.ClientIDHeader, clientID)
 	err := h.sse.Handler(w, r)
 	if err != nil && !errors.Is(err, context.Canceled) {
-		log.Println("errorLogger:", err.Error())
 		return
 	}
 }
-
-func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
+func cookieMemberDetails(cookieName string, r *http.Request) (*rooms.Member, error) {
 	roomID := roomIDFromReq(r)
-	cookie, err := r.Cookie(roomID)
+	cookie, err := r.Cookie(cookieName)
 	if err != nil {
 		return nil, errors.UnauthenticatedErrf(err, "you're not a member of the room %q", roomID)
 	}
@@ -253,6 +250,14 @@ func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
 	if err != nil {
 		return nil, errors.UnauthenticatedErrf(err, "could not verify your membership in the room %q", roomID)
 	}
+	return member, nil
+}
+
+func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
+	member, err := cookieMemberDetails(cookieName, r)
+	if err != nil {
+		return nil, err
+	}
 
 	member, err = ht.api.ValidateMember(member)
 	if err != nil {
@@ -260,4 +265,22 @@ func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
 	}
 
 	return member, nil
+}
+
+func (ht *HTTP) anonMemberFromCookie(r *http.Request) (*rooms.Member, error) {
+	return cookieMemberDetails(cookieNameAnon, r)
+}
+
+func (ht *HTTP) memberOrAnonFromCookie(r *http.Request) (*rooms.Member, error) {
+	member, err := ht.memberFromCookie(r)
+	if err == nil {
+		return member, nil
+	}
+
+	member, err = ht.anonMemberFromCookie(r)
+	if err == nil {
+		return member, nil
+	}
+
+	return nil, errors.New("no cookie")
 }

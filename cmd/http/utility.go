@@ -9,9 +9,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bnkamalesh/phispr/internal/rooms"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"
+
+	"github.com/bnkamalesh/phispr/internal/rooms"
+)
+
+const (
+	cookieNameAnon = "roomanonauth"
+	cookieName     = "roomauth"
+	cookieNameJS   = "roomauth-js"
 )
 
 func errorHandler(tmpl templateExecutor, w http.ResponseWriter, err error) {
@@ -70,28 +77,41 @@ func roomIDFromReq(r *http.Request) string {
 	roomID, _ = url.QueryUnescape(roomID)
 	return roomID
 }
-
-func setMemberCookies(
+func setCookie(
+	cookieName string,
 	member *rooms.Member,
-	roomID string,
 	roomPath string,
 	w http.ResponseWriter,
 ) {
 	jb, _ := json.Marshal(member)
+	cookieExpiry := time.Now().Add(240 * time.Hour)
 
-	cookieExpiry := time.Now().Add(240 * time.Hour) // Set cookie expiry to 24 hours
 	http.SetCookie(w, &http.Cookie{
-		Name:     roomID,
+		Name:     cookieName,
 		Value:    base64.StdEncoding.EncodeToString(jb),
 		Path:     roomPath,
 		HttpOnly: true,
 		Expires:  cookieExpiry,
 	})
+}
+func setMemberCookies(
+	cookieName string,
+	member *rooms.Member,
+	roomPath string,
+	w http.ResponseWriter,
+) {
+	setCookie(cookieName, member, roomPath, w)
+	setCookie(cookieNameJS, member, roomPath, w)
+}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:    roomID + "_js",
-		Value:   base64.StdEncoding.EncodeToString(jb),
-		Path:    roomPath,
-		Expires: cookieExpiry,
-	})
+func setAnonCookie(
+	member *rooms.Member,
+	roomPath string,
+	w http.ResponseWriter,
+) {
+	setCookie(cookieNameAnon, member, roomPath, w)
+}
+
+func roomPath(roomID string) string {
+	return "/rooms/" + url.QueryEscape(roomID)
 }

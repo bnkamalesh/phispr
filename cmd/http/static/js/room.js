@@ -1,16 +1,11 @@
 const SSE = async (roomID, onMessage) => {
   const statusContent = {
     inactive: {
-      text: [
-        `(╯°□°）╯︵ ┻━┻`,
-        `(╯ರ ~ ರ）╯︵ ┻━┻`,
-        `┻━┻ ︵ ¯\(ツ)/¯ ︵ ┻━┻`,
-        `┻━┻︵ \(°□°)/ ︵ ┻━┻`,
-      ],
+      text: [`(╯°□°）╯︵ ┻━┻`],
       title: "disconnected (try sending a message or refreshing to reconnect)",
     },
     active: {
-      text: [`(✿◠‿◠)`, `(◕‿◕)`, `(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧`, `(ノ^_^)ノ`],
+      text: [`(◕‿◕)`],
       title: "connected",
     },
   };
@@ -204,7 +199,7 @@ const memberHandler = (roomID) => {
   const membersList = document.getElementById("members-list");
   const cookieParts = document?.cookie
     .split("; ")
-    .find((row) => row.startsWith(`${roomID + "_js"}=`))
+    .find((row) => row.startsWith(`roomauth_js=`))
     ?.split("=");
   let cookieValue = "";
   if (cookieParts?.length > 1) {

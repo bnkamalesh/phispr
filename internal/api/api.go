@@ -6,12 +6,12 @@ import (
 )
 
 type chatrooms interface {
-	AddAndJoin(roomID string, phantom bool, username string) (*rooms.Room, *rooms.Member, error)
+	AddAndJoin(roomID string, private, phantom bool, username string) (*rooms.Room, *rooms.Member, error)
 	Join(roomID string, username string) (*rooms.Member, error)
 	List() ([]*rooms.Room, error)
+	Room(id string) (*rooms.Room, error)
 	Capacity() uint
 	NewMessage(roomID string, memberToken string, message string) (*messages.Message, error)
-	Room(id string) (*rooms.Room, error)
 	ValidateMember(member *rooms.Member) (*rooms.Member, error)
 }
 

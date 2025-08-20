@@ -1,17 +1,20 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"sync"
 
-	"github.com/bnkamalesh/phispr/internal/api"
-	"github.com/bnkamalesh/phispr/internal/configs"
-	"github.com/bnkamalesh/phispr/internal/rooms"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"
 	"github.com/naughtygopher/webgo/v7/extensions/sse"
 	"github.com/naughtygopher/webgo/v7/middleware/accesslog"
 	"github.com/naughtygopher/webgo/v7/middleware/cors"
+
+	"github.com/bnkamalesh/phispr/internal/api"
+	"github.com/bnkamalesh/phispr/internal/configs"
+	"github.com/bnkamalesh/phispr/internal/rooms"
 )
 
 func getRoutes(ht *HTTP) []*webgo.Route {
@@ -82,11 +85,12 @@ func setup(cfg *configs.Config) *webgo.Router {
 
 	api := api.NewAPI(rooms.NewRooms(cfg.Rooms.Capacity))
 	ht := HTTP{
-		api:          api,
-		sse:          sse.New(),
-		templateHome: loadTemplate(cfg.HTTP.TemplateHome, "home", cfg.HTTP.LiveReloadTemplate),
-		templateRoom: loadTemplate(cfg.HTTP.TemplateRoom, "room", cfg.HTTP.LiveReloadTemplate),
-		templateErr:  loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate),
+		api:             api,
+		sse:             sse.New(),
+		templateHome:    loadTemplate(cfg.HTTP.TemplateHome, "home", cfg.HTTP.LiveReloadTemplate),
+		templateRoom:    loadTemplate(cfg.HTTP.TemplateRoom, "room", cfg.HTTP.LiveReloadTemplate),
+		templateErr:     loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate),
+		roomLiveViewers: sync.Map{},
 	}
 	routes := getRoutes(&ht)
 
@@ -97,6 +101,21 @@ func setup(cfg *configs.Config) *webgo.Router {
 			AllowedHeaders: cfg.HTTP.AllowedHeaders,
 		}),
 	)
+
+	ht.sse.OnCreateClient = func(_ context.Context, client *sse.Client, _ int) {
+		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
+
+		val, _ := ht.roomLiveViewers.Load(roomID)
+		count, _ := val.(int)
+		ht.roomLiveViewers.Store(roomID, count+1)
+	}
+
+	ht.sse.OnRemoveClient = func(_ context.Context, clientID string, _ int) {
+		roomID, _ := roomIDUserNameFromSSEClientID(clientID)
+		val, _ := ht.roomLiveViewers.Load(roomID)
+		count, _ := val.(int)
+		ht.roomLiveViewers.Store(roomID, count-1)
+	}
 
 	if cfg.HTTP.EnableAccessLog {
 		router.Use(accesslog.AccessLog)

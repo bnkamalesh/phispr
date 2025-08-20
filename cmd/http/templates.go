@@ -5,9 +5,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/naughtygopher/errors"
+
 	"github.com/bnkamalesh/phispr/internal/messages"
 	"github.com/bnkamalesh/phispr/internal/rooms"
-	"github.com/naughtygopher/errors"
 )
 
 func readFile(path string) (string, error) {
@@ -70,6 +71,7 @@ type roomPayload struct {
 	Messages  []messages.Message
 	Members   []rooms.Member
 	Phantom   bool
+	Public    bool
 }
 
 type errorPayload struct {

@@ -51,7 +51,7 @@ func (msg *Message) SanitizeValidate() error {
 
 func New(author *users.User, roomID, content string) (*Message, error) {
 	msg := &Message{
-		ServerReceivedAt: time.Now().UTC(),
+		ServerReceivedAt: time.Now(),
 		RoomID:           roomID,
 		Author:           author,
 		Content:          content,

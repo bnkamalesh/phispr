@@ -24,8 +24,8 @@
     <section class="main">
         <h1>
             <span id="room-name" title="{{.RoomName}}">
-                {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
-                {{.RoomName}}
+                {{.RoomName}}{{if .Phantom}}<span class="phantom {{if not .Public}}active{{end}}"
+                    title="phantom{{if not .Public}}, unlised{{end}} channel"></span>{{end}}
             </span>
 
             <div class="sub-header">

@@ -20,7 +20,7 @@
 
 <body>
     <section class="main">
-        <h1><span class="phantom"></span> Phispr</h1>
+        <h1><span class="phantom" title="Phantom Whisper"></span> Phispr</h1>
         <section class="container small">
             <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
             </h3>
@@ -32,8 +32,8 @@
                 {{range .Rooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
-                        {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
+                        {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
                 </li>
@@ -53,8 +53,11 @@
                             <input type="text" name="username" id="username" placeholder="maakri" maxlength="256" />
                         </li>
                         <li style="text-align: right;">
+                            <input type="checkbox" name="unlisted" id="unlisted" value="true" />
+                            <label for="unlisted" title="do not list the room publicly">unlisted</label>
+                            &nbsp;
                             <input type="checkbox" name="phantom" id="phantom" value="true" checked />
-                            <label for="phantom" title="enable phantom mode" class="phantom"></label>
+                            <label for="phantom" title="enable phantom mode">phantom</label>
                         </li>
                         <li>
                             <button type="submit">Create & Join</button>
@@ -68,7 +71,7 @@
             <p>
                 Phispr is where whispers live briefly, then vanish into the void. No logins, no history, just fleeting
                 conversations that disappear like phantoms. By default rooms are created with phantom mode
-                (<span class="phantom" style="font-size: 1em; line-height: 1em;"></span>) enabled.
+                <span class="phantom" style="font-size: 1em; line-height: 1em;"></span> enabled.
                 <a href="https://github.com/bnkamalesh/phispr">Github</a>
             </p>
         </footer>

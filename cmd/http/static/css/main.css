@@ -78,7 +78,6 @@ button:active {
 
 footer {
   margin-top: 1em;
-  font-size: 0.9em;
   text-align: center;
 }
 
@@ -128,21 +127,6 @@ section.container.small {
   border: 1px solid #ddd;
   border-radius: 8px;
   background: #fafafa;
-}
-
-#new-room #phantom {
-  display: none;
-}
-
-#new-room #phantom ~ label {
-  display: inline-block;
-  padding: 0.15em;
-  font-variant-emoji: text;
-  font-size: 2em;
-  line-height: 1em;
-  cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0);
-  border-radius: 50%;
 }
 
 #messages {
@@ -237,6 +221,13 @@ section.container.small {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+.room-link .phantom {
+  display: inline-block;
+  vertical-align: top;
+  font-size: 0.7em;
+  margin: -0.5em 0 0 -0.25em;
+}
+
 .room-members-count {
   font-size: 0.75em;
   float: right;
@@ -289,8 +280,10 @@ span#room-name {
   line-height: 1em;
 }
 span#room-name .phantom {
+  font-size: 0.5em;
   display: inline-block;
-  vertical-align: middle;
+  vertical-align: top;
+  margin-top: -0.5em;
 }
 
 #joinform button {
@@ -304,9 +297,9 @@ span#room-name .phantom {
 .phantom {
   font-variant-emoji: text;
   cursor: default;
-  color: #f6ae06;
   font-size: 1.25em;
 }
+
 .phantom::after,
 #new-room .phantom:hover::after {
   content: " ";
@@ -318,8 +311,7 @@ span#room-name .phantom {
   background-size: cover;
 }
 
-.phantom:hover::after,
-#new-room #phantom:checked ~ .phantom::after {
+.active.phantom::after {
   background-image: url("/static/images/phrispr-active.svg");
 }
 

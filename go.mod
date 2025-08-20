@@ -9,7 +9,7 @@ require (
 	github.com/knadh/koanf/providers/file v1.2.0
 	github.com/knadh/koanf/v2 v2.2.2
 	github.com/naughtygopher/errors v1.3.1
-	github.com/naughtygopher/webgo/v7 v7.0.7
+	github.com/naughtygopher/webgo/v7 v7.1.1
 )
 
 require (
@@ -21,5 +21,5 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/sys v0.35.0 // indirect
-	google.golang.org/grpc v1.74.2 // indirect
+	google.golang.org/grpc v1.75.0 // indirect
 )
