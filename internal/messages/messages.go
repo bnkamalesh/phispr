@@ -1,10 +1,11 @@
 package messages
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 
-	"github.com/bnkamalesh/chat/internal/users"
+	"github.com/bnkamalesh/phispr/internal/users"
 	"github.com/naughtygopher/errors"
 )
 
@@ -51,7 +52,7 @@ func (msg *Message) SanitizeValidate() error {
 
 func New(author *users.User, roomID, content string) (*Message, error) {
 	msg := &Message{
-		ServerReceivedAt: time.Now().UTC(),
+		ServerReceivedAt: time.Now(),
 		RoomID:           roomID,
 		Author:           author,
 		Content:          content,
@@ -63,4 +64,44 @@ func New(author *users.User, roomID, content string) (*Message, error) {
 	}
 
 	return msg, nil
+}
+
+type store interface {
+	Add(msg *Message) error
+	All() []Message
+}
+
+type Messages struct {
+	capacity uint
+	store    store
+}
+
+func (msgs *Messages) Add(msg *Message) error {
+	return msgs.store.Add(msg)
+}
+
+func (msgs *Messages) All() []Message {
+	return msgs.store.All()
+}
+func (msgs *Messages) Capacity() uint {
+	return msgs.capacity
+}
+
+func (msgs *Messages) MarshalJSON() ([]byte, error) {
+	return json.Marshal(msgs.store)
+}
+
+func (msgs *Messages) UnmarshalJSON(payload []byte) error {
+	return json.Unmarshal(payload, msgs.store)
+}
+
+func NewMessages(capacity uint, str store) (*Messages, error) {
+	if str == nil {
+		return nil, errors.New("message store cannot be nil")
+	}
+
+	return &Messages{
+		capacity: capacity,
+		store:    str,
+	}, nil
 }

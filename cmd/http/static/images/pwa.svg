@@ -1,0 +1,40 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Phone outline -->
+    <rect x="50" y="20" width="100" height="160" rx="16" ry="16" fill="none" stroke="black"
+        stroke-width="4" />
+
+    <!-- Screen area -->
+    <rect x="60" y="35" width="80" height="120" rx="4" ry="4" fill="#f8f9fa" stroke="none" />
+
+    <!-- Home button -->
+    <rect x="90" y="165" width="20" height="8" rx="4" ry="4" fill="black" />
+
+    <!-- Home screen grid - existing apps (lighter) -->
+    <rect x="70" y="45" width="16" height="16" rx="3" fill="#e9ecef" />
+    <rect x="94" y="45" width="16" height="16" rx="3" fill="#e9ecef" />
+    <rect x="118" y="45" width="16" height="16" rx="3" fill="#e9ecef" />
+
+    <rect x="70" y="69" width="16" height="16" rx="3" fill="#e9ecef" />
+    <rect x="94" y="69" width="16" height="16" rx="3" fill="#e9ecef" />
+    <rect x="118" y="69" width="16" height="16" rx="3" fill="#e9ecef" />
+
+    <rect x="70" y="93" width="16" height="16" rx="3" fill="#e9ecef" />
+    <rect x="118" y="93" width="16" height="16" rx="3" fill="#e9ecef" />
+
+    <!-- New app being added (highlighted) -->
+    <rect x="94" y="93" width="16" height="16" rx="3" fill="#007bff" stroke="#0056b3"
+        stroke-width="1" />
+
+    <!-- Download arrow pointing to the new app -->
+    <g transform="translate(102, 75)">
+        <!-- Arrow shaft -->
+        <rect x="-1" y="-15" width="2" height="12" fill="#28a745" />
+        <!-- Arrow head -->
+        <polygon points="0,-3 -4,-8 4,-8" fill="#28a745" />
+    </g>
+
+    <!-- Optional: Small "+" indicator -->
+    <circle cx="110" cy="85" r="6" fill="#28a745" />
+    <rect x="107" y="83" width="6" height="2" rx="1" fill="white" />
+    <rect x="109" y="81" width="2" height="6" rx="1" fill="white" />
+</svg>

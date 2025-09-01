@@ -1,0 +1,21 @@
+http:
+  host: ""
+  port: 8080
+  read_timeout: "3s"
+  # write_timeout should be very long, for SSE to work properly
+  write_timeout: "2h"
+  allowed_origins:
+    - "*"
+  allowed_headers: 
+    - "*"
+  template_home: "./cmd/http/templates/home.html"
+  template_room: "./cmd/http/templates/room.html"
+  template_error: "./cmd/http/templates/error.html"
+  live_reload_template: true
+  enable_access_log: true
+
+rooms:
+  capacity: 100
+  member_capacity: 250
+  backup_filepath: ""
+  idle_room_expiry: 24h

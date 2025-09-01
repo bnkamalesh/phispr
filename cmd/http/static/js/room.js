@@ -1,25 +1,132 @@
+const SSE = async (roomID, onMessage) => {
+  // lastMsgReceived is the timestamp of when the last *successful* message was received
+  let lastMsgReceived = null;
+  const sseStatuscontainer = document.querySelector(
+    "#message-form button[type='submit']"
+  );
+  const statusContent = {
+    inactive: {
+      title: "disconnected (try refreshing to reconnect)",
+    },
+    active: {
+      title: sseStatuscontainer.dataset.liveViewers
+        ? `Send (live: ${sseStatuscontainer.dataset.liveViewers})`
+        : "Send",
+    },
+  };
+  const setStatus = (status) => {
+    if (sseStatuscontainer.classList.contains(status)) {
+      return;
+    }
+    sseStatuscontainer.classList.remove("inactive");
+    sseStatuscontainer.classList.remove("active");
+    sseStatuscontainer.classList.add(status);
+    sseStatuscontainer.setAttribute("title", statusContent[status].title);
+  };
+
+  setStatus("active");
+  const config = {
+    url: `/rooms/${roomID}/messages`,
+    onMessage: (data) => {
+      try {
+        const parsed = JSON.parse(data);
+        onMessage?.(parsed.Type, parsed.Data);
+      } catch (e) {}
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+    initialBackoff: 100,
+    backoffStep: 1000,
+  };
+
+  const sseworker = new Worker("/static/js/sse.min.js");
+
+  sseworker.onerror = (e) => {
+    sseworker.terminate();
+    setStatus("inactive");
+  };
+
+  sseworker.onmessage = (e) => {
+    if (e?.data?.error) {
+      setStatus("inactive");
+      config.onError("SSE failed", e?.data);
+    } else {
+      lastMsgReceived = new Date();
+      setStatus("active");
+      config.onMessage(e?.data);
+    }
+  };
+
+  sseworker.postMessage({
+    url: config.url,
+    initialBackoff: config.initialBackoff,
+    backoffStep: config.backoffStep,
+  });
+
+  // broadcastDelay is declared outside of this file, directly in room.html
+  // Server broadcasts room live count every 'broadcastDelay' milliseconds.
+  if (broadcastDelay) {
+    window.setInterval(() => {
+      if (!lastMsgReceived) return;
+      const now = new Date();
+      const diff = now - lastMsgReceived;
+      if (diff < broadcastDelay) {
+        setStatus("active");
+        return;
+      }
+      setStatus("inactive");
+    }, broadcastDelay);
+  }
+};
+
 const messagesHandler = (roomID, authorID) => {
   const localstoreKey = "stored_messages";
   // TODO: implement local storage later
   const store = JSON.parse(localStorage.getItem(localstoreKey)) || {};
   const messagesList = document.getElementById("messages-list");
   const messageContainer = document.getElementById("messages");
+  const loading = document.getElementById("loading");
+  const messageTextarea = document.getElementById("message");
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
+
+  sendMessage = async (message, callback) => {
+    const formData = new FormData();
+    formData.append("message", message);
+    try {
+      fetch("/rooms/" + roomID + "/messages", {
+        method: "POST",
+        // Set the FormData instance as the request body
+        body: formData,
+      })
+        .catch((reason) => {
+          callback?.(reason);
+        })
+        .then((response) => {
+          if (response.ok) {
+            callback?.();
+            return;
+          }
+
+          response.text().then((obj) => {
+            callback?.(obj);
+          });
+        });
+    } catch (e) {
+      callback?.(e);
+      console.error(e);
+    }
+  };
+
   return {
-    All: function (roomID) {
-      return store[roomID] || [];
-    },
-    // Load is used for bulk load messages to a room storage
-    Load: function (roomID, messages) {
-      store[roomID] = messages;
-    },
-    Push: function (roomID, message, callback) {
-      this.RenderSingleMessage(message);
+    // push a message to the messages and render
+    push: function (message, callback) {
+      this.renderSingleMessage(message);
       callback?.();
     },
-    RenderSingleMessage: function (message) {
-      if (!message) return;
+    renderSingleMessage: function (message) {
+      if (!message || !message.content) return;
 
       const msgLi = document.createElement("li");
       msgLi.className = "msg";
@@ -39,37 +146,84 @@ const messagesHandler = (roomID, authorID) => {
         at.innerText = timestamp.toLocaleString();
       }
 
-      content.innerText = message?.content;
+      content.innerHTML = message?.content;
       msgLi.appendChild(author);
       msgLi.appendChild(at);
       msgLi.appendChild(content);
       messagesList.appendChild(msgLi);
-      messageContainer.scrollTop = messageContainer.scrollHeight;
+
+      /*
+      The minus 64 is a buffer zone to identify if the scroll top is close to 
+      the max possible, so that it auto scrolls when there are new messages.
+      */
+      const maxPossibleScrollTop =
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 128;
+
+      if (messageContainer.scrollTop >= maxPossibleScrollTop) {
+        messageContainer.scrollTo({
+          top: messageContainer.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+
+      // this feels silly, but I couldn't find an easier way to do it.
+      messagesList
+        .querySelector(".init")
+        .setAttribute("style", "display: none");
     },
-    RenderMessageTimestamps: function () {
+    renderMessageTimestamps: function () {
       messageContainer.querySelectorAll("li.msg .datetime").forEach((el) => {
-        const timestamp = new Date(el.dataset.datetime);
+        const timestamp = new Date(parseInt(el.dataset.datetime));
         el.innerText = timestamp.toLocaleString();
       });
     },
-    Clear: function (roomID) {
+    clearTextArea: function () {
+      // clear container only if sendmessage was successful
+      // since the submission can be triggered by shift+enter, there's a new line
+      // entered after prepAndSendMessage is executed. Setting a timeout helps
+      // clear the text area properly. This can otherwise be handled using promises
+      // and such to async clear this whole thing.
+      window.setTimeout(() => {
+        messageTextarea.value = "";
+        messageTextarea.textContent = "";
+        messageTextarea.focus();
+        messageTextarea.click();
+      }, 5);
+    },
+    clear: function (roomID) {
       messagesList.querySelectorAll("li.msg").forEach((li) => li.remove());
       messagesList.querySelector(".init").setAttribute("style", "");
+      this.clearTextArea();
+    },
+    send: function () {
+      loading.classList.add("active");
+      const message = messageTextarea.value.trim();
+      sendMessage(message, (response) => {
+        loading.classList.remove("active");
+        if (response) {
+          alert(response);
+          return;
+        }
+        // clear container only if sendmessage was successful
+        this.clearTextArea();
+      });
     },
   };
 };
 
 const memberHandler = (roomID) => {
-  const cookieParts = document?.cookie.split("; ");
+  const membersList = document.getElementById("members-list");
+  const memberCount = document.getElementById("members-count");
+  const cookieParts = document?.cookie
+    .split("; ")
+    .find((row) => row.startsWith(jsCookieName))
+    ?.split("=");
   let cookieValue = "";
-  if (cookieParts.length > 1) {
-    cookieValue = cookieParts
-      .find((row) => row.startsWith(`${btoa(roomID + "_js")}=`))
-      ?.split("=")[1];
+  if (cookieParts?.length > 1) {
+    cookieValue = cookieParts[1];
   }
 
   let parsed = {};
-
   if (!cookieValue) {
     return parsed;
   }
@@ -82,167 +236,188 @@ const memberHandler = (roomID) => {
 
   return {
     member: parsed,
+    // AddMember is used to add a new member to the room
+    AddMember: function (member) {
+      if (!membersList) return;
+      const authorName = member?.User?.Name;
+
+      const li = document.createElement("li");
+      li.dataset.author = authorName;
+      const span = document.createElement("span");
+      span.innerText = authorName;
+      span.setAttribute("title", span.innerText);
+      li.appendChild(span);
+      membersList.appendChild(li);
+      memberCount.innerText = member.TotalMembers;
+    },
+    RemoveMember: function (member) {
+      if (!membersList) return;
+      const authorName = member?.User?.Name;
+      membersList.querySelector(`[data-author="${authorName}"]`).remove();
+      memberCount.innerText = member.TotalMembers;
+    },
   };
 };
 
-const SSE = async (roomID, onMessage) => {
-  const statusContent = {
-    inactive: {
-      text: [
-        `(╯°□°）╯︵ ┻━┻`,
-        `(╯ರ ~ ರ）╯︵ ┻━┻`,
-        `┻━┻ ︵ ¯\(ツ)/¯ ︵ ┻━┻`,
-        `┻━┻︵ \(°□°)/ ︵ ┻━┻`,
-      ],
-      title: "disconnected (try sending a message or refreshing to reconnect)",
+const notifier = () => {
+  const container = document.getElementById("notification");
+  const defaultDelay = 1000;
+  let timer = undefined;
+  return {
+    notify: function (msg, delay) {
+      if (!container || !msg) return;
+      delay = delay || defaultDelay;
+      container.innerHTML = msg;
+      container.classList.toggle("active");
+      if (timer) clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        container.classList.toggle("active");
+        // clearing content within timeout to avoid animation stutter
+        window.setTimeout(() => {
+          container.innerHTML = "";
+        }, 1000);
+
+        timer = undefined;
+      }, delay);
     },
-    active: {
-      text: [`(✿◠‿◠)`, `(◕‿◕)`, `(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧`, `(ノ^_^)ノ`],
-      title: "connected",
-    },
   };
-  const sseStatus = document.getElementById("sse-status");
-  const setStatus = (status) => {
-    const currentStatus = sseStatus.className;
-    if (currentStatus === status) {
-      return;
-    }
+};
 
-    sseStatus.className = status;
-    sseStatus.innerText =
-      statusContent[status].text[
-        Math.floor(Math.random() * statusContent[status].text.length)
-      ];
-    sseStatus.setAttribute("title", statusContent[status].title);
+const qrHandler = () => {
+  const qrCodeContainer = document.getElementById("qr-code-container");
+  const notifications = notifier();
+  const qrCodeContainerButton = qrCodeContainer.querySelector("button");
+  const qrCode = qrCodeContainer.querySelector("#qr-code");
+  const sharedSuccessfully = async () => {
+    notifications.notify("copied");
+    navigator.clipboard.writeText(qrCodeContainerButton.innerText);
   };
 
-  setStatus("active");
-  const config = {
-    url: `/rooms/${roomID}/messages`,
-    onMessage: (data) => {
-      setStatus("active");
-      try {
-        const parsed = JSON.parse(data);
-        onMessage?.(parsed);
-      } catch (e) {}
-    },
-    onError: (err) => {
-      console.log(err);
-      setStatus("inactive");
-    },
-    initialBackoff: 100,
-    backoffStep: 1000,
-  };
+  qrCodeContainerButton.innerText = window.location.href;
 
-  const sseworker = new Worker("/static/js/sse.js");
+  new QRCode(qrCode, window.location.href);
 
-  sseworker.onerror = (e) => {
-    sseworker.terminate();
-    sseStatus.className = "inactive";
-  };
-
-  sseworker.onmessage = (e, ...attrs) => {
-    if (e?.data?.error) {
-      config.onError("SSE failed", e?.data);
-    } else {
-      config.onMessage(e?.data);
-    }
-  };
-
-  sseworker.postMessage({
-    url: config.url,
-    initialBackoff: config.initialBackoff,
-    backoffStep: config.backoffStep,
+  qrCodeContainer.childNodes.forEach((child) => {
+    child.addEventListener("click", (e) => {
+      e.stopPropagation();
+      sharedSuccessfully();
+    });
   });
+
+  qrCodeContainer.addEventListener("click", () => {
+    qrCodeContainer.classList.toggle("active");
+  });
+
+  document.onkeydown = (e) => {
+    if (e.key === "Escape") {
+      qrCodeContainer.classList.remove("active");
+    }
+  };
+
+  document.getElementById("room-name").addEventListener("click", () => {
+    qrCodeContainer.classList.toggle("active");
+  });
+};
+
+const serviceWorkerSetup = async () => {
+  if (!("serviceWorker" in navigator)) {
+    document.querySelectorAll(".pwa").forEach((el) => {
+      el.remove();
+    });
+    return;
+  }
+
+  const registration = await navigator.serviceWorker.getRegistration(
+    window.location.pathname
+  );
+  if (registration) {
+    await registration.unregister();
+  }
+
+  navigator.serviceWorker
+    .register("/static/js/serviceworker.js", {
+      start_url: "/" + window.location.pathname,
+      scope: "/",
+    })
+    .then(() => console.log("Service Worker registered"))
+    .catch((err) => console.error("Service Worker registration failed", err));
 };
 
 const room = async () => {
-  const roomID = window.location.pathname.split("/").pop();
-  const { member } = memberHandler(roomID);
+  serviceWorkerSetup();
 
+  const notifications = notifier();
+  const roomID = window.location.pathname.split("/").pop();
+  const { member, AddMember, RemoveMember } = memberHandler(roomID);
   const authorID = member?.User?.Name || "anonymous";
   const messages = messagesHandler(roomID, authorID);
-
-  const messageTextarea = document.getElementById("message");
-  const clearMessages = document.getElementById("clear-messages");
   const msgForm = document.getElementById("message-form");
-  msgForm.setAttribute("action", "/rooms/" + roomID + "/messages");
+  const sendMsgButton = document.querySelector(
+    "#message-form button[type='submit']"
+  );
+  const members = document.getElementById("members");
 
-  clearMessages.onclick = () => {
-    messages.Clear(roomID);
-  };
+  qrHandler();
 
-  messages.RenderMessageTimestamps();
+  if (members) {
+    members.addEventListener("click", () => {
+      members.classList.toggle("active");
+    });
+  }
+
+  messages.renderMessageTimestamps();
 
   msgForm.onsubmit = () => {
-    prepAndSendMessage();
+    if (!sendMsgButton.classList.contains("inactive")) {
+      messages.send();
+    }
     return false;
   };
 
+  document.querySelectorAll(".pwa").forEach((el) => {
+    const msg = `<a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing" target="_blank">Check how to install PWA</a>`;
+    el.addEventListener("click", () => {
+      notifications.notify(msg, 3000);
+    });
+  });
+
   msgForm.addEventListener("keypress", (e) => {
+    // if shift+enter is pressed, submit
     if (e.key === "Enter" && e.shiftKey) {
-      prepAndSendMessage();
+      if (
+        document.getElementById("message").value.trim().startsWith("/clear")
+      ) {
+        messages.clear(roomID);
+      } else if (!sendMsgButton.classList.contains("inactive")) {
+        messages.send();
+      }
     }
   });
 
-  prepAndSendMessage = () => {
-    const message = messageTextarea.value.trim();
-    if (!message) return;
-    // clear container only if sendmessage was successful
-    sendMessage(message, (response) => {
-      if (response) {
-        alert(response);
-        return;
-      }
+  SSE(roomID, (type, data) => {
+    switch (type) {
+      case "room_join":
+        AddMember(data);
+        break;
+      case "room_leave":
+        RemoveMember(data);
+        break;
 
-      // clear container only if sendmessage was successful
-      // since the submission can be triggered by shift+enter, there's a new line
-      // entered after prepAndSendMessage is executed. Setting a timeout helps
-      // clear the text area properly. This can otherwise be handled using promises
-      // and such to async clear this whole thing.
-      window.setTimeout(() => {
-        messageTextarea.value = "";
-        messageTextarea.textContent = "";
-        messageTextarea.focus();
-        messageTextarea.click();
-      }, 5);
-    });
-  };
-
-  sendMessage = async (message, callback) => {
-    const formData = new FormData();
-    formData.append("message", message);
-    try {
-      fetch("/rooms/" + roomID + "/messages", {
-        method: "POST",
-        // Set the FormData instance as the request body
-        body: formData,
-      })
-        .catch((reason) => {
-          callback?.(reason);
-        })
-        .then((response) => {
-          if (response.ok) {
-            return;
-          }
-          response.text().then((obj) => {
-            callback?.(obj);
-          });
+      case "room_message":
+        messages.push({
+          content: data.Content,
+          at: data.ServerReceivedAt,
+          author: data.Author.Name,
         });
-    } catch (e) {
-      // console.error(e);
-      console.log(JSON.stringify(e));
+        break;
+
+      case "room_viewers":
+        if (data > 1) {
+          sendMsgButton.setAttribute("title", `Send (live: ${data})`);
+        }
+        break;
     }
-
-    callback?.();
-  };
-
-  SSE(roomID, (data) => {
-    messages.Push(roomID, {
-      content: data.Content,
-      at: data.ServerReceivedAt,
-      author: data.Author.Name,
-    });
   });
 };
+
 room();

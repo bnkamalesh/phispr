@@ -1,0 +1,60 @@
+{
+    "manifest_version": 12,
+    "name": "Phantom Whispers",
+    "short_name": "Phispr",
+    "description": "A space of phantom whispers",
+    "default_locale": "en",
+    "id": "/",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "display_override": [
+        "window-controls-overlay",
+        "tabbed",
+        "standalone",
+        "minimal-ui",
+        "fullscreen"
+    ],
+    "background_color": "#efefef",
+    "theme_color": "#f6ae06",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/static/images/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/images/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/images/icon-144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/images/icon-96.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/images/icon-72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/images/icon-48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        }
+    ],
+    "permissions": [
+        "background",
+        "clipboardWrite",
+        "cookies",
+        "notifications"
+    ],
+    "handle_links": "preferred"
+}

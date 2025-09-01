@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <meta charset="utf-8">
+    <title>Phispr - A Space of Phantom Whispers</title>
+    <meta name="description"
+        content="Phispr, a space of phantom whispers. Absolute anonymity, zero tracking, and ephemeral messages that vanish into the void.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Phispr – A Space of Phantom Whispers" />
+    <meta property="og:description"
+        content="Enter Phispr: a space of phantom whispers. Absolute anonymity, zero tracking, and ephemeral messages that vanish into the void." />
+    <meta property="og:url" content="https://phispr.space/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://phispr.space/static/images/phispr-active.svg" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Phispr – A Space of Phantom Whispers" />
+    <meta name="twitter:description"
+        content="Whispers without memory. Silence without trace. Absolute anonymity, zero tracking, ephemeral presence." />
+    <meta name="twitter:image" content="https://phispr.space/static/images/phispr-active.svg" />
+
+    <link rel="stylesheet" href="/static/css/main.min.css">
+    <link rel="icon" type="image/svg+xml" href="/static/images/phispr.svg">
+
+    <link rel="manifest" href="/static/js/manifest.json">
+    <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+
+<body>
+    <main class="home {{if .Rooms}}has-rooms{{end}}">
+        <div id="notification"> </div>
+        <header>
+            <h1 class="home">
+                <div class="sub-header flex-container">
+                    <button id="refresher" onclick="location.reload()"> </button>
+                    <span class="pwa" title="Supports Progressive Web App (PWA)"></span>
+                </div>
+                <span class="phantom" title="Phantom Whisper"></span>
+                Phispr
+                <span class="tagline">A space of phantom whispers</span>
+            </h1>
+        </header>
+        <section class="container small {{if .Rooms}}has-rooms{{end}}">
+            <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
+            </h3>
+            <ol id="public-chat-rooms" class="chat-rooms-list">
+                {{if not .Rooms}}
+                <li style="list-style:none">No listed chat room available</li>
+                {{end}}
+
+                {{range .Rooms}}
+                <li class="room">
+                    <a href="/rooms/{{.ID}}" class="room-link">
+                        {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
+                        <span class="room-name">{{.Name}}</span>
+                        <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
+                    </a>
+                </li>
+                {{end}}
+            </ol>
+
+            {{if .UnlistedRooms}}
+            <h3>Your unlisted rooms</h3>
+            <ol id="public-chat-rooms" class="chat-rooms-list">
+                {{range .UnlistedRooms}}
+                <li class="room">
+                    <a href="/rooms/{{.ID}}" class="room-link">
+                        {{if .Phantom}}<span class="active phantom" title="phantom channel"></span>{{end}}
+                        <span class="room-name">{{.Name}}</span>
+                        <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
+                    </a>
+                </li>
+                {{end}}
+            </ol>
+            {{end}}
+
+            <h3>New room</h3>
+            <section class="note" style="margin-bottom: 2em">
+                <p>
+                    Pick how you want your room to work:
+                </p>
+
+                <ul>
+                    <li>
+                        <strong>Phantom:</strong>
+                        Messages disappear when you leave or refresh. Nothing is saved on the server.
+                    </li>
+                    <li>
+                        <strong>Unlisted:</strong>
+                        Your room stays hidden from the public list. Only people with the link
+                        can join.
+                    </li>
+                    <li>
+                        <strong>Combination:</strong>
+                        Your room can be both unlisted and phantom or neither unlisted nor phantom.
+                    </li>
+                </ul>
+            </section>
+
+            <section id="new-room">
+                <form action="/rooms" method="POST">
+                    <ul class="nolist">
+                        <li class="flex-container">
+                            <label for="room-name">Name</label>
+                            <input type="text" name="name" id="room-name" placeholder="cosmos" maxlength="512" />
+                        </li>
+                        <li class="flex-container">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" id="username" placeholder="ghost" maxlength="256" />
+                        </li>
+                        <li style="text-align: right;">
+                            <input type="checkbox" name="unlisted" id="unlisted" value="true" checked />
+                            <label for="unlisted" title="do not list the room publicly">unlisted</label>
+                            &nbsp;
+                            <input type="checkbox" name="phantom" id="phantom" value="true" checked />
+                            <label for="phantom" title="enable phantom mode">phantom</label>
+                            <div style="margin-top:1em"></div>
+                            <span class="phantom" title="Phantom room"></span>
+                            <button type="submit">Create & Join</button>
+                        </li>
+                    </ul>
+                </form>
+            </section>
+        </section>
+        <footer class="note small">
+            <h3>Phantom Whispers</h3>
+            <p>
+                Here, every message is ephemeral. Every voice is nameless.
+                Nothing is recorded, nothing is tracked.
+                What is spoken exists only for a fleeting instant, then vanishes;
+                like a phantom in the dark.
+                No accounts. No logs. No trails. Only the whisper, and then the silence.
+            </p>
+            <div style="text-align: center;">
+                <a href="https://github.com/bnkamalesh/phispr" class="github" title="Source code on Github"> </a>
+            </div>
+        </footer>
+    </main>
+</body>
+<script src="/static/js/home.min.js" async></script>
+
+</html>

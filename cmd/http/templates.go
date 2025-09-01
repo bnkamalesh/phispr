@@ -2,11 +2,13 @@ package http
 
 import (
 	"html/template"
+	"io"
 	"os"
 
-	"github.com/bnkamalesh/chat/internal/messages"
-	"github.com/bnkamalesh/chat/internal/rooms"
 	"github.com/naughtygopher/errors"
+
+	"github.com/bnkamalesh/phispr/internal/messages"
+	"github.com/bnkamalesh/phispr/internal/rooms"
 )
 
 func readFile(path string) (string, error) {
@@ -30,60 +32,53 @@ func readFile(path string) (string, error) {
 	return string(out), nil
 }
 
-func loadTemplate(path, name string) (*template.Template, error) {
+func loadRawTemplate(path, name string) templateExecutor {
 	out, err := readFile(path)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	tmpl, err := template.New(name).Parse(out)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse template(%s:%s)", path, name)
-	}
-
-	return tmpl, nil
-}
-
-type homePayload struct {
-	TotalRooms  uint
-	LiveRooms   uint
-	PublicRooms uint
-	Rooms       []*rooms.Room
-}
-
-func templateHomepage() *template.Template {
-	tmpl, err := loadTemplate("./cmd/http/static/home.html", "home")
-	if err != nil {
-		panic(err)
+		panic(errors.Wrapf(err, "failed to parse template(%s:%s)", path, name))
 	}
 	return tmpl
 }
 
-type roomPayload struct {
-	RoomID    string
-	Live      uint
-	Capacity  uint
-	Requestor string
-	Messages  []messages.Message
-}
-
-func templateRoom() *template.Template {
-	tmpl, err := loadTemplate("./cmd/http/static/room.html", "room")
-	if err != nil {
-		panic(err)
+func loadTemplate(path, name string, livereload bool) templateExecutor {
+	if !livereload {
+		return loadRawTemplate(path, name)
 	}
-	return tmpl
+
+	return templateExecutorFunc(func(wr io.Writer, data any) error {
+		return loadRawTemplate(path, name).Execute(wr, data)
+	})
 }
 
-type errorPayload struct {
-	Code    int
-	Message string
+type HomePayload struct {
+	TotalRooms    uint          `json:"total_rooms,omitempty"`
+	LiveRooms     uint          `json:"live_rooms,omitempty"`
+	PublicRooms   uint          `json:"public_rooms,omitempty"`
+	Rooms         []*rooms.Room `json:"rooms,omitempty"`
+	UnlistedRooms []*rooms.Room `json:"unlisted_rooms,omitempty"`
 }
 
-func templateError() *template.Template {
-	tmpl, err := loadTemplate("./cmd/http/static/error.html", "error")
-	if err != nil {
-		panic(err)
-	}
-	return tmpl
+type RoomPayload struct {
+	RoomID           string             `json:"room_id,omitempty"`
+	RoomName         string             `json:"room_name,omitempty"`
+	Live             uint               `json:"live,omitempty"`
+	Capacity         uint               `json:"capacity,omitempty"`
+	MessageCapacity  uint               `json:"message_capacity,omitempty"`
+	Requestor        string             `json:"requestor,omitempty"`
+	Messages         []messages.Message `json:"messages,omitempty"`
+	Members          []rooms.Member     `json:"members,omitempty"`
+	Phantom          bool               `json:"phantom,omitempty"`
+	Public           bool               `json:"public,omitempty"`
+	BroadcastDelayMs uint               `json:"broadcast_delay_ms,omitempty"`
+	JSCookieName     string             `json:"js_cookie_name,omitempty"`
+}
+
+type ErrorPayload struct {
+	Code    int    `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
 }

@@ -1,23 +1,30 @@
+// install https://github.com/evanw/esbuild for code generation
+//
+//go:generate esbuild static/js/room.js --minify --outfile=static/js/room.min.js
+//go:generate esbuild static/js/home.js --minify --outfile=static/js/home.min.js
+//go:generate esbuild static/js/sse.js --minify --outfile=static/js/sse.min.js
+//go:generate esbuild static/css/main.css --minify --outfile=static/css/main.min.css
+//go:generate esbuild static/css/normalize.css --minify --outfile=static/css/normalize.min.css
 package http
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"os"
-	"strings"
+	"sync"
 	"time"
 
-	"github.com/bnkamalesh/chat/internal/api"
-	"github.com/bnkamalesh/chat/internal/rooms"
 	"github.com/naughtygopher/errors"
 	"github.com/naughtygopher/webgo/v7"
 	"github.com/naughtygopher/webgo/v7/extensions/sse"
 	"github.com/naughtygopher/webgo/v7/middleware/accesslog"
 	"github.com/naughtygopher/webgo/v7/middleware/cors"
-)
 
-var (
-	lastModified = time.Now().Format(http.TimeFormat)
+	"github.com/bnkamalesh/phispr/internal/api"
+	"github.com/bnkamalesh/phispr/internal/configs"
+	"github.com/bnkamalesh/phispr/internal/rooms"
 )
 
 func getRoutes(ht *HTTP) []*webgo.Route {
@@ -53,21 +60,28 @@ func getRoutes(ht *HTTP) []*webgo.Route {
 			FallThroughPostResponse: true,
 		},
 		{
-			Name:          "join room",
+			Name:          "join-room",
 			Method:        http.MethodPost,
 			Pattern:       "/rooms/:roomID",
 			Handlers:      []http.HandlerFunc{ht.JoinRoomHandler},
 			TrailingSlash: true,
 		},
 		{
-			Name:          "room subscription",
-			Method:        http.MethodGet,
-			Pattern:       "/rooms/:roomID/messages",
-			Handlers:      []http.HandlerFunc{ht.SSEHandler()},
+			Name:          "leave-room",
+			Method:        http.MethodPost,
+			Pattern:       "/rooms/:roomID/leave",
+			Handlers:      []http.HandlerFunc{ht.LeaveRoomHandler},
 			TrailingSlash: true,
 		},
 		{
-			Name:          "send message",
+			Name:          "room-subscription",
+			Method:        http.MethodGet,
+			Pattern:       "/rooms/:roomID/messages",
+			Handlers:      []http.HandlerFunc{ht.SSEHandler},
+			TrailingSlash: true,
+		},
+		{
+			Name:          "send-message",
 			Method:        http.MethodPost,
 			Pattern:       "/rooms/:roomID/messages",
 			Handlers:      []http.HandlerFunc{ht.NewMessage},
@@ -76,64 +90,144 @@ func getRoutes(ht *HTTP) []*webgo.Route {
 	}
 }
 
-func setup(env string) (*webgo.Router, *sse.SSE) {
-	port := strings.TrimSpace(os.Getenv("HTTP_PORT"))
-	if port == "" {
-		port = "8080"
+func initServices(cfg *configs.Config) (*rooms.Rooms, *HTTP) {
+	rms := rooms.NewRooms(cfg.Rooms.Capacity, cfg.Rooms.MemberCapacity, cfg.Rooms.IdleRoomExpiry)
+	if cfg.Rooms.BackupFilePath != "" {
+		f, err := os.OpenFile(cfg.Rooms.BackupFilePath, os.O_RDONLY, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+		payload, err := io.ReadAll(f)
+		if err != nil {
+			panic(err)
+		}
+		if len(payload) > 1 {
+			err = rms.LoadRoomsBackup(payload)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
-	cfg := &webgo.Config{
-		Host:         "",
-		Port:         port,
-		HTTPSPort:    "9595",
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 1 * time.Hour,
-		CertFile:     "./certs/localhost.crt",
-		KeyFile:      "./certs/localhost.decrypted.key",
+
+	api := api.NewAPI(rms)
+	ht := &HTTP{
+		api:             api,
+		sse:             sse.New(),
+		templateHome:    loadTemplate(cfg.HTTP.TemplateHome, "home", cfg.HTTP.LiveReloadTemplate),
+		templateRoom:    loadTemplate(cfg.HTTP.TemplateRoom, "room", cfg.HTTP.LiveReloadTemplate),
+		templateErr:     loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate),
+		roomLiveViewers: sync.Map{},
+		broadcastDelay:  cfg.Rooms.LiveViewerBroadcastDelay,
+	}
+	ht.Sanitize()
+
+	ht.sse.OnCreateClient = func(_ context.Context, client *sse.Client, _ int) {
+		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
+
+		val, _ := ht.roomLiveViewers.Load(roomID)
+		count, _ := val.(int)
+		ht.roomLiveViewers.Store(roomID, count+1)
 	}
 
-	webgo.GlobalLoggerConfig(
-		nil, nil,
-		webgo.LogCfgDisableDebug,
-	)
-
-	sseService := sse.New()
-
-	api := api.NewAPI(rooms.NewRooms(100))
-	ht := HTTP{
-		api:          api,
-		sse:          sseService,
-		templateHome: templateHomepage(),
-		templateRoom: templateRoom(),
-		templateErr:  templateError(),
+	ht.sse.OnRemoveClient = func(_ context.Context, clientID string, _ int) {
+		roomID, _ := roomIDUserNameFromSSEClientID(clientID)
+		val, _ := ht.roomLiveViewers.Load(roomID)
+		count, _ := val.(int)
+		ht.roomLiveViewers.Store(roomID, count-1)
 	}
-	routes := getRoutes(&ht)
 
-	router := webgo.NewRouter(cfg, routes...)
+	return rms, ht
+}
+
+func setupRouter(
+	cfg *configs.Config,
+	ht *HTTP,
+) *webgo.Router {
+	wcfg := &webgo.Config{
+		Host:         cfg.HTTP.Host,
+		Port:         fmt.Sprintf("%d", cfg.HTTP.Port),
+		ReadTimeout:  cfg.HTTP.ReadTimeout,
+		WriteTimeout: cfg.HTTP.WriteTimeout,
+	}
+
+	webgo.GlobalLoggerConfig(nil, nil, webgo.LogCfgDisableDebug)
+	routes := getRoutes(ht)
+	router := webgo.NewRouter(wcfg, routes...)
 	router.Use(
 		cors.CORS(&cors.Config{
-			AllowedOrigins: []string{"chat.maakri.space"},
-			AllowedHeaders: []string{"*"},
+			AllowedOrigins: cfg.HTTP.AllowedOrigins,
+			AllowedHeaders: cfg.HTTP.AllowedHeaders,
 		}),
 	)
-	if env == "dev" {
+
+	if cfg.HTTP.EnableAccessLog {
 		router.Use(accesslog.AccessLog)
 	}
 
-	return router, sseService
+	errTmpl := loadTemplate(
+		cfg.HTTP.TemplateError,
+		"error",
+		cfg.HTTP.LiveReloadTemplate,
+	)
+	router.NotFound = func(w http.ResponseWriter, r *http.Request) {
+		errHandler(
+			errTmpl, w, r,
+			errors.NotFoundf(`Here, take your URL back please (つ•᷄᎑•᷅)  %q.`, r.URL.Path),
+		)
+	}
+
+	return router
 }
 
-func Start() {
-	router, sseService := setup("dev")
-	clients := []*sse.Client{}
-	sseService.OnCreateClient = func(ctx context.Context, client *sse.Client, count int) {
-		clients = append(clients, client)
-	}
+func Start(cfg *configs.Config) func() {
+	rms, ht := initServices(cfg)
+	// Goroutine to broadcast room viewer counts to all rooms
+	go func() {
+		for {
+			time.Sleep(time.Second * 5)
+			ht.sse.Clients.Range(func(c *sse.Client) {
+				roomID, _ := roomIDUserNameFromSSEClientID(c.ID)
+				val, _ := ht.roomLiveViewers.Load(roomID)
+				count, _ := val.(int)
+				ht.roomBroadcast(roomID, &ssePayload{
+					Type: SSEPTypeRoomViewers,
+					Data: count,
+				})
+			})
 
-	errTmpl := templateError()
-	router.NotFound = func(w http.ResponseWriter, r *http.Request) {
-		errorHandler(errTmpl, w, errors.NotFoundf(`Here, take your URL back please (つ•᷄᎑•᷅)  %q.`, r.URL.Path))
-	}
+			ht.api.Cleanup()
+		}
+	}()
 
-	go router.StartHTTPS()
-	router.Start()
+	router := setupRouter(cfg, ht)
+	go router.Start()
+
+	return func() {
+		if cfg.Rooms.BackupFilePath == "" {
+			return
+		}
+
+		payload, err := rms.BackupRooms()
+		if err != nil {
+			// wrapping to get trace
+			err = errors.Wrap(err)
+			webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
+			return
+		}
+
+		f, err := os.OpenFile(cfg.Rooms.BackupFilePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, os.ModePerm)
+		if err != nil {
+			// wrapping to get trace
+			err = errors.Wrap(err)
+			webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
+			return
+		}
+		_, err = f.Write(payload)
+		if err != nil {
+			// wrapping to get trace
+			err = errors.Wrap(err)
+			webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", err))
+			return
+		}
+	}
 }

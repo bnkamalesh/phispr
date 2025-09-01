@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="theme-color" content="#f6ae06">
+    <meta charset="utf-8">
+    <meta name="description"
+        content="Phispr, a space of phantom whispers. Absolute anonymity, zero tracking, and ephemeral messages that vanish into the void.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>Phispr - {{.RoomName}}</title>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Phispr – A Space of Phantom Whispers" />
+    <meta property="og:description"
+        content="Enter Phispr: a space of phantom whispers. Absolute anonymity, zero tracking, and ephemeral messages that vanish into the void." />
+    <meta property="og:url" content="https://phispr.space/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://phispr.space/static/images/phispr-active.svg" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Phispr – A Space of Phantom Whispers" />
+    <meta name="twitter:description"
+        content="Whispers without memory. Silence without trace. Absolute anonymity, zero tracking, ephemeral presence." />
+    <meta name="twitter:image" content="https://phispr.space/static/images/phispr-active.svg" />
+
+
+    <link rel="stylesheet" href="/static/css/main.min.css">
+    {{if .Phantom}}
+    {{if .Public}}
+    <link rel="icon" type="image/svg+xml" href="/static/images/phispr.svg">
+    {{else}}
+    <link rel="icon" type="image/svg+xml" href="/static/images/phispr-active.svg">
+    {{end}}
+    {{end}}
+
+    <link rel="manifest" href="/static/js/manifest.json">
+    <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <!-- loading this here so that room.js can use QRCode without waiting -->
+    <script src="/static/js/qr.min.js"></script>
+</head>
+
+<body>
+    <main class="room">
+        <div id="notification"> </div>
+        <header>
+            <h1>
+                <div class="sub-header flex-container">
+                    {{if .Requestor}}
+                    <label for="leave-submit" class="critical" title="Leave room">✕</label>
+                    {{end}}
+                    <a href="/" title="Home">⌂</a>
+                    <button id="refresher" onclick="location.reload()"> </button>
+                    <span class="pwa" title="Supports Progressive Web App (PWA)"></span>
+                </div>
+                <span id="room-name" title="Share: {{.RoomName}}">
+                    {{if .Phantom}}<span class="phantom {{if not .Public}}active{{end}}"
+                        title="phantom{{if not .Public}}, unlisted{{end}} room"></span>{{end}}
+                    {{.RoomName}}
+                </span>
+            </h1>
+        </header>
+        {{if not .Requestor}}
+        <div style="margin-bottom: 1em;" class="joinform-container flex-container">
+            <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
+                <ul class="nolist">
+                    <li class="flex-container">
+                        <label for="username">
+                            Username&nbsp;
+                            <input type="text" name="username" id="username" placeholder="ghost" maxlength="256" />
+                        </label>
+                        <button type="submit">Join</button>
+                    </li>
+                </ul>
+            </form>
+        </div>
+        {{end}}
+        {{if .Requestor}}
+        {{if not .Phantom }}
+        <div class="critical" style="font-size: 0.75em;">
+            Note: Only the latest <strong>{{.MessageCapacity}}</strong> messages of the
+            <em>room</em>
+            are stored.
+        </div>
+        {{end}}
+        {{end}}
+        <section class="flex-container">
+            {{if .Requestor}}
+            <section id="members">
+                <h4>
+                    Members
+                    <span>(<span id="members-count">{{ len .Members }}</span> / {{.Capacity}})</span>
+                </h4>
+                <ol id="members-list">
+                    {{range .Members}}
+                    <li data-author="{{.User.Name}}"><span class="author {{if eq .User.Name $.Requestor}}you{{end}}"
+                            title="{{.User.Name}}">{{.User.Name}}</span></li>
+                    {{end}}
+                </ol>
+            </section>
+            {{end}}
+            <section id="messages" style="{{if not .Requestor}}width: 100%{{end}}">
+                <ul id="messages-list" class="nolist">
+                    <li class="init" style="{{if .Messages}}display: none;{{end}}">No messages ...</li>
+                    {{range .Messages}}
+                    <li class="msg">
+                        <!-- Golang template, access variable Requestor which is in the root -->
+                        <span class="author {{if eq .Author.Name $.Requestor}}you{{end}}">{{.Author.Name}}</span>
+                        <span class="datetime" data-datetime="{{ .ServerReceivedAt.UnixMilli }}"></span>
+                        <p>{{.Content}}</p>
+                    </li>
+                    {{end}}
+                </ul>
+            </section>
+        </section>
+
+        <section class="sending" style="{{if not .Requestor }}display: none;{{end}}">
+            <form id="leave-form" action="/rooms/{{.RoomID}}/leave" method="POST" style="display: none;">
+                <input type="hidden" name="username" value="{{.Requestor}}" />
+                <button id="leave-submit" type="submit" style="height:0; width:0"></button>
+            </form>
+            <form id="message-form" action="/rooms/{{.RoomID}}/messages" method="POST" class="flex-container">
+                <textarea name="message" id="message" placeholder="Type your message here..."
+                    maxlength="2048"></textarea>
+                <button type="submit" title="Send" data-liveViewers="{{.Live}}">
+                    <span id="loading">
+                        <svg width="100%" height="100%" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="25" cy="25" r="20" fill="none" stroke="#dddddd" stroke-width="4"
+                                stroke-linecap="round" stroke-dasharray="31.416" stroke-dashoffset="31.416"
+                                opacity="0.3">
+                            </circle>
+
+                            <circle cx="25" cy="25" r="20" fill="none" stroke="#dddddd" stroke-width="4"
+                                stroke-linecap="round" stroke-dasharray="31.416" stroke-dashoffset="7.854">
+                                <animateTransform attributeName="transform" attributeType="XML" type="rotate"
+                                    from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite" />
+                            </circle>
+                        </svg>
+                    </span>
+                </button>
+            </form>
+        </section>
+        <div id="qr-code-container">
+            <div class="card">
+                <p class="title">Click / tap to copy</p>
+                <div id="qr-code"><button title="click to copy"></button></div>
+            </div>
+        </div>
+    </main>
+    <script>const broadcastDelay = {{.BroadcastDelayMs }} || 0; const jsCookieName = "{{.JSCookieName }}" || undefined;</script>
+    <script src="/static/js/room.min.js" async></script>
+    <script>
+        (() => {
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("/static/js/serviceworker.js")
+                    .then(() => console.log("Service Worker registered"))
+                    .catch(err => console.error("SW registration failed", err));
+            }
+        })()
+    </script>
+</body>
+
+</html>

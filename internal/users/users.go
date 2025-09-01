@@ -4,26 +4,33 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gosimple/slug"
 	"github.com/naughtygopher/errors"
 )
 
 type User struct {
 	Name        string
+	ID          string
 	Joined      time.Time
-	LastPing    time.Time
 	LastMessage time.Time
+	LastPing    time.Time
 }
 
 func (usr *User) Sanitize() {
 	usr.Name = strings.TrimSpace(usr.Name)
+	usr.ID = slug.Make(usr.Name)
+
+	now := time.Now()
 	if usr.Joined.IsZero() {
-		usr.Joined = time.Now()
+		usr.Joined = now
 	}
-	if usr.LastPing.IsZero() {
-		usr.LastPing = time.Now()
-	}
+
 	if usr.LastMessage.IsZero() {
-		usr.LastMessage = time.Now()
+		usr.LastMessage = now
+	}
+
+	if usr.LastPing.IsZero() {
+		usr.LastPing = now
 	}
 }
 
