@@ -9,13 +9,13 @@ const SSE = async (roomID, onMessage) => {
       title: "disconnected (try refreshing to reconnect)",
     },
     active: {
-      title: sseStatuscontainer.dataset.liveViewers
-        ? `Send (live: ${sseStatuscontainer.dataset.liveViewers})`
+      title: sseStatuscontainer?.dataset.liveViewers
+        ? `Send (live: ${sseStatuscontainer?.dataset.liveViewers})`
         : "Send",
     },
   };
   const setStatus = (status) => {
-    if (sseStatuscontainer.classList.contains(status)) {
+    if (!sseStatuscontainer || sseStatuscontainer.classList.contains(status)) {
       return;
     }
     sseStatuscontainer.classList.remove("inactive");
@@ -413,7 +413,7 @@ const room = async () => {
 
       case "room_viewers":
         if (data > 1) {
-          sendMsgButton.setAttribute("title", `Send (live: ${data})`);
+          sendMsgButton?.setAttribute("title", `Send (live: ${data})`);
         }
         break;
     }
