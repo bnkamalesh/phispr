@@ -108,6 +108,7 @@ func (rm *Room) AddMember(usr *users.User, memberToken string) (*Member, error) 
 
 	rm.Members[member.Token] = member
 	rm.nameUsed[usr.ID] = member.Token
+	// a newly joined member can become the owner if there are no other members
 	if len(rm.Members) <= 1 {
 		rm.Owner = member
 	}
