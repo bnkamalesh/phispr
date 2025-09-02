@@ -275,7 +275,7 @@ section.container.small {
 #members-list,
 #members.active #members-list {
   border: none;
-  padding: 0 1em 0;
+  padding: 0 1em 0 2em;
   margin: 0;
 }
 #members.active #members-list {
