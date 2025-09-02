@@ -615,7 +615,7 @@ h1.home .phantom::after {
   .sending {
     background-color: #f6ae06;
     padding: 0.1em 1em;
-    padding-bottom: calc(2px + env(safe-area-inset-bottom));
+    padding-bottom: calc(4px + env(safe-area-inset-bottom));
     position: fixed;
     left: -0.9em;
     right: -0.9em;
