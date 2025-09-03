@@ -632,6 +632,7 @@ h1.home .phantom::after {
     padding: 0.5em 1.5em;
     max-height: 10vh;
     background-color: #fff;
+    z-index: 5;
   }
 
   input[type="text"] {
