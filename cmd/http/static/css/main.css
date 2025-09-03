@@ -621,8 +621,7 @@ h1.home .phantom::after {
     right: -0.9em;
     bottom: 0;
   }
-
-  .mem-container {
+  .fixed-spacer {
     margin-top: 3.1em;
   }
   header {
@@ -630,7 +629,7 @@ h1.home .phantom::after {
     top: 0;
     left: -0.75em;
     right: -0.75em;
-    padding: 0.5em 1em;
+    padding: 0.5em 1.5em;
     max-height: 10vh;
   }
 

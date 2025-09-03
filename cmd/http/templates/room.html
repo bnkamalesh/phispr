@@ -69,7 +69,7 @@
             </h1>
         </header>
         {{if not .Requestor}}
-        <div style="margin-bottom: 1em;" class="joinform-container flex-container">
+        <div style="margin-bottom: 1em;" class="joinform-container flex-container fixed-spacer">
             <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
                 <ul class="nolist">
                     <li class="flex-container">
@@ -84,7 +84,7 @@
         </div>
         {{end}}
         {{if .Requestor}}
-        <div class="critical" style="font-size: 0.75em;">
+        <div class="critical fixed-spacer" style="font-size: 0.75em;">
             {{if .Phantom }}
             Note: Messages are cleared when you refresh, leave or navigate away.
             {{else}}
@@ -94,7 +94,7 @@
             {{end}}
         </div>
         {{end}}
-        <section class="flex-container mem-container">
+        <section class="flex-container">
             {{if .Requestor}}
             <section id="members">
                 <h4>
