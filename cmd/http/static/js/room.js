@@ -146,7 +146,7 @@ const messagesHandler = (roomID, authorID) => {
         at.innerText = timestamp.toLocaleString();
       }
 
-      content.innerHTML = message?.content;
+      content.innerText = message?.content;
       msgLi.appendChild(author);
       msgLi.appendChild(at);
       msgLi.appendChild(content);
