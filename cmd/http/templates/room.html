@@ -84,13 +84,15 @@
         </div>
         {{end}}
         {{if .Requestor}}
-        {{if not .Phantom }}
         <div class="critical" style="font-size: 0.75em;">
+            {{if .Phantom }}
+            Note: Messages are cleared when you refresh, leave or navigate away.
+            {{else}}
             Note: Only the latest <strong>{{.MessageCapacity}}</strong> messages of the
             <em>room</em>
             are stored.
+            {{end}}
         </div>
-        {{end}}
         {{end}}
         <section class="flex-container mem-container">
             {{if .Requestor}}
