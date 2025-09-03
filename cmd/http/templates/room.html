@@ -9,7 +9,11 @@
         content="Phispr, a space of phantom whispers. Absolute anonymity, zero tracking, and ephemeral messages that vanish into the void.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>Phispr - {{.RoomName}}</title>
+    {{if .Requestor}}
+    <title>{{.RoomName}}</title>
+    {{else}}
+    <title>Phispr: {{.RoomName}}</title>
+    {{end}}
 
     <!-- Open Graph -->
     <meta property="og:title" content="Phispr – A Space of Phantom Whispers" />
@@ -88,7 +92,7 @@
         </div>
         {{end}}
         {{end}}
-        <section class="flex-container">
+        <section class="flex-container mem-container">
             {{if .Requestor}}
             <section id="members">
                 <h4>

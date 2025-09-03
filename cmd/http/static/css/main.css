@@ -622,7 +622,15 @@ h1.home .phantom::after {
     bottom: 0;
   }
 
+  .mem-container {
+    margin-top: 3.1em;
+  }
   header {
+    position: fixed;
+    top: 0;
+    left: -0.75em;
+    right: -0.75em;
+    padding: 0.5em 1em;
     max-height: 10vh;
   }
 
