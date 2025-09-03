@@ -119,6 +119,16 @@ const messagesHandler = (roomID, authorID) => {
     }
   };
 
+  const maxNewLinesAllowed = 5;
+  function replaceNewlines(str, replacement = " ") {
+    let seen = 0;
+    // Match LF or CRLF; preserve the first 5 matches, replace the rest
+    return str.replace(/\r?\n/g, (match) => {
+      seen += 1;
+      return seen <= maxNewLinesAllowed ? match : replacement;
+    });
+  }
+
   return {
     // push a message to the messages and render
     push: function (message, callback) {
@@ -146,7 +156,7 @@ const messagesHandler = (roomID, authorID) => {
         at.innerText = timestamp.toLocaleString();
       }
 
-      content.innerText = message?.content;
+      content.innerText = replaceNewlines(message?.content, " \\n ");
       msgLi.appendChild(author);
       msgLi.appendChild(at);
       msgLi.appendChild(content);
@@ -196,8 +206,10 @@ const messagesHandler = (roomID, authorID) => {
       this.clearTextArea();
     },
     send: function () {
-      loading.classList.add("active");
       const message = messageTextarea.value.trim();
+      if (!message.length) return;
+
+      loading.classList.add("active");
       sendMessage(message, (response) => {
         loading.classList.remove("active");
         if (response) {
