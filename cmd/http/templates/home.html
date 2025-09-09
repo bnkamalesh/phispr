@@ -38,8 +38,8 @@
         <header>
             <h1 class="home">
                 <div class="sub-header flex-container">
-                    <button id="refresher" onclick="location.reload()"> </button>
-                    <span class="pwa" title="Supports Progressive Web App (PWA)"></span>
+                    <button id="refresher" onclick="location.reload()" class="only-pwa"> </button>
+                    <span class="pwa only-not-pwa" title="Supports Progressive Web App (PWA)"></span>
                 </div>
                 <span class="phantom" title="Phantom Whisper"></span>
                 Phispr
@@ -81,7 +81,7 @@
             {{end}}
 
             <h3>New room</h3>
-            <section class="note" style="margin-bottom: 2em">
+            <section class="note only-not-pwa" style="margin-bottom: 2em">
                 <p>
                     Pick how you want your room to work:
                 </p>
@@ -128,7 +128,7 @@
                 </form>
             </section>
         </section>
-        <footer class="note small">
+        <footer class="note small only-not-pwa">
             <h3>Phantom Whispers</h3>
             <p>
                 Here, every message is ephemeral. Every voice is nameless.
