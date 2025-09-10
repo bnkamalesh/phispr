@@ -28,7 +28,7 @@
 
     <link rel="manifest" href="/static/js/manifest.json">
     <link rel="apple-touch-icon" href="/static/images/icon-192.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 
@@ -36,12 +36,12 @@
     <main class="home {{if .Rooms}}has-rooms{{end}}">
         <div id="notification"></div>
         <header>
-            <h1 class="home">
+            <h1>
                 <div class="sub-header flex-container">
-                    <button id="refresher" class="only-pwa" onclick="location.reload()" class="only-pwa"> </button>
-                    <span class="pwa only-not-pwa" title="Supports Progressive Web App (PWA)"></span>
+                    <button id="refresher" class="ico only-pwa" onclick="location.reload()"></button>
+                    <span class="ico pwa only-not-pwa" title="Supports Progressive Web App (PWA)"></span>
                 </div>
-                <span class="phantom" title="Phantom Whisper"></span>
+                <span class="ico phantom" title="Phantom Whisper"></span>
                 Phispr
                 <span class="tagline">A space of phantom whispers</span>
             </h1>
@@ -57,7 +57,7 @@
                 {{range .Rooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
-                        {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
+                        {{if .Phantom}}<span class="ico phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
@@ -71,7 +71,7 @@
                 {{range .UnlistedRooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
-                        {{if .Phantom}}<span class="active phantom" title="phantom channel"></span>{{end}}
+                        {{if .Phantom}}<span class="active ico phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
@@ -121,7 +121,7 @@
                             <input type="checkbox" name="phantom" id="phantom" value="true" checked />
                             <label for="phantom" title="enable phantom mode">phantom</label>
                             <div style="margin-top:1em"></div>
-                            <span class="phantom" title="Phantom room"></span>
+                            <span class="ico phantom" title="Phantom room"></span>
                             <button type="submit">Create & Join</button>
                         </li>
                     </ul>

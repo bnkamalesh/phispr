@@ -7,10 +7,10 @@ const notifier = () => {
       if (!container || !msg) return;
       delay = delay || defaultDelay;
       container.innerHTML = msg;
-      container.classList.toggle("active");
+      container.classList.add("active");
       if (timer) clearTimeout(timer);
       timer = window.setTimeout(() => {
-        container.classList.toggle("active");
+        container.classList.remove("active");
         timer = undefined;
         // clearing content within timeout to avoid animation stutter
         window.setTimeout(() => {

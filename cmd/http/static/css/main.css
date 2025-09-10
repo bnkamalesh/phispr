@@ -2,7 +2,7 @@
 
 * {
   transition: background-color 0.25s, color 0.25s, width 0.25s, height 0.25s,
-    scroll 0.25s, opacity 0.25s, transform 0.25s, position 0.25s;
+    scroll 0.25s, opacity 0.25s, top 0.25s, transform 0.25s;
   box-sizing: border-box;
   z-index: 1;
 }
@@ -13,17 +13,21 @@
   --theme-rgb: rgba(246, 174, 6, 1);
   --theme-hex: #f6ae06;
   --theme-light: #fff3cd;
+  --theme-dark: #d48c04;
   --theme-text: #fff;
-  --theme-light-text: #856404;
 
   --anchor: var(--theme-rgb);
 
-  --border: #ddd;
+  --border: #e5e5e5;
+  --border-warning: #ffeaa7;
+  --border-message: #f5f5f5;
   --border-radius: 4px;
 
   --text-dark: #222;
   --text-normal: #444;
   --text-light: #bbb;
+  --text-warning: #856404;
+  --text-theme-light: #856404;
 }
 
 body {
@@ -49,6 +53,9 @@ h6 {
 a {
   text-decoration: none;
   color: var(--anchor);
+  &:hover {
+    color: var(--text-dark);
+  }
 }
 
 p {
@@ -66,9 +73,14 @@ button {
 
 main {
   background: #fff;
-  max-width: 60em;
+  max-width: 70em;
   margin: 1vh auto 0;
   padding: 1em 1.5em;
+}
+
+main.room {
+  padding: 0;
+  border: 1px solid var(--border);
 }
 
 input[type="text"],
@@ -92,6 +104,15 @@ button,
   padding: 0.75em 1.25em;
   background-color: var(--theme-hex);
 }
+button:hover,
+.button:hover {
+  background-color: var(--theme-dark);
+}
+
+button:active,
+.button:active {
+  transform: scale(0.9);
+}
 
 footer.small {
   margin-top: 1em;
@@ -106,8 +127,25 @@ footer.small {
   background-size: contain;
   opacity: 0.75;
 }
+
 .github:hover {
   opacity: 1;
+}
+
+header {
+  border-bottom: 1px solid var(--border);
+}
+
+.room header {
+  padding: 1em 1.5em;
+}
+
+.room header h1 {
+  margin-bottom: 0;
+}
+
+.sub-header {
+  float: right;
 }
 
 .tagline {
@@ -118,10 +156,10 @@ footer.small {
   margin-left: 0.5em;
 }
 
-.phantom {
-  background: url("/static/images/phispr.svg") no-repeat 0 0;
+.ico {
+  background-position: center center;
+  background-repeat: no-repeat;
   background-size: contain;
-
   display: inline-block;
   vertical-align: text-bottom;
   font-size: 1.25em;
@@ -129,8 +167,17 @@ footer.small {
   height: 1em;
 }
 
+.phantom {
+  background-image: url("/static/images/phispr.svg");
+}
+
 .phantom.active {
   background-image: url("/static/images/phispr-active.svg");
+}
+
+.pwa {
+  background-image: url("/static/images/pwa.svg");
+  cursor: pointer;
 }
 
 .small {
@@ -165,8 +212,22 @@ footer.small {
   background-color: #f0f0f0;
   padding: 1em 1.5em;
 }
+
 .home .note {
   margin-bottom: 1em;
+}
+.home header {
+  margin-bottom: 1em;
+}
+
+.warning {
+  background-color: var(--theme-light);
+  border-bottom: 1px solid var(--border-warning);
+  padding: 0.75em 1em;
+
+  font-size: 0.8em;
+  text-align: center;
+  color: var(--text-warning);
 }
 
 .only-pwa {
@@ -182,6 +243,7 @@ footer.small {
 
 .chat-rooms-list a {
   display: block;
+  color: var(--text-dark);
   padding: 0.5em 0.75em;
   border-bottom: 1px dashed var(--border);
   text-wrap: nowrap;
@@ -191,6 +253,7 @@ footer.small {
 
 .chat-rooms-list a:hover {
   background-color: var(--main-bg);
+  color: var(--theme-hex);
 }
 .chat-rooms-list li {
   margin-bottom: 0;
@@ -210,11 +273,37 @@ footer.small {
   font-size: 0.75em;
   vertical-align: top;
 }
+
 .room-members-count {
   color: var(--text-light);
   font-size: 0.6em;
   list-style: 1;
   float: right;
+}
+
+#refresher {
+  background-color: unset;
+  color: var(--theme-hex);
+  border-radius: 50%;
+  overflow: hidden;
+  line-height: 0;
+  padding: 0;
+}
+
+#refresher:hover {
+  color: var(--text-dark);
+}
+#refresher::after {
+  content: "↻";
+  font-size: 100%;
+}
+
+#refresher:active {
+  transform: rotate3d(0, 0, 10, 90deg);
+}
+
+#refresher:hover {
+  background-color: unset;
 }
 
 #notification {
@@ -227,16 +316,21 @@ footer.small {
   color: var(--theme-light-text);
 
   position: fixed;
-  top: -1em;
+  top: -4em;
   left: 0;
   right: 0;
-  height: 0;
   overflow: hidden;
+  z-index: -1;
 }
 
 #notification.active {
+  z-index: 5;
   top: 0;
-  height: unset;
+}
+
+#notification a {
+  text-decoration: underline;
+  color: var(--theme-light-text);
 }
 
 #new-room .phantom {
@@ -260,6 +354,55 @@ footer.small {
   font-weight: 400;
   color: var(--text-light);
   float: right;
+}
+
+.room.flex-container {
+  height: 60vh;
+}
+
+.room.flex-container > * {
+  align-content: first baseline;
+}
+
+#members,
+#messages {
+  padding: 1em 1.5em;
+  height: 100%;
+  overflow: auto;
+}
+
+#members {
+  background-color: var(--main-bg);
+  border-right: 1px solid var(--border);
+  max-width: 15em;
+}
+
+#members .meta {
+  font-size: 0.75em;
+  float: right;
+  color: var(--text-light);
+}
+
+.you {
+  color: var(--theme-hex);
+  font-weight: 600;
+}
+
+.datetime {
+  font-size: 0.75em;
+  color: var(--text-light);
+}
+
+#messages-list li {
+  border-bottom: 1px solid var(--border-message);
+}
+
+.sending {
+  padding: 1em 1.5em;
+  border-top: 1px solid var(--border);
+}
+.sending textarea {
+  flex: 8;
 }
 
 @media all and (display-mode: standalone), all and (display-mode: minimal-ui) {
