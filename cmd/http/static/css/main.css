@@ -97,6 +97,19 @@ footer.small {
   margin-top: 1em;
 }
 
+.github {
+  display: inline-block;
+  margin: 0 auto;
+  width: 2.5em;
+  height: 2.5em;
+  background: url("/static/images/github.svg") no-repeat center center;
+  background-size: contain;
+  opacity: 0.75;
+}
+.github:hover {
+  opacity: 1;
+}
+
 .tagline {
   font-weight: 400;
   font-size: 0.35em;
@@ -209,6 +222,7 @@ footer.small {
   border-bottom: 1px solid var(--theme-hex);
   padding: 0.25em 1em;
 
+  font-size: 0.8em;
   text-align: center;
   color: var(--theme-light-text);
 
@@ -219,6 +233,7 @@ footer.small {
   height: 0;
   overflow: hidden;
 }
+
 #notification.active {
   top: 0;
   height: unset;
