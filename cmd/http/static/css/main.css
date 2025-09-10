@@ -516,10 +516,10 @@ header {
   #joinform .flex-container > label {
     flex: 11;
   }
-}
 
-@media all and (max-height: 520px) {
-  .room.flex-container {
-    height: unset;
+  @media all and (max-height: 520px) {
+    .room.flex-container {
+      height: unset;
+    }
   }
 }
