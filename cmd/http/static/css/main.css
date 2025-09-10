@@ -9,6 +9,7 @@
 
 .theme-gold {
   --main-bg: #fafafa;
+  --overlay-bg: rgba(0, 0, 0, 0.75);
 
   --theme-rgb: rgba(246, 174, 6, 1);
   --theme-hex: #f6ae06;
@@ -79,6 +80,7 @@ main {
 }
 
 main.room {
+  margin: 0 auto;
   padding: 0;
   border: 1px solid var(--border);
 }
@@ -146,6 +148,14 @@ header {
 
 .sub-header {
   float: right;
+}
+.sub-header .leave {
+  font-size: 0.75em;
+  color: var(--theme-hex);
+  cursor: pointer;
+}
+.sub-header .leave:hover {
+  color: var(--text-dark);
 }
 
 .tagline {
@@ -324,7 +334,7 @@ header {
 }
 
 #notification.active {
-  z-index: 5;
+  z-index: 15;
   top: 0;
 }
 
@@ -396,13 +406,79 @@ header {
 #messages-list li {
   border-bottom: 1px solid var(--border-message);
 }
+#messages-list li:last-child {
+  border-bottom: none;
+}
 
+.joinform-container,
 .sending {
   padding: 1em 1.5em;
   border-top: 1px solid var(--border);
 }
+#joinform {
+  margin: 0 auto;
+  max-width: 30em;
+}
+
+#joinform .flex-container > label {
+  flex: 9;
+}
+#joinform .flex-container > input {
+  width: 78%;
+}
+
 .sending textarea {
-  flex: 8;
+  flex: 11;
+}
+
+#message-form button {
+  font-size: 1.75em;
+  line-height: 0;
+}
+#loading {
+  display: none;
+  cursor: progress;
+}
+#loading.active {
+  display: unset;
+}
+#loading.active ~ .text {
+  opacity: 0;
+}
+#qr-code-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 100vh;
+  left: 0;
+  background: var(--overlay-bg);
+  z-index: -1;
+  overflow: hidden;
+}
+#qr-code-container.active {
+  bottom: 0;
+  z-index: 5;
+  overflow: unset;
+}
+
+#qr-code-container .card {
+  background-color: var(--main-bg);
+  max-width: 20em;
+  margin: 7vh auto 0;
+  text-align: center;
+  padding: 1em 1.5em;
+  border-radius: var(--border-radius);
+}
+#qr-code-container .card img {
+  display: unset !important;
+  border-radius: var(--border-radius);
+}
+
+#qr-code-container .card button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-dark);
 }
 
 @media all and (display-mode: standalone), all and (display-mode: minimal-ui) {
@@ -412,5 +488,38 @@ header {
 
   .only-pwa {
     display: unset;
+  }
+}
+
+@media all and (max-width: 640px) {
+  .flex-container {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  #members {
+    max-width: unset;
+    max-height: 3em;
+    overflow: hidden;
+  }
+
+  #members.active {
+    max-height: 7em;
+    overflow: auto;
+  }
+  #joinform .flex-container,
+  .sub-header.flex-container,
+  #message-form.flex-container {
+    flex-direction: row;
+    gap: 0.5em;
+  }
+  #joinform .flex-container > label {
+    flex: 11;
+  }
+}
+
+@media all and (max-height: 520px) {
+  .room.flex-container {
+    height: unset;
   }
 }

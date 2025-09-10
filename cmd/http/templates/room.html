@@ -132,11 +132,12 @@
                             </circle>
                         </svg>
                     </span>
+                    <span class="text">➤</span>
                 </button>
             </form>
         </section>
         {{if not .Requestor}}
-        <div style="margin-bottom: 1em;" class="joinform-container flex-container fixed-spacer">
+        <div class="joinform-container flex-container">
             <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
                 <ul class="nolist">
                     <li class="flex-container">
@@ -152,7 +153,7 @@
         {{end}}
         <div id="qr-code-container">
             <div class="card">
-                <p class="title">Click / tap to copy</p>
+                <h4 class="title">Click / tap to copy</h4>
                 <div id="qr-code"><button title="click to copy"></button></div>
             </div>
         </div>
