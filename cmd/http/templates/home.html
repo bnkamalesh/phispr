@@ -32,13 +32,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 
-<body>
+<body class="theme-gold">
     <main class="home {{if .Rooms}}has-rooms{{end}}">
-        <div id="notification"> </div>
+        <div id="notification"></div>
         <header>
             <h1 class="home">
                 <div class="sub-header flex-container">
-                    <button id="refresher" onclick="location.reload()" class="only-pwa"> </button>
+                    <button id="refresher" class="only-pwa" onclick="location.reload()" class="only-pwa"> </button>
                     <span class="pwa only-not-pwa" title="Supports Progressive Web App (PWA)"></span>
                 </div>
                 <span class="phantom" title="Phantom Whisper"></span>
@@ -49,7 +49,7 @@
         <section class="container small {{if .Rooms}}has-rooms{{end}}">
             <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
             </h3>
-            <ol id="public-chat-rooms" class="chat-rooms-list">
+            <ol id="public-chat-rooms" class="chat-rooms-list box">
                 {{if not .Rooms}}
                 <li style="list-style:none">No listed chat room available</li>
                 {{end}}
@@ -67,7 +67,7 @@
 
             {{if .UnlistedRooms}}
             <h3>Your unlisted rooms</h3>
-            <ol id="public-chat-rooms" class="chat-rooms-list">
+            <ol id="unlisted-chat-rooms" class="chat-rooms-list box">
                 {{range .UnlistedRooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
@@ -81,7 +81,7 @@
             {{end}}
 
             <h3>New room</h3>
-            <section class="note only-not-pwa" style="margin-bottom: 2em">
+            <section class="note only-not-pwa">
                 <p>
                     Pick how you want your room to work:
                 </p>
@@ -103,7 +103,7 @@
                 </ul>
             </section>
 
-            <section id="new-room">
+            <section id="new-room" class="box">
                 <form action="/rooms" method="POST">
                     <ul class="nolist">
                         <li class="flex-container">

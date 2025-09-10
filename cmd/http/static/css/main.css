@@ -2,20 +2,38 @@
 
 * {
   transition: background-color 0.25s, color 0.25s, width 0.25s, height 0.25s,
-    scroll 0.25s, opacity 0.25s, transform 0.25s;
+    scroll 0.25s, opacity 0.25s, transform 0.25s, position 0.25s;
   box-sizing: border-box;
   z-index: 1;
-  --theme-rgb: rgba(240, 152, 25, 0.8);
+}
+
+.theme-gold {
+  --main-bg: #fafafa;
+
+  --theme-rgb: rgba(246, 174, 6, 1);
   --theme-hex: #f6ae06;
+  --theme-light: #fff3cd;
+  --theme-text: #fff;
+  --theme-light-text: #856404;
+
+  --anchor: var(--theme-rgb);
+
+  --border: #ddd;
+  --border-radius: 4px;
+
+  --text-dark: #222;
+  --text-normal: #444;
+  --text-light: #bbb;
 }
 
 body {
-  background: #fafafa;
+  background: var(--main-bg);
   font-family: sans-serif;
   font-size: 16px;
+  line-height: 1.5;
   width: 100vw;
   height: 100vh;
-  color: #333;
+  color: var(--text-normal);
 }
 h1,
 h2,
@@ -25,7 +43,12 @@ h5,
 h6 {
   margin: 0 0 1em;
   font-weight: 600;
-  color: #222;
+  color: var(--text-dark);
+}
+
+a {
+  text-decoration: none;
+  color: var(--anchor);
 }
 
 p {
@@ -34,10 +57,11 @@ p {
 
 main,
 .small,
+.note,
 input[type="text"],
 textarea,
 button {
-  border-radius: 4px;
+  border-radius: var(--border-radius);
 }
 
 main {
@@ -50,7 +74,7 @@ main {
 input[type="text"],
 textarea {
   padding: 0.5em 1em;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
 }
 
 li {
@@ -60,11 +84,24 @@ li:last-child {
   margin-bottom: 0;
 }
 
+button,
+.button {
+  border: none;
+  cursor: pointer;
+  color: var(--theme-text);
+  padding: 0.75em 1.25em;
+  background-color: var(--theme-hex);
+}
+
+footer.small {
+  margin-top: 1em;
+}
+
 .tagline {
   font-weight: 400;
   font-size: 0.35em;
   display: block;
-  color: #bbb;
+  color: var(--text-light);
   margin-left: 0.5em;
 }
 
@@ -77,6 +114,10 @@ li:last-child {
   font-size: 1.25em;
   width: 1em;
   height: 1em;
+}
+
+.phantom.active {
+  background-image: url("/static/images/phispr-active.svg");
 }
 
 .small {
@@ -100,13 +141,110 @@ li:last-child {
   margin: 0;
 }
 
+.box {
+  padding: 1em 1.5em;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  box-shadow: 1px 1px 2px var(--border);
+}
+
 .note {
   background-color: #f0f0f0;
   padding: 1em 1.5em;
 }
+.home .note {
+  margin-bottom: 1em;
+}
 
 .only-pwa {
   display: none;
+}
+
+.chat-rooms-list {
+  padding: 0.25em 1.5em 0.25em 2em;
+  max-height: 15em;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.chat-rooms-list a {
+  display: block;
+  padding: 0.5em 0.75em;
+  border-bottom: 1px dashed var(--border);
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.chat-rooms-list a:hover {
+  background-color: var(--main-bg);
+}
+.chat-rooms-list li {
+  margin-bottom: 0;
+}
+
+.chat-rooms-list li:first-child {
+  margin-top: 0.75em;
+}
+.chat-rooms-list li:last-child {
+  margin-bottom: 0.75em;
+}
+
+.chat-rooms-list li:last-child a {
+  border-bottom: none;
+}
+.chat-rooms-list .phantom {
+  font-size: 0.75em;
+  vertical-align: top;
+}
+.room-members-count {
+  color: var(--text-light);
+  font-size: 0.6em;
+  list-style: 1;
+  float: right;
+}
+
+#notification {
+  background-color: var(--theme-light);
+  border-bottom: 1px solid var(--theme-hex);
+  padding: 0.25em 1em;
+
+  text-align: center;
+  color: var(--theme-light-text);
+
+  position: fixed;
+  top: -1em;
+  left: 0;
+  right: 0;
+  height: 0;
+  overflow: hidden;
+}
+#notification.active {
+  top: 0;
+  height: unset;
+}
+
+#new-room .phantom {
+  width: 1.5em;
+  height: 1.5em;
+  margin-top: 0.25em;
+  opacity: 0;
+  float: left;
+}
+
+#phantom:checked ~ .phantom {
+  opacity: 1;
+}
+
+#unlisted:checked ~ .phantom {
+  background-image: url("/static/images/phispr-active.svg");
+}
+
+#live-rooms-count {
+  font-size: 0.65em;
+  font-weight: 400;
+  color: var(--text-light);
+  float: right;
 }
 
 @media all and (display-mode: standalone), all and (display-mode: minimal-ui) {
