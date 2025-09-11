@@ -125,6 +125,7 @@ button:hover,
   background-color: var(--theme-dark);
 }
 
+.sub-header .ico:active,
 button:active,
 .button:active {
   transform: scale(0.9);
@@ -162,14 +163,33 @@ header {
 
 .sub-header {
   float: right;
+  margin-top: 0.25em;
 }
-.sub-header .leave {
+.sub-header .ico {
   font-size: 0.75em;
-  color: var(--theme-hex);
+  opacity: 0.6;
+}
+
+.sub-header .ico:hover {
+  opacity: 1;
+  box-shadow: 0 0 3px var(--theme-hex);
+}
+
+.sub-header .leave {
+  background-image: url("/static/images/leave.svg");
   cursor: pointer;
 }
-.sub-header .leave:hover {
-  color: var(--text-dark);
+
+.sub-header .refresher {
+  background-color: unset;
+  background-image: url("/static/images/refresh.svg");
+  cursor: pointer;
+  padding: 0;
+}
+
+.sub-header .home {
+  background-image: url("/static/images/home.svg");
+  cursor: pointer;
 }
 
 .tagline {
@@ -303,31 +323,6 @@ header {
   font-size: 0.6em;
   list-style: 1;
   float: right;
-}
-
-#refresher {
-  background-color: unset;
-  color: var(--theme-hex);
-  border-radius: 50%;
-  overflow: hidden;
-  line-height: 0;
-  padding: 0;
-}
-
-#refresher:hover {
-  color: var(--text-dark);
-}
-#refresher::after {
-  content: "↻";
-  font-size: 100%;
-}
-
-#refresher:active {
-  transform: rotate3d(0, 0, 10, 90deg);
-}
-
-#refresher:hover {
-  background-color: unset;
 }
 
 #notification {

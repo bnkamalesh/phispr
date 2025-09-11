@@ -55,10 +55,10 @@
             <h1>
                 <div class="sub-header flex-container">
                     {{if .Requestor}}
-                    <label for="leave-submit" class="leave" title="Leave room">✕</label>
+                    <label for="leave-submit" class="ico leave" title="Leave room"></label>
                     {{end}}
-                    <a href="/" title="Home">⌂</a>
-                    <button id="refresher" class="ico only-pwa" onclick="location.reload()"></button>
+                    <a href="/" title="Home" class="ico home"></a>
+                    <button id="refresher" class="ico refresher only-pwa" onclick="location.reload()"></button>
                     <span class="ico pwa only-not-pwa" title="Supports Progressive Web App (PWA)"></span>
                 </div>
                 <span id="room-name" title="Share: {{.RoomName}}">
