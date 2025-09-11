@@ -519,7 +519,12 @@ span#room-name {
   }
 
   .sending {
+    position: fixed;
+    bottom: 4px;
+    left: 0;
+    right: 0;
     padding: 1em 0.25em calc(4px + env(safe-area-inset-bottom));
+    border-top: none;
   }
 }
 
