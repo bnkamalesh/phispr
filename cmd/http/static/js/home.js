@@ -1,21 +1,24 @@
 const notifier = () => {
   const container = document.getElementById("notification");
-  const defaultDelay = 1000;
   let timer = undefined;
   return {
-    notify: function (msg, delay) {
+    notify: function (msg, delay = 1000) {
       if (!container || !msg) return;
-      delay = delay || defaultDelay;
-      container.innerHTML = msg;
-      container.classList.add("active");
       if (timer) clearTimeout(timer);
+
+      container.innerHTML = msg;
+      container.style.zIndex = 15;
+      container.style.top = 0;
+
       timer = window.setTimeout(() => {
-        container.classList.remove("active");
-        timer = undefined;
+        container.style.top = "-4em";
+        container.style.zIndex = -1;
         // clearing content within timeout to avoid animation stutter
         window.setTimeout(() => {
           container.innerHTML = "";
         }, 1000);
+
+        timer = undefined;
       }, delay);
     },
   };

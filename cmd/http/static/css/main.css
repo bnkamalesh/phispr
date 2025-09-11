@@ -347,11 +347,6 @@ header {
   z-index: -1;
 }
 
-#notification.active {
-  z-index: 15;
-  top: 0;
-}
-
 #notification a {
   text-decoration: underline;
   color: var(--theme-light-text);
@@ -380,7 +375,7 @@ header {
   float: right;
 }
 
-#room-name {
+span#room-name {
   display: block;
   max-width: 50%;
   overflow: hidden;
