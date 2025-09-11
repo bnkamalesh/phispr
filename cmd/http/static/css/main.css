@@ -396,6 +396,10 @@ header {
   overflow: auto;
 }
 
+p.content {
+  font-size: 0.95em;
+}
+
 #members {
   background-color: var(--main-bg);
   border-right: 1px solid var(--border);
