@@ -24,6 +24,7 @@
   --border-message: #f5f5f5;
   --border-radius: 4px;
 
+  --text-titles: #1a1a1a;
   --text-dark: #222;
   --text-normal: #444;
   --text-light: #bbb;
@@ -48,7 +49,11 @@ h5,
 h6 {
   margin: 0 0 1em;
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--text-titles);
+  letter-spacing: 0.05em;
+}
+h1 {
+  letter-spacing: unset;
 }
 
 a {
@@ -367,6 +372,15 @@ header {
   float: right;
 }
 
+#room-name {
+  display: block;
+  max-width: 50%;
+  overflow: hidden;
+  height: 1.5em;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+}
+
 .room.flex-container {
   height: 60vh;
 }
@@ -432,9 +446,9 @@ header {
   flex: 11;
 }
 
-#message-form button {
+#message-form button .text {
   font-size: 1.75em;
-  line-height: 0;
+  line-height: 1;
 }
 #loading {
   display: none;
@@ -457,6 +471,7 @@ header {
   z-index: -1;
   overflow: hidden;
 }
+
 #qr-code-container.active {
   bottom: 0;
   z-index: 5;
@@ -466,11 +481,12 @@ header {
 #qr-code-container .card {
   background-color: var(--main-bg);
   max-width: 20em;
-  margin: 7vh auto 0;
+  margin: 10vh auto 0;
   text-align: center;
   padding: 1em 1.5em;
   border-radius: var(--border-radius);
 }
+
 #qr-code-container .card img {
   display: unset !important;
   border-radius: var(--border-radius);
@@ -509,12 +525,14 @@ header {
     max-height: 7em;
     overflow: auto;
   }
+
   #joinform .flex-container,
   .sub-header.flex-container,
   #message-form.flex-container {
     flex-direction: row;
     gap: 0.5em;
   }
+
   #joinform .flex-container > label {
     flex: 11;
   }

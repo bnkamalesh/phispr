@@ -355,9 +355,28 @@ const serviceWorkerSetup = async () => {
     .catch((err) => console.error("Service Worker registration failed", err));
 };
 
+const roomSizer = () => {
+  const msgMemContainer = document.querySelector("section.room.flex-container");
+  if (!msgMemContainer) return null;
+  const sending = document.querySelector("section.sending");
+
+  findHeight = () => {
+    const top = msgMemContainer.getBoundingClientRect().top;
+    const availableHeight = window.innerHeight - top;
+    if (!sending) return availableHeight;
+    const sendingHeight = sending.getBoundingClientRect().height;
+    return availableHeight - sendingHeight;
+  };
+
+  resize = () => {
+    msgMemContainer.style.height = `${findHeight() - 2}px`;
+  };
+  resize();
+  window.addEventListener("resize", resize);
+};
+
 const room = async () => {
   serviceWorkerSetup();
-
   const notifications = notifier();
   const roomID = window.location.pathname.split("/").pop();
   const { member, AddMember, RemoveMember } = memberHandler(roomID);
@@ -369,6 +388,7 @@ const room = async () => {
   );
   const members = document.getElementById("members");
 
+  roomSizer();
   qrHandler();
 
   if (members) {

@@ -51,7 +51,6 @@ const home = () => {
   const chkBoxPhantom = document.getElementById("phantom");
   const chkBoxUnlisted = document.getElementById("unlisted");
   serviceWorkerSetup();
-
   if (
     !newRoomPhantomBadge ||
     !defaultTitle ||
