@@ -522,6 +522,10 @@ span#room-name {
   .only-pwa {
     display: unset;
   }
+
+  .sending {
+    padding: 1em 0.25em calc(4px + env(safe-area-inset-bottom));
+  }
 }
 
 @media all and (max-width: 640px) {
@@ -552,7 +556,7 @@ span#room-name {
     flex: 11;
   }
   .sending {
-    padding: 1em 0.25em;
+    padding: 1em 0.25em calc(4px + env(safe-area-inset-bottom));
   }
 
   @media all and (max-height: 520px) {
