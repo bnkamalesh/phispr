@@ -42,49 +42,34 @@
 
     <link rel="manifest" href="/static/js/manifest.json">
     <link rel="apple-touch-icon" href="/static/images/icon-192.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <!-- loading this here so that room.js can use QRCode without waiting -->
     <script src="/static/js/qr.min.js"></script>
 </head>
 
-<body>
+<body class="theme-gold">
     <main class="room">
         <div id="notification"> </div>
         <header>
             <h1>
                 <div class="sub-header flex-container">
                     {{if .Requestor}}
-                    <label for="leave-submit" class="critical" title="Leave room">✕</label>
+                    <label for="leave-submit" class="leave" title="Leave room">✕</label>
                     {{end}}
                     <a href="/" title="Home">⌂</a>
-                    <button id="refresher" onclick="location.reload()"> </button>
-                    <span class="pwa" title="Supports Progressive Web App (PWA)"></span>
+                    <button id="refresher" class="ico only-pwa" onclick="location.reload()"></button>
+                    <span class="ico pwa only-not-pwa" title="Supports Progressive Web App (PWA)"></span>
                 </div>
                 <span id="room-name" title="Share: {{.RoomName}}">
-                    {{if .Phantom}}<span class="phantom {{if not .Public}}active{{end}}"
+                    {{if .Phantom}}<span class="ico phantom {{if not .Public}}active{{end}}"
                         title="phantom{{if not .Public}}, unlisted{{end}} room"></span>{{end}}
                     {{.RoomName}}
                 </span>
             </h1>
         </header>
-        {{if not .Requestor}}
-        <div style="margin-bottom: 1em;" class="joinform-container flex-container fixed-spacer">
-            <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
-                <ul class="nolist">
-                    <li class="flex-container">
-                        <label for="username">
-                            Username&nbsp;
-                            <input type="text" name="username" id="username" placeholder="ghost" maxlength="256" />
-                        </label>
-                        <button type="submit">Join</button>
-                    </li>
-                </ul>
-            </form>
-        </div>
-        {{end}}
         {{if .Requestor}}
-        <div class="critical fixed-spacer" style="font-size: 0.75em;">
+        <div class="warning">
             {{if .Phantom }}
             Note: Messages are cleared when you refresh, leave or navigate away.
             {{else}}
@@ -94,13 +79,13 @@
             {{end}}
         </div>
         {{end}}
-        <section class="flex-container">
+        <section class="room flex-container">
             {{if .Requestor}}
             <section id="members">
-                <h4>
+                <h5>
                     Members
-                    <span>(<span id="members-count">{{ len .Members }}</span> / {{.Capacity}})</span>
-                </h4>
+                    <span class="meta">(<span id="members-count">{{ len .Members }}</span> / {{.Capacity}})</span>
+                </h5>
                 <ol id="members-list">
                     {{range .Members}}
                     <li data-author="{{.User.Name}}"><span class="author {{if eq .User.Name $.Requestor}}you{{end}}"
@@ -147,12 +132,28 @@
                             </circle>
                         </svg>
                     </span>
+                    <span class="text">➤</span>
                 </button>
             </form>
         </section>
+        {{if not .Requestor}}
+        <div class="joinform-container flex-container">
+            <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
+                <ul class="nolist">
+                    <li class="flex-container">
+                        <label for="username">
+                            Username&nbsp;
+                            <input type="text" name="username" id="username" placeholder="ghost" maxlength="256" />
+                        </label>
+                        <button type="submit">Join</button>
+                    </li>
+                </ul>
+            </form>
+        </div>
+        {{end}}
         <div id="qr-code-container">
             <div class="card">
-                <p class="title">Click / tap to copy</p>
+                <h4 class="title">Click / tap to copy</h4>
                 <div id="qr-code"><button title="click to copy"></button></div>
             </div>
         </div>

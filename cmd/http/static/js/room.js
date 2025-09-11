@@ -273,17 +273,19 @@ const memberHandler = (roomID) => {
 
 const notifier = () => {
   const container = document.getElementById("notification");
-  const defaultDelay = 1000;
   let timer = undefined;
   return {
-    notify: function (msg, delay) {
+    notify: function (msg, delay = 1000) {
       if (!container || !msg) return;
-      delay = delay || defaultDelay;
-      container.innerHTML = msg;
-      container.classList.toggle("active");
       if (timer) clearTimeout(timer);
+
+      container.innerHTML = msg;
+      container.style.zIndex = 15;
+      container.style.top = 0;
+
       timer = window.setTimeout(() => {
-        container.classList.toggle("active");
+        container.style.top = "-4em";
+        container.style.zIndex = -1;
         // clearing content within timeout to avoid animation stutter
         window.setTimeout(() => {
           container.innerHTML = "";
@@ -295,13 +297,14 @@ const notifier = () => {
   };
 };
 
-const qrHandler = () => {
+const qrHandler = (notifications) => {
   const qrCodeContainer = document.getElementById("qr-code-container");
-  const notifications = notifier();
+  if (!qrCodeContainer) return;
+
   const qrCodeContainerButton = qrCodeContainer.querySelector("button");
   const qrCode = qrCodeContainer.querySelector("#qr-code");
   const sharedSuccessfully = async () => {
-    notifications.notify("copied");
+    notifications?.notify("copied", 2000);
     navigator.clipboard.writeText(qrCodeContainerButton.innerText);
   };
 
@@ -355,9 +358,28 @@ const serviceWorkerSetup = async () => {
     .catch((err) => console.error("Service Worker registration failed", err));
 };
 
+const roomSizer = () => {
+  const msgMemContainer = document.querySelector("section.room.flex-container");
+  if (!msgMemContainer) return null;
+  const sending = document.querySelector("section.sending");
+
+  findHeight = () => {
+    const top = msgMemContainer.getBoundingClientRect().top;
+    const availableHeight = window.innerHeight - top;
+    if (!sending) return availableHeight;
+    const sendingHeight = sending.getBoundingClientRect().height;
+    return availableHeight - sendingHeight;
+  };
+
+  resize = () => {
+    msgMemContainer.style.height = `${findHeight() - 2}px`;
+  };
+  resize();
+  window.addEventListener("resize", resize);
+};
+
 const room = async () => {
   serviceWorkerSetup();
-
   const notifications = notifier();
   const roomID = window.location.pathname.split("/").pop();
   const { member, AddMember, RemoveMember } = memberHandler(roomID);
@@ -369,7 +391,8 @@ const room = async () => {
   );
   const members = document.getElementById("members");
 
-  qrHandler();
+  roomSizer();
+  qrHandler(notifications);
 
   if (members) {
     members.addEventListener("click", () => {

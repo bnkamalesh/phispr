@@ -28,28 +28,28 @@
 
     <link rel="manifest" href="/static/js/manifest.json">
     <link rel="apple-touch-icon" href="/static/images/icon-192.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 
-<body>
+<body class="theme-gold">
     <main class="home {{if .Rooms}}has-rooms{{end}}">
-        <div id="notification"> </div>
+        <div id="notification"></div>
         <header>
-            <h1 class="home">
+            <h1>
                 <div class="sub-header flex-container">
-                    <button id="refresher" onclick="location.reload()"> </button>
-                    <span class="pwa" title="Supports Progressive Web App (PWA)"></span>
+                    <button id="refresher" class="ico only-pwa" onclick="location.reload()"></button>
+                    <span class="ico pwa only-not-pwa" title="Supports Progressive Web App (PWA)"></span>
                 </div>
-                <span class="phantom" title="Phantom Whisper"></span>
+                <span class="ico phantom" title="Phantom Whisper"></span>
                 Phispr
                 <span class="tagline">A space of phantom whispers</span>
             </h1>
         </header>
         <section class="container small {{if .Rooms}}has-rooms{{end}}">
-            <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
-            </h3>
-            <ol id="public-chat-rooms" class="chat-rooms-list">
+            <h4>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
+            </h4>
+            <ol id="public-chat-rooms" class="chat-rooms-list box">
                 {{if not .Rooms}}
                 <li style="list-style:none">No listed chat room available</li>
                 {{end}}
@@ -57,7 +57,7 @@
                 {{range .Rooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
-                        {{if .Phantom}}<span class="phantom" title="phantom channel"></span>{{end}}
+                        {{if .Phantom}}<span class="ico phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
@@ -67,11 +67,11 @@
 
             {{if .UnlistedRooms}}
             <h3>Your unlisted rooms</h3>
-            <ol id="public-chat-rooms" class="chat-rooms-list">
+            <ol id="unlisted-chat-rooms" class="chat-rooms-list box">
                 {{range .UnlistedRooms}}
                 <li class="room">
                     <a href="/rooms/{{.ID}}" class="room-link">
-                        {{if .Phantom}}<span class="active phantom" title="phantom channel"></span>{{end}}
+                        {{if .Phantom}}<span class="active ico phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
@@ -80,8 +80,8 @@
             </ol>
             {{end}}
 
-            <h3>New room</h3>
-            <section class="note" style="margin-bottom: 2em">
+            <h4>New room</h4>
+            <section class="note only-not-pwa">
                 <p>
                     Pick how you want your room to work:
                 </p>
@@ -103,7 +103,7 @@
                 </ul>
             </section>
 
-            <section id="new-room">
+            <section id="new-room" class="box">
                 <form action="/rooms" method="POST">
                     <ul class="nolist">
                         <li class="flex-container">
@@ -121,14 +121,14 @@
                             <input type="checkbox" name="phantom" id="phantom" value="true" checked />
                             <label for="phantom" title="enable phantom mode">phantom</label>
                             <div style="margin-top:1em"></div>
-                            <span class="phantom" title="Phantom room"></span>
+                            <span class="ico phantom" title="Phantom room"></span>
                             <button type="submit">Create & Join</button>
                         </li>
                     </ul>
                 </form>
             </section>
         </section>
-        <footer class="note small">
+        <footer class="note small only-not-pwa">
             <h3>Phantom Whispers</h3>
             <p>
                 Here, every message is ephemeral. Every voice is nameless.
@@ -138,7 +138,8 @@
                 No accounts. No logs. No trails. Only the whisper, and then the silence.
             </p>
             <div style="text-align: center;">
-                <a href="https://github.com/bnkamalesh/phispr" class="github" title="Source code on Github"> </a>
+                <a href="https://github.com/bnkamalesh/phispr" class="github" title="Source code on Github"
+                    target="_blank"> </a>
             </div>
         </footer>
     </main>
