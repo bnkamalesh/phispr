@@ -119,18 +119,19 @@ func (rm *Room) AddMember(usr *users.User, memberToken string) (*Member, error) 
 }
 
 func (rm *Room) RemoveMember(username string) (*Member, error) {
+	username = strings.TrimSpace(username)
 	userID := slug.Make(username)
 	tokenID, exists := rm.nameUsed[userID]
 	if !exists {
 		return nil, errors.Duplicatef(
-			"member %q is not a member of the room %q",
+			"user %q is not a member of the room %q",
 			username, rm.ID,
 		)
 	}
 	member := rm.Members[tokenID]
 
-	delete(rm.Members, tokenID)
-	delete(rm.nameUsed, userID)
+	delete(rm.Members, member.Token)
+	delete(rm.nameUsed, member.User.ID)
 
 	return member, nil
 }
@@ -169,7 +170,7 @@ func (rm *Room) cleanupMembers() {
 		member := rm.Members[key]
 		if time.Since(member.User.LastPing) > rm.Expiry &&
 			time.Since(member.User.LastMessage) > rm.Expiry {
-			delete(rm.Members, key)
+			rm.RemoveMember(member.User.Name)
 		}
 	}
 }
