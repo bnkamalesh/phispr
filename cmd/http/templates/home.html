@@ -47,8 +47,8 @@
             </h1>
         </header>
         <section class="container small {{if .Rooms}}has-rooms{{end}}">
-            <h3>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
-            </h3>
+            <h4>Live rooms <span id="live-rooms-count">{{.LiveRooms}}/{{.TotalRooms}}</span>
+            </h4>
             <ol id="public-chat-rooms" class="chat-rooms-list box">
                 {{if not .Rooms}}
                 <li style="list-style:none">No listed chat room available</li>
@@ -80,7 +80,7 @@
             </ol>
             {{end}}
 
-            <h3>New room</h3>
+            <h4>New room</h4>
             <section class="note only-not-pwa">
                 <p>
                     Pick how you want your room to work:

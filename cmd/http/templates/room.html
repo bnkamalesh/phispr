@@ -82,10 +82,10 @@
         <section class="room flex-container">
             {{if .Requestor}}
             <section id="members">
-                <h4>
+                <h5>
                     Members
                     <span class="meta">(<span id="members-count">{{ len .Members }}</span> / {{.Capacity}})</span>
-                </h4>
+                </h5>
                 <ol id="members-list">
                     {{range .Members}}
                     <li data-author="{{.User.Name}}"><span class="author {{if eq .User.Name $.Requestor}}you{{end}}"

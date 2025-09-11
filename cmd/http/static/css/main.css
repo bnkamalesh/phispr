@@ -56,6 +56,14 @@ h1 {
   letter-spacing: unset;
 }
 
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-transform: uppercase;
+}
+
 a {
   text-decoration: none;
   color: var(--anchor);
@@ -396,14 +404,22 @@ header {
   overflow: auto;
 }
 
-p.content {
+.msg p {
   font-size: 0.95em;
+  line-height: 1.6;
+}
+.msg .author {
+  font-size: 0.8em;
 }
 
 #members {
   background-color: var(--main-bg);
   border-right: 1px solid var(--border);
   max-width: 15em;
+  padding-left: 0;
+}
+#members h5 {
+  margin-left: 1em;
 }
 
 #members .meta {
@@ -539,6 +555,9 @@ p.content {
 
   #joinform .flex-container > label {
     flex: 11;
+  }
+  .sending {
+    padding: 1em 0.25em;
   }
 
   @media all and (max-height: 520px) {
