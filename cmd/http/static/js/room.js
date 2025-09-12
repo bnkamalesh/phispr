@@ -362,13 +362,17 @@ const roomSizer = () => {
   const msgMemContainer = document.querySelector("section.room.flex-container");
   if (!msgMemContainer) return null;
   const sending = document.querySelector("section.sending");
+  const joinFormContainer = document.querySelector(".joinform-container");
 
   findHeight = () => {
     const top = msgMemContainer.getBoundingClientRect().top;
-    const availableHeight = window.innerHeight - top;
-    if (!sending) return availableHeight;
-    const sendingHeight = sending.getBoundingClientRect().height;
-    return availableHeight - sendingHeight;
+    let availableHeight = window.innerHeight - top;
+    if (sending) availableHeight -= sending.getBoundingClientRect().height;
+
+    if (joinFormContainer)
+      availableHeight -= joinFormContainer.getBoundingClientRect().height;
+
+    return availableHeight;
   };
 
   resize = () => {

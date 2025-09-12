@@ -20,6 +20,7 @@
   --anchor: var(--theme-rgb);
 
   --border: #e5e5e5;
+  --border-dark: #d0d0d0;
   --border-warning: #ffeaa7;
   --border-message: #f5f5f5;
   --border-radius: 4px;
@@ -381,6 +382,7 @@ span#room-name {
 
 .room.flex-container {
   height: 60vh;
+  gap: 0;
 }
 
 .room.flex-container > * {
@@ -389,6 +391,7 @@ span#room-name {
 
 #members,
 #messages {
+  border-bottom: 0.5px solid var(--border);
   padding: 1em 1.5em;
   height: 100%;
   overflow: auto;
@@ -404,7 +407,7 @@ span#room-name {
 
 #members {
   background-color: var(--main-bg);
-  border-right: 1px solid var(--border);
+  border-right: 0.5px solid var(--border);
   max-width: 15em;
   padding-left: 0;
 }
@@ -428,6 +431,10 @@ span#room-name {
   color: var(--text-light);
 }
 
+#members ~ #messages {
+  border-left: 0.5px solid var(--border-dark);
+}
+
 #messages-list li {
   border-bottom: 1px solid var(--border-message);
 }
@@ -438,7 +445,7 @@ span#room-name {
 .joinform-container,
 .sending {
   padding: 1em 1.5em;
-  border-top: 1px solid var(--border);
+  border-top: 0.5px solid var(--border-dark);
 }
 #joinform {
   margin: 0 auto;
@@ -538,6 +545,10 @@ span#room-name {
     max-width: unset;
     max-height: 3em;
     overflow: hidden;
+    border-right: none;
+  }
+  #members ~ #messages {
+    border-left: none;
   }
 
   #members.active {
