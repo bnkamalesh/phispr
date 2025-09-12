@@ -163,11 +163,12 @@ const messagesHandler = (roomID, authorID) => {
       messagesList.appendChild(msgLi);
 
       /*
-      The minus 64 is a buffer zone to identify if the scroll top is close to 
-      the max possible, so that it auto scrolls when there are new messages.
+      The minus 256 is a buffer zone to identify if the scroll top is close to 
+      the max possible, so that it auto scrolls when there are new messages and
+      is already close to the bottom.
       */
       const maxPossibleScrollTop =
-        messageContainer.scrollHeight - messageContainer.offsetHeight - 128;
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 256;
 
       if (messageContainer.scrollTop >= maxPossibleScrollTop) {
         messageContainer.scrollTo({
