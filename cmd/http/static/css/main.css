@@ -523,6 +523,9 @@ span#room-name {
     padding: 1em 0.25em calc(4px + env(safe-area-inset-bottom));
     border-top: none;
   }
+  main {
+    min-height: 100vh;
+  }
 }
 
 @media all and (max-width: 640px) {
