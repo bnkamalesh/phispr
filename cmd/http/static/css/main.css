@@ -389,6 +389,17 @@ span#room-name {
 .msg .author {
   font-size: 0.8em;
 }
+.msg {
+  border-bottom: 0.5px solid var(--border-dark);
+  margin-bottom: 0;
+}
+.msg:hover {
+  background-color: var(--border-message);
+}
+
+.msg:last-child {
+  border-bottom: none;
+}
 
 #members {
   background-color: var(--main-bg);
@@ -396,6 +407,7 @@ span#room-name {
   max-width: 15em;
   padding-left: 0;
 }
+
 #members h5 {
   margin-left: 1em;
 }
@@ -418,13 +430,6 @@ span#room-name {
 
 #members ~ #messages {
   border-left: 0.5px solid var(--border-dark);
-}
-
-#messages-list li {
-  border-bottom: 1px solid var(--border-message);
-}
-#messages-list li:last-child {
-  border-bottom: none;
 }
 
 .joinform-container,

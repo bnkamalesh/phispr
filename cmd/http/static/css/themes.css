@@ -11,10 +11,10 @@
   --anchor: var(--theme-rgb);
 
   --border: #dfdfdf;
-  --border-dark: #cfcfcf;
+  --border-dark: #ccc;
   --border-warning: #ffeaa7;
-  --border-message: #f5f5f5;
-  --border-radius: 4px;
+  --border-message: #f0f0f0;
+  --border-radius: 8px;
 
   --text-titles: #1a1a1a;
   --text-dark: #222;
