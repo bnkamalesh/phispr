@@ -1,4 +1,4 @@
-const CACHE_NAME = "phispr-cache-v17";
+const CACHE_NAME = "phispr-cache-v18";
 const ASSETS = [
   "/",
   "/static/css/normalize.min.css",

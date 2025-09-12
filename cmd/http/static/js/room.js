@@ -367,7 +367,8 @@ const roomSizer = () => {
     let availableHeight = window.innerHeight;
     allElements.forEach((sib) => {
       if (sib === msgMemContainer) return;
-      availableHeight -= sib.getBoundingClientRect().height;
+      console.log(sib, sib.getBoundingClientRect().height || 0);
+      availableHeight -= sib.getBoundingClientRect().height || 0;
     });
     return availableHeight;
   };
