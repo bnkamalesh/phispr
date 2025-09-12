@@ -1,12 +1,16 @@
-const CACHE_NAME = "phispr-cache-v16";
+const CACHE_NAME = "phispr-cache-v17";
 const ASSETS = [
   "/",
   "/static/css/normalize.min.css",
   "/static/css/main.min.css",
+  "/static/css/themes.css",
 
   "/static/images/github.svg",
+  "/static/images/home.svg",
+  "/static/images/leave.svg",
   "/static/images/phispr-active.svg",
   "/static/images/phispr.svg",
+  "/static/images/refresh.svg",
 
   "/static/images/icon-192.png",
   "/static/images/icon-512.png",
