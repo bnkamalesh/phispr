@@ -19,8 +19,8 @@
 
   --anchor: var(--theme-rgb);
 
-  --border: #e5e5e5;
-  --border-dark: #d0d0d0;
+  --border: #d0d0d0;
+  --border-dark: #b0b0b0;
   --border-warning: #ffeaa7;
   --border-message: #f5f5f5;
   --border-radius: 4px;
@@ -91,12 +91,12 @@ main {
   max-width: 70em;
   margin: 1vh auto 0;
   padding: 1em 1.5em;
+  border: 1px solid var(--border);
 }
 
 main.room {
   margin: 0 auto;
   padding: 0;
-  border: 1px solid var(--border);
 }
 
 input[type="text"],
@@ -258,6 +258,15 @@ header {
   padding: 1em 1.5em;
 }
 
+body.home {
+  display: flex;
+  justify-content: center; /* horizontal centering */
+  align-items: center; /* vertical centering */
+}
+body.home main {
+  flex: 1;
+  margin: 0;
+}
 .home .note {
   margin-bottom: 1em;
 }
