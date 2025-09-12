@@ -362,20 +362,13 @@ const serviceWorkerSetup = async () => {
 const roomSizer = () => {
   const msgMemContainer = document.querySelector("section.room.flex-container");
   if (!msgMemContainer) return null;
-  const mainHeader = document.querySelector("main>header");
-  const sending = document.querySelector("section.sending");
-  const joinFormContainer = document.querySelector(".joinform-container");
-
+  const allElements = document.querySelectorAll("main > *");
   findHeight = () => {
-    const top = msgMemContainer.getBoundingClientRect().top;
-    let availableHeight = window.innerHeight - top;
-
-    if (mainHeader)
-      availableHeight -= mainHeader.getBoundingClientRect().height;
-    if (sending) availableHeight -= sending.getBoundingClientRect().height;
-    if (joinFormContainer)
-      availableHeight -= joinFormContainer.getBoundingClientRect().height;
-
+    let availableHeight = window.innerHeight;
+    allElements.forEach((sib) => {
+      if (sib === msgMemContainer) return;
+      availableHeight -= sib.getBoundingClientRect().height;
+    });
     return availableHeight;
   };
 
