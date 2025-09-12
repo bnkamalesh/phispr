@@ -515,16 +515,17 @@ span#room-name {
     display: unset;
   }
 
+  main {
+    min-height: 100vh;
+  }
+
   .sending {
     position: fixed;
     bottom: env(safe-area-inset-bottom, 0);
     left: 0;
     right: 0;
-    padding: 1em 0.25em calc(4px + env(safe-area-inset-bottom));
+    padding: 1em 0.25em 0;
     border-top: none;
-  }
-  main {
-    min-height: 100vh;
   }
 }
 
