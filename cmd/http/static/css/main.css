@@ -527,7 +527,7 @@ span#room-name {
 
   .sending {
     position: fixed;
-    bottom: calc(2px + env(safe-area-inset-bottom, 0px));
+    bottom: env(safe-area-inset-bottom, 0);
     left: 0;
     right: 0;
     padding: 1em 0.25em calc(4px + env(safe-area-inset-bottom));
