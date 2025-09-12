@@ -158,17 +158,8 @@
             </div>
         </div>
     </main>
-    <script>const broadcastDelay = {{.BroadcastDelayMs }} || 0; const jsCookieName = "{{.JSCookieName }}" || undefined;</script>
-    <script src="/static/js/room.min.js" async></script>
-    <script>
-        (() => {
-            if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register("/static/js/serviceworker.js")
-                    .then(() => console.log("Service Worker registered"))
-                    .catch(err => console.error("SW registration failed", err));
-            }
-        })()
-    </script>
 </body>
+<script>const broadcastDelay = {{.BroadcastDelayMs }} || 0; const jsCookieName = "{{.JSCookieName }}" || undefined;</script>
+<script src="/static/js/room.min.js" async></script>
 
 </html>
