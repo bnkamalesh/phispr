@@ -1,0 +1,33 @@
+.theme-gold {
+  --main-bg: #efefef;
+  --overlay-bg: rgba(0, 0, 0, 0.75);
+
+  --theme-rgb: rgba(246, 174, 6, 1);
+  --theme-hex: #f6ae06;
+  --theme-light: #fff3cd;
+  --theme-dark: #d48c04;
+  --theme-text: #fff;
+
+  --anchor: var(--theme-rgb);
+
+  --border: #dfdfdf;
+  --border-dark: #cfcfcf;
+  --border-warning: #ffeaa7;
+  --border-message: #f5f5f5;
+  --border-radius: 4px;
+
+  --text-titles: #1a1a1a;
+  --text-dark: #222;
+  --text-normal: #444;
+  --text-light: #bbb;
+  --text-warning: #856404;
+  --text-theme-light: #856404;
+
+  --url-github: url("/static/images/github.svg");
+  --url-leave: url("/static/images/leave.svg");
+  --url-refresh: url("/static/images/refresh.svg");
+  --url-home: url("/static/images/home.svg");
+  --url-logo: url("/static/images/phispr.svg");
+  --url-logo-active: url("/static/images/phispr-active.svg");
+  --url-pwa: url("/static/images/pwa.svg");
+}

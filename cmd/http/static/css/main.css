@@ -1,36 +1,11 @@
 @import url("/static/css/normalize.min.css");
+@import url("/static/css/themes.css");
 
 * {
   transition: background-color 0.25s, color 0.25s, width 0.25s, height 0.25s,
     scroll 0.25s, opacity 0.25s, top 0.25s, transform 0.25s;
   box-sizing: border-box;
   z-index: 1;
-}
-
-.theme-gold {
-  --main-bg: #efefef;
-  --overlay-bg: rgba(0, 0, 0, 0.75);
-
-  --theme-rgb: rgba(246, 174, 6, 1);
-  --theme-hex: #f6ae06;
-  --theme-light: #fff3cd;
-  --theme-dark: #d48c04;
-  --theme-text: #fff;
-
-  --anchor: var(--theme-rgb);
-
-  --border: #d0d0d0;
-  --border-dark: #b0b0b0;
-  --border-warning: #ffeaa7;
-  --border-message: #f5f5f5;
-  --border-radius: 4px;
-
-  --text-titles: #1a1a1a;
-  --text-dark: #222;
-  --text-normal: #444;
-  --text-light: #bbb;
-  --text-warning: #856404;
-  --text-theme-light: #856404;
 }
 
 body {
@@ -133,7 +108,7 @@ button:active,
 }
 
 footer.small {
-  margin-top: 1em;
+  margin-top: 2em;
 }
 
 .github {
@@ -141,7 +116,7 @@ footer.small {
   margin: 0 auto;
   width: 2.5em;
   height: 2.5em;
-  background: url("/static/images/github.svg") no-repeat center center;
+  background: var(--url-github) no-repeat center center;
   background-size: contain;
   opacity: 0.75;
 }
@@ -177,19 +152,19 @@ header {
 }
 
 .sub-header .leave {
-  background-image: url("/static/images/leave.svg");
+  background-image: var(--url-leave);
   cursor: pointer;
 }
 
 .sub-header .refresher {
   background-color: unset;
-  background-image: url("/static/images/refresh.svg");
+  background-image: var(--url-refresh);
   cursor: pointer;
   padding: 0;
 }
 
 .sub-header .home {
-  background-image: url("/static/images/home.svg");
+  background-image: var(--url-home);
   cursor: pointer;
 }
 
@@ -213,15 +188,15 @@ header {
 }
 
 .phantom {
-  background-image: url("/static/images/phispr.svg");
+  background-image: var(--url-logo);
 }
 
 .phantom.active {
-  background-image: url("/static/images/phispr-active.svg");
+  background-image: var(--url-logo-active);
 }
 
 .pwa {
-  background-image: url("/static/images/pwa.svg");
+  background-image: var(--url-pwa);
   cursor: pointer;
 }
 
@@ -268,7 +243,7 @@ body.home main {
   margin: 0;
 }
 .home .note {
-  margin-bottom: 1em;
+  margin-bottom: 2em;
 }
 .home header {
   margin-bottom: 1em;
@@ -293,6 +268,7 @@ body.home main {
   max-height: 15em;
   overflow-x: hidden;
   overflow-y: auto;
+  margin: 0 0 2em;
 }
 
 .chat-rooms-list a {
@@ -370,7 +346,7 @@ body.home main {
 }
 
 #unlisted:checked ~ .phantom {
-  background-image: url("/static/images/phispr-active.svg");
+  background-image: var(--url-logo-active);
 }
 
 #live-rooms-count {
