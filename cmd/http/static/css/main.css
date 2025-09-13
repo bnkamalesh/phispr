@@ -540,10 +540,10 @@ span#room-name {
 
   .sending {
     position: fixed;
-    bottom: 0;
+    bottom: env(safe-area-inset-bottom, 1em);
     left: 0.25em;
     right: 0.25em;
-    padding: 1em 0 env(safe-area-inset-bottom, 1em);
+    padding: 1em 0.25em;
     border-top: none;
   }
 }
@@ -580,7 +580,7 @@ span#room-name {
     flex: 11;
   }
   .sending {
-    padding: 1em 0.25em env(safe-area-inset-bottom, 1em);
+    padding: 1em 0.25em 0.5em;
   }
 
   @media all and (max-height: 520px) {
