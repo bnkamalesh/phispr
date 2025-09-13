@@ -8,7 +8,6 @@
 package http
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -87,6 +86,13 @@ func getRoutes(ht *HTTP) []*webgo.Route {
 			Handlers:      []http.HandlerFunc{ht.NewMessage},
 			TrailingSlash: true,
 		},
+		{
+			Name:          "boot-user",
+			Method:        http.MethodDelete,
+			Pattern:       "/rooms/:roomID/:userID",
+			Handlers:      []http.HandlerFunc{ht.authOwner(ht.BootUserHandler)},
+			TrailingSlash: true,
+		},
 	}
 }
 
@@ -120,21 +126,6 @@ func initServices(cfg *configs.Config) (*rooms.Rooms, *HTTP) {
 		broadcastDelay:  cfg.Rooms.LiveViewerBroadcastDelay,
 	}
 	ht.Sanitize()
-
-	ht.sse.OnCreateClient = func(_ context.Context, client *sse.Client, _ int) {
-		roomID, _ := roomIDUserNameFromSSEClientID(client.ID)
-
-		val, _ := ht.roomLiveViewers.Load(roomID)
-		count, _ := val.(int)
-		ht.roomLiveViewers.Store(roomID, count+1)
-	}
-
-	ht.sse.OnRemoveClient = func(_ context.Context, clientID string, _ int) {
-		roomID, _ := roomIDUserNameFromSSEClientID(clientID)
-		val, _ := ht.roomLiveViewers.Load(roomID)
-		count, _ := val.(int)
-		ht.roomLiveViewers.Store(roomID, count-1)
-	}
 
 	return rms, ht
 }
@@ -185,16 +176,19 @@ func Start(cfg *configs.Config) func() {
 	go func() {
 		for {
 			time.Sleep(time.Second * 5)
+
+			roomViewers := map[string]int{}
 			ht.sse.Clients.Range(func(c *sse.Client) {
 				roomID, _ := roomIDUserNameFromSSEClientID(c.ID)
-				val, _ := ht.roomLiveViewers.Load(roomID)
-				count, _ := val.(int)
-				ht.roomBroadcast(roomID, &ssePayload{
-					Type: SSEPTypeRoomViewers,
-					Data: count,
-				})
+				roomViewers[roomID]++
 			})
 
+			for roomID, viewers := range roomViewers {
+				ht.roomBroadcast(roomID, &ssePayload{
+					Type: SSEPTypeRoomViewers,
+					Data: viewers,
+				})
+			}
 			ht.api.Cleanup()
 		}
 	}()

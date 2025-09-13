@@ -81,12 +81,13 @@ func (rs *Rooms) Join(roomID string, username string, memberToken string) (*Memb
 	return rs.AddMember(room, username, memberToken)
 }
 
-func (rs *Rooms) Leave(roomID string, username string) (*Member, error) {
+func (rs *Rooms) RemoveMember(roomID string, username string) (*Member, error) {
 	room, err := rs.Room(roomID)
 	if err != nil {
 		return nil, err
 	}
-	return room.RemoveMember(username)
+
+	return room.RemoveMemberAutoAssignOwner(username)
 }
 
 func (rs *Rooms) AddAndJoin(roomID string, private, phantom bool, username, memberToken string) (*Room, *Member, error) {

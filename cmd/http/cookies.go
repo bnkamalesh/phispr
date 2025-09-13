@@ -13,13 +13,13 @@ import (
 
 const (
 	cookieNameAnon     = "roomanonauth"
-	cookieName         = "roomauth"
+	cookieRoomAuth     = "roomauth"
 	cookieNameJS       = "roomauth_js"
 	cookieNameMemberID = "member_id"
 )
 
 func (ht *HTTP) memberFromCookie(r *http.Request) (*rooms.Member, error) {
-	member, err := cookieMemberDetails(cookieName, r)
+	member, err := cookieMemberDetails(cookieRoomAuth, r)
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +135,15 @@ func memberIDFromCookie(r *http.Request) string {
 	}
 
 	return string(decoded)
+}
+
+func memberFromCookie(r *http.Request) (*rooms.Member, error) {
+	member, err := cookieMemberDetails(cookieRoomAuth, r)
+	if err != nil {
+		return nil, err
+	}
+
+	return member, nil
 }
 
 func setMemberIDCookie(memberID string, w http.ResponseWriter) {

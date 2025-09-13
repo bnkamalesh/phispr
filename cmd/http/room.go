@@ -53,7 +53,12 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 	requestor := ""
 	member, err := h.memberFromCookie(r)
 	if err == nil {
-		requestor = member.User.Name
+		requestor = member.User.ID
+	}
+
+	owner := ""
+	if room.Owner != nil {
+		owner = room.Owner.User.ID
 	}
 
 	val, _ := h.roomLiveViewers.Load(roomID)
@@ -67,6 +72,7 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 		Requestor:        requestor,
 		Messages:         room.Messages(),
 		Members:          room.MembersList(),
+		Owner:            owner,
 		Phantom:          room.Phantom,
 		Public:           room.Listed,
 		BroadcastDelayMs: uint(h.broadcastDelay.Milliseconds()),
@@ -134,7 +140,7 @@ func (h *HTTP) CreateJoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rp := roomPath(room.ID)
-	setMemberCookies(cookieName, member, rp, w)
+	setMemberCookies(cookieRoomAuth, member, rp, w)
 
 	if strings.Contains(r.Header.Get("Content-type"), "application/json") {
 		webgo.SendResponse(w, rp, http.StatusOK)
@@ -179,7 +185,7 @@ func (h *HTTP) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rp := roomPath(roomID)
-	setMemberCookies(cookieName, member, rp, w)
+	setMemberCookies(cookieRoomAuth, member, rp, w)
 
 	if strings.Contains(r.Header.Get("Content-type"), "application/json") {
 		webgo.SendResponse(w, member, http.StatusOK)
@@ -209,14 +215,47 @@ func (h *HTTP) LeaveRoomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	member, err := h.api.Leave(roomID, username)
+	member, err := h.api.RemoveMember(roomID, username)
 	if err != nil {
 		errHandler(h.templateErr, w, r, err)
 		return
 	}
 
 	rp := roomPath(roomID)
-	removeMemberCookies(cookieName, member, rp, w)
+	removeMemberCookies(cookieRoomAuth, member, rp, w)
+
+	if strings.Contains(r.Header.Get("Content-type"), "application/json") {
+		webgo.SendResponse(w, member, http.StatusOK)
+	} else {
+		http.Redirect(w, r, rp, http.StatusSeeOther)
+	}
+
+	room, _ := h.api.Room(roomID)
+	payload := struct {
+		rooms.Member
+		TotalMembers uint
+	}{}
+	payload.Member = *member
+	payload.TotalMembers = uint(len(room.Members))
+
+	h.roomBroadcast(roomID, &ssePayload{
+		Type: SSEPTypeRoomLeave,
+		Data: payload,
+	})
+}
+
+func (h *HTTP) BootUserHandler(w http.ResponseWriter, r *http.Request) {
+	roomID := roomIDFromReq(r)
+	wctx := webgo.Context(r)
+	username := wctx.URIParams["userID"]
+
+	member, err := h.api.RemoveMember(roomID, username)
+	if err != nil {
+		errHandler(h.templateErr, w, r, err)
+		return
+	}
+
+	rp := roomPath(roomID)
 
 	if strings.Contains(r.Header.Get("Content-type"), "application/json") {
 		webgo.SendResponse(w, member, http.StatusOK)

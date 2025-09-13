@@ -137,3 +137,30 @@ func errHandler(tmpl templateExecutor, w http.ResponseWriter, r *http.Request, e
 		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", terr))
 	}
 }
+
+func (ht *HTTP) authOwner(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		member, err := memberFromCookie(r)
+		if err != nil || member == nil {
+			webgo.SendError(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		room, err := ht.api.Room(member.RoomID)
+		if err != nil {
+			webgo.SendError(w, err.Error(), http.StatusForbidden)
+			return
+		}
+
+		if !room.IsOwner(member) {
+			webgo.SendError(
+				w,
+				"only the room owner is allowed to perform this action",
+				http.StatusForbidden,
+			)
+			return
+		}
+
+		next(w, r)
+	}
+}

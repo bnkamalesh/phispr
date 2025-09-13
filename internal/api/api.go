@@ -8,7 +8,7 @@ import (
 type chatrooms interface {
 	AddAndJoin(roomID string, private, phantom bool, username string, memberToken string) (*rooms.Room, *rooms.Member, error)
 	Join(roomID string, username string, memberTokens string) (*rooms.Member, error)
-	Leave(roomID string, username string) (*rooms.Member, error)
+	RemoveMember(roomID string, username string) (*rooms.Member, error)
 
 	Public() ([]*rooms.Room, error)
 	Unlisted(memberToken string) ([]*rooms.Room, error)

@@ -1,6 +1,8 @@
 .theme-gold {
-  --main-bg: #efefef;
-  --overlay-bg: rgba(0, 0, 0, 0.75);
+  --bg-body: #efefef;
+  --bg-main: #fff;
+  --bg-members: #f9f9f9;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
 
   --theme-rgb: rgba(246, 174, 6, 1);
   --theme-hex: #f6ae06;
@@ -14,7 +16,9 @@
   --border-dark: #ccc;
   --border-warning: #ffeaa7;
   --border-message: #f0f0f0;
+
   --border-radius: 8px;
+  --border-radius-pill: 1em;
 
   --text-titles: #1a1a1a;
   --text-dark: #222;
@@ -25,6 +29,7 @@
 
   --url-github: url("/static/images/github.svg");
   --url-leave: url("/static/images/leave.svg");
+  --url-boot: url("/static/images/boot.svg");
   --url-refresh: url("/static/images/refresh.svg");
   --url-home: url("/static/images/home.svg");
   --url-logo: url("/static/images/phispr.svg");

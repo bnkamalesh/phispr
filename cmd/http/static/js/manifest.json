@@ -1,5 +1,5 @@
 {
-    "manifest_version": 18,
+    "manifest_version": 19,
     "name": "Phantom Whispers",
     "short_name": "Phispr",
     "description": "A space of phantom whispers",
@@ -7,6 +7,9 @@
     "id": "/",
     "start_url": "/",
     "scope": "/",
+    "background_color": "#efefef",
+    "theme_color": "#f6ae06",
+    "orientation": "portrait",
     "display": "standalone",
     "display_override": [
         "window-controls-overlay",
@@ -15,9 +18,6 @@
         "minimal-ui",
         "fullscreen"
     ],
-    "background_color": "#efefef",
-    "theme_color": "#f6ae06",
-    "orientation": "portrait",
     "icons": [
         {
             "src": "/static/images/icon-512.png",
@@ -50,11 +50,15 @@
             "type": "image/png"
         }
     ],
-    "permissions": [
-        "background",
-        "clipboardWrite",
-        "cookies",
-        "notifications"
+    "categories": [
+        "utilities",
+        "social"
     ],
+    "launch_handler": {
+        "client_mode": [
+            "navigate-existing",
+            "auto"
+        ]
+    },
     "handle_links": "preferred"
 }

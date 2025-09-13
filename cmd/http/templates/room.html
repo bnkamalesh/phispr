@@ -49,7 +49,7 @@
 </head>
 
 <body class="theme-gold">
-    <main class="room">
+    <main class="room {{if eq .Owner .Requestor}}owner{{end}}">
         <div id="notification"> </div>
         <header>
             <h1>
@@ -88,8 +88,14 @@
                 </h5>
                 <ol id="members-list">
                     {{range .Members}}
-                    <li data-author="{{.User.Name}}"><span class="author {{if eq .User.Name $.Requestor}}you{{end}}"
-                            title="{{.User.Name}}">{{.User.Name}}</span></li>
+                    <li class="member" data-author="{{.User.Name}}" data-authorID="{{.User.ID}}">
+                        <span
+                            class="author {{if eq .User.ID $.Requestor}}you{{end}} {{if eq $.Owner .User.ID}}owner{{end}}"
+                            title="{{if eq .User.ID $.Requestor}}you: {{end}}{{.User.Name}} {{if eq $.Owner .User.ID}}(owner){{end}}">{{.User.Name}}</span>
+                        {{if and (eq $.Owner $.Requestor) (ne .User.ID $.Requestor)}}
+                        <button class="ico boot" title="Boot {{.User.Name}}"></button>
+                        {{end}}
+                    </li>
                     {{end}}
                 </ol>
             </section>
@@ -100,7 +106,7 @@
                     {{range .Messages}}
                     <li class="msg">
                         <!-- Golang template, access variable Requestor which is in the root -->
-                        <span class="author {{if eq .Author.Name $.Requestor}}you{{end}}">{{.Author.Name}}</span>
+                        <span class="author {{if eq .Author.ID $.Requestor}}you{{end}}">{{.Author.Name}}</span>
                         <span class="datetime" data-datetime="{{ .ServerReceivedAt.UnixMilli }}"></span>
                         <p>{{.Content}}</p>
                     </li>
@@ -159,7 +165,11 @@
         </div>
     </main>
 </body>
-<script>const broadcastDelay = {{.BroadcastDelayMs }} || 0; const jsCookieName = "{{.JSCookieName }}" || undefined;</script>
+<script>
+    const broadcastDelay = {{.BroadcastDelayMs }} || 0;
+    const jsCookieName = "{{.JSCookieName }}" || undefined;
+    const isOwner = {{ if eq .Owner .Requestor }}true{{else}} false{{end}};
+</script>
 <script src="/static/js/room.min.js" async></script>
 
 </html>

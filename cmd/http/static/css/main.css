@@ -9,7 +9,7 @@
 }
 
 body {
-  background: var(--main-bg);
+  background: var(--bg-main);
   font-family: sans-serif;
   font-size: 16px;
   line-height: 1.5;
@@ -62,7 +62,7 @@ button {
 }
 
 main {
-  background: #fff;
+  background: var(--bg-main);
   max-width: 70em;
   margin: 1vh auto 0;
   padding: 1em 1.5em;
@@ -151,20 +151,7 @@ header {
   box-shadow: 0 0 3px var(--theme-hex);
 }
 
-.sub-header .leave {
-  background-image: var(--url-leave);
-  cursor: pointer;
-}
-
-.sub-header .refresher {
-  background-color: unset;
-  background-image: var(--url-refresh);
-  cursor: pointer;
-  padding: 0;
-}
-
-.sub-header .home {
-  background-image: var(--url-home);
+.sub-header .ico {
   cursor: pointer;
 }
 
@@ -177,14 +164,39 @@ header {
 }
 
 .ico {
+  background-color: none;
   background-position: center center;
   background-repeat: no-repeat;
   background-size: contain;
   display: inline-block;
-  vertical-align: text-bottom;
   font-size: 1.25em;
   width: 1em;
   height: 1em;
+}
+
+button.ico {
+  background-color: unset;
+  padding: 0;
+}
+
+.ico.boot {
+  background-image: var(--url-boot);
+  font-size: 0.75em;
+}
+
+.ico.leave {
+  background-image: var(--url-leave);
+  cursor: pointer;
+}
+
+.ico.refresher {
+  background-image: var(--url-refresh);
+  cursor: pointer;
+}
+
+.ico.home {
+  background-image: var(--url-home);
+  cursor: pointer;
 }
 
 .phantom {
@@ -282,7 +294,7 @@ body.home main {
 }
 
 .chat-rooms-list a:hover {
-  background-color: var(--main-bg);
+  background-color: var(--bg-main);
   color: var(--theme-hex);
 }
 .chat-rooms-list li {
@@ -402,7 +414,7 @@ span#room-name {
 }
 
 #members {
-  background-color: var(--main-bg);
+  background-color: var(--bg-members);
   border-right: 0.5px solid var(--border);
   max-width: 15em;
   padding-left: 0;
@@ -421,6 +433,13 @@ span#room-name {
 .you {
   color: var(--theme-hex);
   font-weight: 600;
+}
+
+.author.owner {
+  border: 1px solid var(--theme-hex);
+  padding: 0.1em 0.75em;
+  border-radius: var(--border-radius-pill);
+  background-color: var(--theme-light);
 }
 
 .datetime {
@@ -474,7 +493,7 @@ span#room-name {
   right: 0;
   bottom: 100vh;
   left: 0;
-  background: var(--overlay-bg);
+  background: var(--bg-overlay);
   z-index: -1;
   overflow: hidden;
 }
@@ -486,7 +505,7 @@ span#room-name {
 }
 
 #qr-code-container .card {
-  background-color: var(--main-bg);
+  background-color: var(--bg-main);
   max-width: 20em;
   margin: 10vh auto 0;
   text-align: center;
@@ -561,7 +580,7 @@ span#room-name {
     flex: 11;
   }
   .sending {
-    padding: 1em 0.25em calc(4px + env(safe-area-inset-bottom));
+    padding: 1em 0.25em 0;
   }
 
   @media all and (max-height: 520px) {

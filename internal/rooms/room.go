@@ -78,7 +78,7 @@ func (rm *Room) SanitizeValidate() error {
 }
 
 func (rm *Room) IsOwner(mem *Member) bool {
-	if rm.Owner == nil {
+	if rm.Owner == nil || mem == nil {
 		return false
 	}
 
@@ -136,6 +136,30 @@ func (rm *Room) RemoveMember(username string) (*Member, error) {
 	return member, nil
 }
 
+func (rm *Room) RemoveMemberAutoAssignOwner(username string) (*Member, error) {
+	removedMember, err := rm.RemoveMember(username)
+	if err != nil {
+		return nil, err
+	}
+
+	// auto assign *earliest member as owner*
+	var earliestMember *Member
+	for key := range rm.Members {
+		member := rm.Members[key]
+		if earliestMember == nil {
+			earliestMember = member
+			continue
+		}
+		if member.User.Joined.Before(earliestMember.User.Joined) {
+			earliestMember = member
+		}
+	}
+
+	rm.Owner = earliestMember
+
+	return removedMember, nil
+}
+
 func (rm *Room) Messages() []messages.Message {
 	return rm.msgs.All()
 }
@@ -170,7 +194,7 @@ func (rm *Room) cleanupMembers() {
 		member := rm.Members[key]
 		if time.Since(member.User.LastPing) > rm.Expiry &&
 			time.Since(member.User.LastMessage) > rm.Expiry {
-			rm.RemoveMember(member.User.Name)
+			rm.RemoveMemberAutoAssignOwner(member.User.Name)
 		}
 	}
 }

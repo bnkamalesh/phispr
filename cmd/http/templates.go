@@ -72,6 +72,7 @@ type RoomPayload struct {
 	Requestor        string             `json:"requestor,omitempty"`
 	Messages         []messages.Message `json:"messages,omitempty"`
 	Members          []rooms.Member     `json:"members,omitempty"`
+	Owner            string             `json:"owner,omitempty"`
 	Phantom          bool               `json:"phantom,omitempty"`
 	Public           bool               `json:"public,omitempty"`
 	BroadcastDelayMs uint               `json:"broadcast_delay_ms,omitempty"`

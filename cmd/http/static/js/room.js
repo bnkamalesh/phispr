@@ -227,6 +227,7 @@ const messagesHandler = (roomID, authorID) => {
 const memberHandler = (roomID) => {
   const membersList = document.getElementById("members-list");
   const memberCount = document.getElementById("members-count");
+  // jsCookieName is declared outside of this file, directly in room.html
   const cookieParts = document?.cookie
     .split("; ")
     .find((row) => row.startsWith(jsCookieName))
@@ -247,6 +248,47 @@ const memberHandler = (roomID) => {
     console.error("Failed to parse cookie:", e);
   }
 
+  const bootMember = function (userID, callback) {
+    const url = `/rooms/${roomID}/${userID}`;
+    try {
+      fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "DELETE",
+      })
+        .catch((reason) => {
+          callback?.(reason);
+        })
+        .then((response) => {
+          if (!response.ok) {
+            return;
+          }
+
+          response.text().then((obj) => {
+            callback?.(obj);
+          });
+        });
+    } catch (e) {
+      callback?.(e);
+      console.error(e);
+    }
+  };
+
+  if (membersList) {
+    membersList.querySelectorAll(".member").forEach((el) => {
+      const userID = el.dataset.authorid;
+      const button = el.querySelector(".boot");
+      if (!button) return;
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!userID) return;
+        bootMember(userID);
+      });
+    });
+  }
+
   return {
     member: parsed,
     // AddMember is used to add a new member to the room
@@ -257,18 +299,35 @@ const memberHandler = (roomID) => {
       const li = document.createElement("li");
       li.dataset.author = authorName;
       const span = document.createElement("span");
-      span.innerText = authorName;
+      span.innerText = authorName + " ";
       span.setAttribute("title", span.innerText);
       li.appendChild(span);
+      // isOwner is declared outside of this file, directly in room.html
+      if (isOwner) {
+        const bootButton = document.createElement("button");
+        bootButton.classList.add("ico", "boot");
+        bootButton.title = `Boot ${authorName}`;
+        bootButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          bootMember(member?.User?.ID);
+        });
+        li.appendChild(bootButton);
+      }
       membersList.appendChild(li);
       memberCount.innerText = member.TotalMembers;
     },
-    RemoveMember: function (member) {
+    RemoveMember: function (member, currentUserID) {
       if (!membersList) return;
       const authorName = member?.User?.Name;
       membersList.querySelector(`[data-author="${authorName}"]`).remove();
       memberCount.innerText = member.TotalMembers;
+      if (currentUserID == member?.User?.ID) {
+        alert(`You were booted from this room`);
+        window.location.href = window.location.href;
+      }
     },
+    BootMember: bootMember,
   };
 };
 
@@ -436,7 +495,7 @@ const room = async () => {
         AddMember(data);
         break;
       case "room_leave":
-        RemoveMember(data);
+        RemoveMember(data, authorID);
         break;
 
       case "room_message":
