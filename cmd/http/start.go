@@ -184,6 +184,7 @@ func Start(cfg *configs.Config) func() {
 			})
 
 			for roomID, viewers := range roomViewers {
+				ht.roomLiveViewers.Store(roomID, viewers)
 				ht.roomBroadcast(roomID, &ssePayload{
 					Type: SSEPTypeRoomViewers,
 					Data: viewers,
