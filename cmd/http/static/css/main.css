@@ -206,7 +206,9 @@ button.ico {
 .phantom.active {
   background-image: var(--url-logo-active);
 }
-
+h1 .phantom {
+  vertical-align: sub;
+}
 .pwa {
   background-image: var(--url-pwa);
   cursor: pointer;
