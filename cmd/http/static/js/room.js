@@ -509,6 +509,8 @@ const room = async () => {
       case "room_viewers":
         if (data > 1) {
           sendMsgButton?.setAttribute("title", `Send (live: ${data})`);
+        } else {
+          sendMsgButton?.setAttribute("title", `Send`);
         }
         break;
     }
