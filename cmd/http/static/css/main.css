@@ -9,7 +9,7 @@
 }
 
 body {
-  background: var(--bg-main);
+  background: var(--bg-body);
   font-family: sans-serif;
   font-size: 16px;
   line-height: 1.5;
