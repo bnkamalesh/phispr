@@ -580,7 +580,7 @@ span#room-name {
     flex: 11;
   }
   .sending {
-    padding: 1em 0.25em 0;
+    padding: 1em 0.25em env(safe-area-inset-bottom, 1em);
   }
 
   @media all and (max-height: 520px) {
