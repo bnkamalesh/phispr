@@ -541,8 +541,8 @@ span#room-name {
   .sending {
     position: fixed;
     bottom: env(safe-area-inset-bottom, 1em);
-    left: 0.25em;
-    right: 0.25em;
+    left: 0.5em;
+    right: 0.5em;
     padding: 1em 0.25em;
     border-top: none;
   }
