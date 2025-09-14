@@ -47,6 +47,7 @@ func (f templateExecutorFunc) Execute(wr io.Writer, data any) error {
 type HTTP struct {
 	sse             *sse.SSE
 	api             *api.API
+	staticRoot      string
 	templateHome    templateExecutor
 	templateRoom    templateExecutor
 	templateErr     templateExecutor
@@ -58,6 +59,15 @@ func (h *HTTP) Sanitize() {
 	if h.broadcastDelay < time.Second {
 		h.broadcastDelay = time.Second * 5
 	}
+}
+
+func (h *HTTP) StaticAssetVersion(rw http.ResponseWriter, r *http.Request) {
+	checksum, err := sillyAutoVersioning(h.staticRoot)
+	if err != nil {
+		errHandler(nil, rw, r, err)
+		return
+	}
+	_, _ = rw.Write([]byte(checksum))
 }
 
 // StaticFilesHandler is used to serve static files
@@ -73,7 +83,7 @@ func (h *HTTP) StaticFilesHandler(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Service-Worker-Allowed", "/")
 		rw.Header().Set("Cache-Control", "no-cache")
 	}
-	http.ServeFile(rw, r, fmt.Sprintf("./cmd/http/static/%s", path))
+	http.ServeFile(rw, r, fmt.Sprintf("%s/%s", h.staticRoot, path))
 }
 
 func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,11 +102,12 @@ func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	terr := h.templateHome.Execute(w, &HomePayload{
-		TotalRooms:    h.api.Capacity(),
-		PublicRooms:   uint(len(rooms)),
-		LiveRooms:     h.api.Total(),
-		Rooms:         rooms,
-		UnlistedRooms: unlisted,
+		TotalRooms:     h.api.Capacity(),
+		PublicRooms:    uint(len(rooms)),
+		LiveRooms:      h.api.Total(),
+		Rooms:          rooms,
+		UnlistedRooms:  unlisted,
+		CurrentRelease: lastModified,
 	})
 	if terr != nil {
 		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", terr))

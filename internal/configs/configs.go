@@ -18,6 +18,8 @@ type Config struct {
 		ReadTimeout  time.Duration
 		WriteTimeout time.Duration
 
+		StaticRoot string
+
 		TemplateHome       string
 		TemplateRoom       string
 		TemplateError      string
@@ -45,6 +47,7 @@ func Load(path string) *Config {
 	cfg.HTTP.AllowedHeaders = k.MustStrings("http.allowed_headers")
 	cfg.HTTP.ReadTimeout = k.MustDuration("http.read_timeout")
 	cfg.HTTP.WriteTimeout = k.MustDuration("http.write_timeout")
+	cfg.HTTP.StaticRoot = k.MustString("http.static_root")
 	cfg.HTTP.TemplateHome = k.MustString("http.template_home")
 	cfg.HTTP.TemplateRoom = k.MustString("http.template_room")
 	cfg.HTTP.TemplateError = k.MustString("http.template_error")

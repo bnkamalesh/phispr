@@ -22,6 +22,11 @@ const SSE = async (roomID, onMessage) => {
     sseStatuscontainer.classList.remove("active");
     sseStatuscontainer.classList.add(status);
     sseStatuscontainer.setAttribute("title", statusContent[status].title);
+    if (status === "inactive") {
+      sseStatuscontainer.disabled = true;
+    } else {
+      sseStatuscontainer.disabled = false;
+    }
   };
 
   setStatus("active");
@@ -394,6 +399,20 @@ const qrHandler = (notifications) => {
   });
 };
 
+const assetVersionChecker = (callback) => {
+  const assetVersion = localStorage.getItem("assetsVersion");
+  fetch("/static-asset-version")
+    .then((response) => response.text())
+    .then((latestVersion) => {
+      if (latestVersion && latestVersion !== assetVersion) {
+        localStorage.setItem("assetsVersion", latestVersion);
+        callback?.();
+        window.location.reload();
+      }
+    })
+    .catch((err) => console.error("Asset version check failed", err));
+};
+
 const serviceWorkerSetup = async () => {
   if (!("serviceWorker" in navigator)) {
     document.querySelectorAll(".pwa").forEach((el) => {
@@ -402,16 +421,19 @@ const serviceWorkerSetup = async () => {
     return;
   }
 
-  const registration = await navigator.serviceWorker.getRegistration(
-    window.location.pathname
-  );
-  if (registration) {
-    await registration.unregister();
-  }
+  const unregister = async () => {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    // Unregister all existing service workers
+    const unregisterPromises = registrations.map((registration) => {
+      return registration.unregister();
+    });
+    await Promise.all(unregisterPromises);
+  };
+
+  assetVersionChecker(unregister);
 
   navigator.serviceWorker
     .register("/static/js/serviceworker.js", {
-      start_url: "/" + window.location.pathname,
       scope: "/",
     })
     .then(() => console.log("Service Worker registered"))

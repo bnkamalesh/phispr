@@ -1,15 +1,53 @@
 package http
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"html/template"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/naughtygopher/errors"
 
 	"github.com/bnkamalesh/phispr/internal/messages"
 	"github.com/bnkamalesh/phispr/internal/rooms"
 )
+
+// sillyAutoVersioning generates a checksum of all files in the given directory
+// IMPORTANT: this may cause unnecessary performance issue, if it happens, must
+// introduce https://github.com/naughtygopher/pocache
+func sillyAutoVersioning(root string) (string, error) {
+	checksum := sha256.New()
+	err := filepath.WalkDir(
+		root,
+		func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			if _, err := io.Copy(checksum, file); err != nil {
+				return err
+			}
+			return nil
+		},
+	)
+
+	if err != nil {
+		return "", errors.Wrap(err, "directory walk filed")
+	}
+
+	return hex.EncodeToString(checksum.Sum(nil)), nil
+}
 
 func readFile(path string) (string, error) {
 	fs, err := os.OpenFile(path, os.O_RDONLY, 0600)
@@ -56,11 +94,12 @@ func loadTemplate(path, name string, livereload bool) templateExecutor {
 }
 
 type HomePayload struct {
-	TotalRooms    uint          `json:"total_rooms,omitempty"`
-	LiveRooms     uint          `json:"live_rooms,omitempty"`
-	PublicRooms   uint          `json:"public_rooms,omitempty"`
-	Rooms         []*rooms.Room `json:"rooms,omitempty"`
-	UnlistedRooms []*rooms.Room `json:"unlisted_rooms,omitempty"`
+	TotalRooms     uint          `json:"total_rooms,omitempty"`
+	LiveRooms      uint          `json:"live_rooms,omitempty"`
+	PublicRooms    uint          `json:"public_rooms,omitempty"`
+	Rooms          []*rooms.Room `json:"rooms,omitempty"`
+	UnlistedRooms  []*rooms.Room `json:"unlisted_rooms,omitempty"`
+	CurrentRelease string        `json:"current_release,omitempty"`
 }
 
 type RoomPayload struct {

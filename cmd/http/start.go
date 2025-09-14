@@ -36,6 +36,13 @@ func getRoutes(ht *HTTP) []*webgo.Route {
 			TrailingSlash: true,
 		},
 		{
+			Name:          "static-asset-version",
+			Method:        http.MethodGet,
+			Pattern:       "/static-asset-version",
+			Handlers:      []http.HandlerFunc{ht.StaticAssetVersion},
+			TrailingSlash: true,
+		},
+		{
 			Name:          "root",
 			Method:        http.MethodGet,
 			Pattern:       "/",
@@ -119,6 +126,7 @@ func initServices(cfg *configs.Config) (*rooms.Rooms, *HTTP) {
 	ht := &HTTP{
 		api:             api,
 		sse:             sse.New(),
+		staticRoot:      cfg.HTTP.StaticRoot,
 		templateHome:    loadTemplate(cfg.HTTP.TemplateHome, "home", cfg.HTTP.LiveReloadTemplate),
 		templateRoom:    loadTemplate(cfg.HTTP.TemplateRoom, "room", cfg.HTTP.LiveReloadTemplate),
 		templateErr:     loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate),

@@ -107,6 +107,11 @@ button:active,
   transform: scale(0.9);
 }
 
+button:disabled {
+  background-color: var(--bg-button-disabled);
+  cursor: not-allowed;
+}
+
 footer.small {
   margin-top: 2em;
 }
@@ -243,7 +248,7 @@ h1 .phantom {
 }
 
 .note {
-  background-color: #f0f0f0;
+  background-color: var(--bg-notes);
   padding: 1em 1.5em;
 }
 

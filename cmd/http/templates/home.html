@@ -129,18 +129,23 @@
             </section>
         </section>
         <footer class="note small only-not-pwa">
-            <h3>Phantom Whispers</h3>
-            <p>
+            <h3 class="only-not-pwa">Phantom Whispers</h3>
+            <p class="only-not-pwa">
                 Here, every message is ephemeral. Every voice is nameless.
                 Nothing is recorded, nothing is tracked.
                 What is spoken exists only for a fleeting instant, then vanishes;
                 like a phantom in the dark.
                 No accounts. No logs. No trails. Only the whisper, and then the silence.
             </p>
-            <div style="text-align: center;">
+            <div style="text-align: center;" class="only-not-pwa">
                 <a href="https://github.com/bnkamalesh/phispr" class="github" title="Source code on Github"
                     target="_blank"> </a>
             </div>
+            {{ if .CurrentRelease}}
+            <div style="text-align: center; font-size: 0.75em;" class="only-not-pwa">
+                <small>Release: {{.CurrentRelease}}</small>
+            </div>
+            {{end}}
         </footer>
     </main>
 </body>
