@@ -11,6 +11,7 @@ http:
   template_home: "./cmd/http/templates/home.html"
   template_room: "./cmd/http/templates/room.html"
   template_error: "./cmd/http/templates/error.html"
+  static_root: "./cmd/http/static"
   live_reload_template: true
   enable_access_log: true
 
