@@ -55,7 +55,7 @@
                 {{end}}
 
                 {{range .Rooms}}
-                <li class="room">
+                <li class="room" data-roomid="{{.ID}}">
                     <a href="/rooms/{{.ID}}" class="room-link">
                         {{if .Phantom}}<span class="ico phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
@@ -69,7 +69,7 @@
             <h3>Your unlisted rooms</h3>
             <ol id="unlisted-chat-rooms" class="chat-rooms-list box">
                 {{range .UnlistedRooms}}
-                <li class="room">
+                <li class="room" data-roomid="{{.ID}}">
                     <a href="/rooms/{{.ID}}" class="room-link">
                         {{if .Phantom}}<span class="active ico phantom" title="phantom channel"></span>{{end}}
                         <span class="room-name">{{.Name}}</span>
@@ -108,7 +108,8 @@
                     <ul class="nolist">
                         <li class="flex-container">
                             <label for="room-name">Name</label>
-                            <input type="text" name="name" id="room-name" placeholder="cosmos" maxlength="512" />
+                            <input type="text" name="name" id="room-name" placeholder="cosmos" maxlength="512"
+                                required />
                         </li>
                         <li class="flex-container">
                             <label for="username">Username</label>
@@ -143,7 +144,7 @@
             </div>
             {{ if .CurrentRelease}}
             <div style="text-align: center; font-size: 0.75em;" class="only-not-pwa">
-                <small>Release: {{.CurrentRelease}}</small>
+                <small>Release: <span id="current-release">{{.CurrentRelease}}</span></small>
             </div>
             {{end}}
         </footer>

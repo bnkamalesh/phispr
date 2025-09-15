@@ -101,16 +101,22 @@ func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	terr := h.templateHome.Execute(w, &HomePayload{
+	hp := &HomePayload{
 		TotalRooms:     h.api.Capacity(),
 		PublicRooms:    uint(len(rooms)),
 		LiveRooms:      h.api.Total(),
 		Rooms:          rooms,
 		UnlistedRooms:  unlisted,
 		CurrentRelease: lastModified,
-	})
-	if terr != nil {
-		webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", terr))
+	}
+
+	if strings.Contains(r.Header.Get("Content-type"), "application/json") {
+		webgo.SendResponse(w, hp, http.StatusOK)
+	} else {
+		terr := h.templateHome.Execute(w, hp)
+		if terr != nil {
+			webgo.LOGHANDLER.Error(fmt.Sprintf("%+v", terr))
+		}
 	}
 }
 

@@ -153,6 +153,12 @@ func setupRouter(
 	routes := getRoutes(ht)
 	router := webgo.NewRouter(wcfg, routes...)
 	router.Use(
+		func(w http.ResponseWriter, r *http.Request, hf http.HandlerFunc) {
+			// this header is required for service worker to be able to
+			// cache responses appropriate to negotiated content types
+			w.Header().Add("Vary", "Content-type")
+			hf(w, r)
+		},
 		cors.CORS(&cors.Config{
 			AllowedOrigins: cfg.HTTP.AllowedOrigins,
 			AllowedHeaders: cfg.HTTP.AllowedHeaders,

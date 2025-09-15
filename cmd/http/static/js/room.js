@@ -1,4 +1,4 @@
-const SSE = async (roomID, onMessage) => {
+const SSE = async (roomID, onMessage, setStatusCallback) => {
   // lastMsgReceived is the timestamp of when the last *successful* message was received
   let lastMsgReceived = null;
   const sseStatuscontainer = document.querySelector(
@@ -18,15 +18,14 @@ const SSE = async (roomID, onMessage) => {
     if (!sseStatuscontainer || sseStatuscontainer.classList.contains(status)) {
       return;
     }
+
     sseStatuscontainer.classList.remove("inactive");
     sseStatuscontainer.classList.remove("active");
+
     sseStatuscontainer.classList.add(status);
     sseStatuscontainer.setAttribute("title", statusContent[status].title);
-    if (status === "inactive") {
-      sseStatuscontainer.disabled = true;
-    } else {
-      sseStatuscontainer.disabled = false;
-    }
+    sseStatuscontainer.disabled = status === "inactive";
+    setStatusCallback?.(status);
   };
 
   setStatus("active");
@@ -109,12 +108,11 @@ const messagesHandler = (roomID, authorID) => {
           callback?.(reason);
         })
         .then((response) => {
-          if (response.ok) {
+          if (response?.ok) {
             callback?.();
             return;
           }
-
-          response.text().then((obj) => {
+          response?.text().then((obj) => {
             callback?.(obj);
           });
         });
@@ -154,11 +152,12 @@ const messagesHandler = (roomID, authorID) => {
         authorID === message?.author ? "you" : "other"
       );
       at.className = "datetime";
-      author.innerText = message?.author + ", ";
+      author.innerText = message?.author;
+
       if (message?.at) {
         at.dataset.datetime = message.at;
         const timestamp = new Date(message.at);
-        at.innerText = timestamp.toLocaleString();
+        at.innerText = " " + timestamp.toLocaleString();
       }
 
       content.innerText = replaceNewlines(message?.content, " \\n ");
@@ -168,12 +167,12 @@ const messagesHandler = (roomID, authorID) => {
       messagesList.appendChild(msgLi);
 
       /*
-      The minus 256 is a buffer zone to identify if the scroll top is close to 
+      The minus 320 is a buffer zone to identify if the scroll top is close to 
       the max possible, so that it auto scrolls when there are new messages and
       is already close to the bottom.
       */
       const maxPossibleScrollTop =
-        messageContainer.scrollHeight - messageContainer.offsetHeight - 256;
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 320;
 
       if (messageContainer.scrollTop >= maxPossibleScrollTop) {
         messageContainer.scrollTo({
@@ -225,6 +224,37 @@ const messagesHandler = (roomID, authorID) => {
         // clear container only if sendmessage was successful
         this.clearTextArea();
       });
+    },
+    loadAll: function () {
+      const lastMsg = messagesList.querySelector("li.msg:last-child");
+      const lastDatetime =
+        lastMsg?.querySelector(".datetime")?.dataset.datetime || undefined;
+      const lastTimestamp = lastDatetime ? new Date(lastDatetime) : undefined;
+      // this is a silly way of ignoring duplicate messages and prone to bugs.
+      // but is the simplest way of avoiding duplicates.
+
+      fetch(`/rooms/${roomID}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      })
+        .then((response) => response.json())
+        .then((payload) => {
+          if (!payload || !payload?.data) return;
+          const messages = payload?.data?.messages || [];
+          messages.forEach((message) => {
+            // timestamp based check can be buggy based on concurrent messages delivered at same time
+            const msgAt = new Date(message.ServerReceivedAt);
+            if (lastTimestamp >= msgAt) return;
+
+            this.renderSingleMessage({
+              content: message.Content,
+              at: message.ServerReceivedAt,
+              author: message.Author.Name,
+            });
+          });
+        });
     },
   };
 };
@@ -511,32 +541,38 @@ const room = async () => {
     }
   });
 
-  SSE(roomID, (type, data) => {
-    switch (type) {
-      case "room_join":
-        AddMember(data);
-        break;
-      case "room_leave":
-        RemoveMember(data, authorID);
-        break;
+  SSE(
+    roomID,
+    (type, data) => {
+      switch (type) {
+        case "room_join":
+          AddMember(data);
+          break;
+        case "room_leave":
+          RemoveMember(data, authorID);
+          break;
 
-      case "room_message":
-        messages.push({
-          content: data.Content,
-          at: data.ServerReceivedAt,
-          author: data.Author.Name,
-        });
-        break;
+        case "room_message":
+          messages.push({
+            content: data.Content,
+            at: data.ServerReceivedAt,
+            author: data.Author.Name,
+          });
+          break;
 
-      case "room_viewers":
-        if (data > 1) {
-          sendMsgButton?.setAttribute("title", `Send (live: ${data})`);
-        } else {
-          sendMsgButton?.setAttribute("title", `Send`);
-        }
-        break;
+        case "room_viewers":
+          if (data > 1) {
+            sendMsgButton?.setAttribute("title", `Send (live: ${data})`);
+          } else {
+            sendMsgButton?.setAttribute("title", `Send`);
+          }
+          break;
+      }
+    },
+    () => {
+      messages.loadAll();
     }
-  });
+  );
 };
 
 room();
