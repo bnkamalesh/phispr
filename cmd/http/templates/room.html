@@ -49,7 +49,7 @@
     <script src="/static/js/min/qr.js"></script>
 </head>
 
-<body class="theme-gold">
+<body class="room theme-gold">
     <main class="room {{if eq .Owner .Requestor}}owner{{end}}">
         <div id="notification"> </div>
         <header>
@@ -168,7 +168,7 @@
 <script>
     const broadcastDelay = {{.BroadcastDelayMs }} || 0;
     const jsCookieName = "{{.JSCookieName }}" || undefined;
-    const isOwner = {{ if eq .Owner .Requestor }}true{{ else }}false{{ end }};
+    const isOwner = {{ if eq .Owner .Requestor }}true{ { else } } false{ { end } };
 </script>
 <script type="module" src="/static/js/min/room.js" async></script>
 

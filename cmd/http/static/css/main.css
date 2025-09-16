@@ -567,6 +567,15 @@ span#room-name {
     padding: 1em 0.25em;
     border-top: none;
   }
+
+  body.room {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+  }
 }
 
 @media all and (max-width: 640px) {
