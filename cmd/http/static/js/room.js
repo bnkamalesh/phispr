@@ -230,7 +230,8 @@ const messagesHandler = (roomID, authorID) => {
     loadAll: function () {
       const lastMsg = messagesList.querySelector("li.msg:last-child");
       const lastDatetime =
-        lastMsg?.querySelector(".datetime")?.dataset.datetime || undefined;
+        parseInt(lastMsg?.querySelector(".datetime")?.dataset.datetime) ||
+        undefined;
       const lastTimestamp = lastDatetime ? new Date(lastDatetime) : undefined;
       // this is a silly way of ignoring duplicate messages and prone to bugs.
       // but is the simplest way of avoiding duplicates.
