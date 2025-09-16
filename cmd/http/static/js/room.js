@@ -142,7 +142,6 @@ const messagesHandler = (roomID, authorID) => {
     },
     renderSingleMessage: function (message) {
       if (!message || !message.content) return;
-
       const msgLi = document.createElement("li");
       msgLi.className = "msg";
       const author = document.createElement("span");
@@ -157,8 +156,8 @@ const messagesHandler = (roomID, authorID) => {
       author.innerText = message?.author;
 
       if (message?.at) {
-        at.dataset.datetime = message.at.getTime();
         const timestamp = new Date(message.at);
+        at.dataset.datetime = timestamp.getTime();
         at.innerText = " " + timestamp.toLocaleString();
       }
 
