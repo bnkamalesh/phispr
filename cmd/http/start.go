@@ -1,10 +1,13 @@
 // install https://github.com/evanw/esbuild for code generation
 //
-//go:generate esbuild static/js/room.js --minify --outfile=static/js/room.min.js
-//go:generate esbuild static/js/home.js --minify --outfile=static/js/home.min.js
-//go:generate esbuild static/js/sse.js --minify --outfile=static/js/sse.min.js
-//go:generate esbuild static/css/main.css --minify --outfile=static/css/main.min.css
-//go:generate esbuild static/css/normalize.css --minify --outfile=static/css/normalize.min.css
+//go:generate esbuild static/js/common.js --minify --outfile=static/js/min/common.js
+//go:generate esbuild static/js/room.js --minify --outfile=static/js/min/room.js
+//go:generate esbuild static/js/home.js --minify --outfile=static/js/min/home.js
+//go:generate esbuild static/js/sse.js --minify --outfile=static/js/min/sse.js
+//go:generate esbuild static/js/serviceworker.js --minify --outfile=static/js/min/serviceworker.js
+//go:generate esbuild static/css/main.css --minify --outfile=static/css/min/main.css
+//go:generate esbuild static/css/normalize.css --minify --outfile=static/css/min/normalize.css
+//go:generate esbuild static/css/themes.css --minify --outfile=static/css/min/themes.css
 package http
 
 import (

@@ -1,69 +1,4 @@
-const notifier = () => {
-  const container = document.getElementById("notification");
-  let timer = undefined;
-  return {
-    notify: function (msg, delay = 1000) {
-      if (!container || !msg) return;
-      if (timer) clearTimeout(timer);
-
-      container.innerHTML = msg;
-      container.style.zIndex = 15;
-      container.style.top = 0;
-
-      timer = window.setTimeout(() => {
-        container.style.top = "-4em";
-        container.style.zIndex = -1;
-        // clearing content within timeout to avoid animation stutter
-        window.setTimeout(() => {
-          container.innerHTML = "";
-        }, 1000);
-
-        timer = undefined;
-      }, delay);
-    },
-  };
-};
-
-const assetVersionChecker = (callback) => {
-  const assetVersion = localStorage.getItem("assetsVersion");
-  fetch("/static-asset-version")
-    .then((response) => response.text())
-    .then((latestVersion) => {
-      if (latestVersion && latestVersion !== assetVersion) {
-        localStorage.setItem("assetsVersion", latestVersion);
-        callback?.();
-        window.location.reload();
-      }
-    })
-    .catch((err) => console.error("Asset version check failed", err));
-};
-
-const serviceWorkerSetup = async () => {
-  if (!("serviceWorker" in navigator)) {
-    document.querySelectorAll(".pwa").forEach((el) => {
-      el.remove();
-    });
-    return;
-  }
-
-  const unregister = async () => {
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    // Unregister all existing service workers
-    const unregisterPromises = registrations.map((registration) => {
-      return registration.unregister();
-    });
-    await Promise.all(unregisterPromises);
-  };
-
-  assetVersionChecker(unregister);
-
-  navigator.serviceWorker
-    .register("/static/js/serviceworker.js", {
-      scope: "/",
-    })
-    .then(() => console.log("Service Worker registered"))
-    .catch((err) => console.error("Service Worker registration failed", err));
-};
+import { notifier, serviceWorkerSetup } from "./common.js";
 
 const loadHomeDetails = () => {
   const icoPhantom = document.createElement("span");
@@ -186,6 +121,7 @@ const newRoomForm = () => {
 };
 
 const home = () => {
+  serviceWorkerSetup();
   newRoomForm();
 
   const notifications = notifier();
@@ -197,7 +133,6 @@ const home = () => {
   });
 
   loadHomeDetails();
-  serviceWorkerSetup();
 };
 
 home();

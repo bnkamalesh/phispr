@@ -1,5 +1,5 @@
-@import url("/static/css/normalize.min.css");
-@import url("/static/css/themes.css");
+@import url("/static/css/min/normalize.css");
+@import url("/static/css/min/themes.css");
 
 * {
   transition: background-color 0.25s, color 0.25s, width 0.25s, height 0.25s,
