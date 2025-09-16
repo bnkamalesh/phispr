@@ -404,6 +404,9 @@ span#room-name {
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  height: 100%;
+  transform: translateZ(0);
 }
 
 .msg p {
