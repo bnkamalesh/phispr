@@ -133,59 +133,60 @@ const messagesHandler = (roomID, authorID) => {
       return seen <= maxNewLinesAllowed ? match : replacement;
     });
   }
+  const renderSingleMessage = function (message) {
+    if (!message || !message.content) return;
 
-  return {
-    // push a message to the messages and render
-    push: function (message, callback) {
-      this.renderSingleMessage(message);
-      callback?.();
-    },
-    renderSingleMessage: function (message) {
-      if (!message || !message.content) return;
-      const msgLi = document.createElement("li");
-      msgLi.className = "msg";
-      const author = document.createElement("span");
-      const at = document.createElement("span");
-      const content = document.createElement("p");
-      content.className = "content";
-      author.classList.add(
-        "author",
-        authorID === message?.author ? "you" : "other"
-      );
-      at.className = "datetime";
-      author.innerText = message?.author;
+    const msgLi = document.createElement("li");
+    msgLi.className = "msg";
 
-      if (message?.at) {
-        const timestamp = new Date(message.at);
-        at.dataset.datetime = timestamp.getTime();
-        at.innerText = " " + timestamp.toLocaleString();
-      }
+    const author = document.createElement("span");
+    author.classList.add(
+      "author",
+      authorID === message?.author ? "you" : "other"
+    );
+    author.innerText = message?.author;
 
-      content.innerText = replaceNewlines(message?.content, " \\n ");
-      msgLi.appendChild(author);
-      msgLi.appendChild(at);
-      msgLi.appendChild(content);
-      messagesList.appendChild(msgLi);
+    const at = document.createElement("span");
+    at.className = "datetime";
+    if (message?.at) {
+      const timestamp = new Date(message.at);
+      at.dataset.datetime = timestamp.getTime();
+      at.innerText = " " + timestamp.toLocaleString();
+    }
 
-      /*
+    const content = document.createElement("p");
+    content.className = "content";
+    content.innerText = replaceNewlines(message?.content, " \\n ");
+
+    msgLi.appendChild(author);
+    msgLi.appendChild(at);
+    msgLi.appendChild(content);
+    messagesList.appendChild(msgLi);
+
+    /*
       The minus 320 is a buffer zone to identify if the scroll top is close to 
       the max possible, so that it auto scrolls when there are new messages and
       is already close to the bottom.
       */
-      const maxPossibleScrollTop =
-        messageContainer.scrollHeight - messageContainer.offsetHeight - 320;
+    const maxPossibleScrollTop =
+      messageContainer.scrollHeight - messageContainer.offsetHeight - 320;
 
-      if (messageContainer.scrollTop >= maxPossibleScrollTop) {
-        messageContainer.scrollTo({
-          top: messageContainer.scrollHeight,
-          behavior: "smooth",
-        });
-      }
+    if (messageContainer.scrollTop >= maxPossibleScrollTop) {
+      messageContainer.scrollTo({
+        top: messageContainer.scrollHeight,
+        behavior: "smooth",
+      });
+    }
 
-      // this feels silly, but I couldn't find an easier way to do it.
-      messagesList
-        .querySelector(".init")
-        .setAttribute("style", "display: none");
+    // this feels silly, but I couldn't find an easier way to do it.
+    messagesList.querySelector(".init").setAttribute("style", "display: none");
+  };
+
+  return {
+    // push a message to the messages and render
+    push: function (message, callback) {
+      renderSingleMessage(message);
+      callback?.();
     },
     renderMessageTimestamps: function () {
       messageContainer.querySelectorAll("li.msg .datetime").forEach((el) => {
@@ -228,17 +229,17 @@ const messagesHandler = (roomID, authorID) => {
     },
     loadAll: function () {
       const lastMsg = messagesList.querySelector("li.msg:last-child");
-      let lastDatetime = undefined;
+      let lastUnixMilli = 0;
       const dt =
         lastMsg?.querySelector(".datetime")?.dataset.datetime || undefined;
       if (dt && !isNaN(parseInt(dt))) {
-        lastDatetime = parseInt(dt);
-      } else if (!dt) {
+        lastUnixMilli = parseInt(dt);
+      } else if (lastMsg && !dt) {
         console.log("invalid last datetime found for the last message", dt);
         return;
       }
 
-      const lastTimestamp = lastDatetime || 0;
+      const lastTimestamp = lastUnixMilli || 0;
       // this is a silly way of ignoring duplicate messages and prone to bugs.
       // but is the simplest way of avoiding duplicates.
 
@@ -252,12 +253,13 @@ const messagesHandler = (roomID, authorID) => {
         .then((payload) => {
           if (!payload || !payload?.data) return;
           const messages = payload?.data?.messages || [];
+
           messages.forEach((message) => {
             // timestamp based check can be buggy based on concurrent messages delivered at same time
-            const msgAt = new Date(message.ServerReceivedAt);
-            if (lastTimestamp >= msgAt.getTime()) return;
+            const msgAt = new Date(message.ServerReceivedAt)?.getTime();
+            if (!msgAt || isNaN(msgAt) || lastTimestamp >= msgAt) return;
 
-            this.renderSingleMessage({
+            this.push({
               content: message.Content,
               at: message.ServerReceivedAt,
               author: message.Author.Name,
@@ -518,9 +520,12 @@ const room = async () => {
   );
 
   window.addEventListener("pageshow", (event) => {
-    if (event.persisted) {
+    if (!event.persisted) return;
+    // loadAll is executed only after a delay, because looks like SSE itself works in the
+    // background for a while. This causes double rendering of same messages
+    window.setTimeout(() => {
       messages.loadAll();
-    }
+    }, 1000);
   });
 };
 
