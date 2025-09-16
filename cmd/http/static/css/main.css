@@ -291,10 +291,14 @@ body.home main {
 }
 
 .chat-rooms-list a {
-  display: block;
+  width: 100%;
+  display: inline-block;
+  vertical-align: middle;
+
   color: var(--text-dark);
   padding: 0.5em 0.75em;
   border-bottom: 1px dashed var(--border);
+
   text-wrap: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -398,7 +402,8 @@ span#room-name {
   border-bottom: 0.5px solid var(--border);
   padding: 1em 1.5em;
   height: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .msg p {
@@ -435,6 +440,15 @@ span#room-name {
   font-size: 0.75em;
   float: right;
   color: var(--text-light);
+}
+
+#members .author {
+  display: inline-block;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+  vertical-align: bottom;
 }
 
 .you {

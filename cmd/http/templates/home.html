@@ -59,7 +59,7 @@
                 <li class="room" data-roomid="{{.ID}}">
                     <a href="/rooms/{{.ID}}" class="room-link">
                         {{if .Phantom}}<span class="ico phantom" title="phantom channel"></span>{{end}}
-                        <span class="room-name">{{.Name}}</span>
+                        <span class="room-name" title="{{.Name}}">{{.Name}}</span>
                         <span class="room-members-count">({{len .Members}} / {{.Capacity}})</span>
                     </a>
                 </li>
