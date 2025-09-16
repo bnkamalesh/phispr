@@ -157,7 +157,7 @@ const messagesHandler = (roomID, authorID) => {
       author.innerText = message?.author;
 
       if (message?.at) {
-        at.dataset.datetime = message.at;
+        at.dataset.datetime = message.at.getTime();
         const timestamp = new Date(message.at);
         at.innerText = " " + timestamp.toLocaleString();
       }
@@ -229,9 +229,15 @@ const messagesHandler = (roomID, authorID) => {
     },
     loadAll: function () {
       const lastMsg = messagesList.querySelector("li.msg:last-child");
-      const lastDatetime =
-        parseInt(lastMsg?.querySelector(".datetime")?.dataset.datetime) ||
-        undefined;
+      let lastDatetime = undefined;
+      const dt = lastMsg?.querySelector(".datetime")?.dataset.datetime;
+      if (parseInt(dt) && !isNaN(parseInt(dt))) {
+        lastDatetime = new Date(parseInt(dt));
+      } else {
+        console.log("invalid last datetime found for the last message", dt);
+        return;
+      }
+
       const lastTimestamp = lastDatetime ? new Date(lastDatetime) : undefined;
       // this is a silly way of ignoring duplicate messages and prone to bugs.
       // but is the simplest way of avoiding duplicates.
@@ -250,7 +256,6 @@ const messagesHandler = (roomID, authorID) => {
             // timestamp based check can be buggy based on concurrent messages delivered at same time
             const msgAt = new Date(message.ServerReceivedAt);
             if (lastTimestamp >= msgAt) return;
-
             this.renderSingleMessage({
               content: message.Content,
               at: message.ServerReceivedAt,
