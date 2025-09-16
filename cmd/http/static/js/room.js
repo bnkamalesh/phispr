@@ -230,10 +230,11 @@ const messagesHandler = (roomID, authorID) => {
     loadAll: function () {
       const lastMsg = messagesList.querySelector("li.msg:last-child");
       let lastDatetime = undefined;
-      const dt = lastMsg?.querySelector(".datetime")?.dataset.datetime;
-      if (parseInt(dt) && !isNaN(parseInt(dt))) {
+      const dt =
+        lastMsg?.querySelector(".datetime")?.dataset.datetime || undefined;
+      if (dt && !isNaN(parseInt(dt))) {
         lastDatetime = new Date(parseInt(dt));
-      } else {
+      } else if (!dt) {
         console.log("invalid last datetime found for the last message", dt);
         return;
       }
