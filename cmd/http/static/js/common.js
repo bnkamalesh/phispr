@@ -15,7 +15,7 @@ export const serviceWorkerSetup = async () => {
     await Promise.all(unregisterPromises);
   };
 
-  assetVersionChecker(unregister);
+  await assetVersionChecker(unregister);
 
   navigator.serviceWorker
     .register("/static/js/min/serviceworker.js", {
@@ -25,7 +25,7 @@ export const serviceWorkerSetup = async () => {
     .catch((err) => console.error("Service Worker registration failed", err));
 };
 
-export const assetVersionChecker = (callback) => {
+export const assetVersionChecker = async (callback) => {
   const assetVersion = localStorage.getItem("assetsVersion");
   fetch("/static-asset-version")
     .then((response) => response.text())

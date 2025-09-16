@@ -97,7 +97,7 @@ const messagesHandler = (roomID, authorID) => {
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
 
-  sendMessage = async (message, callback) => {
+  const sendMessage = async (message, callback) => {
     const formData = new FormData();
     formData.append("message", message);
     try {
@@ -409,7 +409,7 @@ const roomSizer = () => {
   const msgMemContainer = document.querySelector("section.room.flex-container");
   if (!msgMemContainer) return null;
   const allElements = document.querySelectorAll("main > *");
-  findHeight = () => {
+  const findHeight = () => {
     let availableHeight = window.innerHeight;
     allElements.forEach((sib) => {
       if (sib === msgMemContainer) return;
@@ -418,7 +418,7 @@ const roomSizer = () => {
     return availableHeight;
   };
 
-  resize = () => {
+  const resize = () => {
     msgMemContainer.style.height = `${findHeight() - 2}px`;
   };
   resize();
@@ -509,6 +509,12 @@ const room = async () => {
       messages.loadAll();
     }
   );
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      messages.loadAll();
+    }
+  });
 };
 
 room();

@@ -125,6 +125,7 @@ const home = () => {
   newRoomForm();
 
   const notifications = notifier();
+
   document.querySelectorAll(".pwa").forEach((el) => {
     const msg = `<a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing" target="_blank">Check how to install PWA</a>`;
     el.addEventListener("click", () => {
@@ -132,7 +133,11 @@ const home = () => {
     });
   });
 
-  loadHomeDetails();
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      loadHomeDetails();
+    }
+  });
 };
 
 home();
