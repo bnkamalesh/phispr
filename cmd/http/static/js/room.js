@@ -133,6 +133,7 @@ const messagesHandler = (roomID, authorID) => {
       return seen <= maxNewLinesAllowed ? match : replacement;
     });
   }
+
   const renderSingleMessage = function (message) {
     if (!message || !message.content) return;
 
@@ -415,14 +416,19 @@ const qrHandler = (notifications) => {
 };
 
 const roomSizer = () => {
-  const msgMemContainer = document.querySelector("section.room.flex-container");
+  const msgMemContainer = document.getElementById("msgs-members");
   if (!msgMemContainer) return null;
+
   const allElements = document.querySelectorAll("main > *");
   const findHeight = () => {
     let availableHeight = window.innerHeight;
-    allElements.forEach((sib) => {
-      if (sib === msgMemContainer) return;
-      availableHeight -= sib.getBoundingClientRect().height || 0;
+    allElements.forEach((el) => {
+      if (el === msgMemContainer) return;
+
+      availableHeight -= el.getBoundingClientRect().height || 0;
+      const style = getComputedStyle(el);
+      availableHeight -= parseFloat(style.marginTop) || 0;
+      availableHeight -= parseFloat(style.marginBottom) || 0;
     });
     return availableHeight;
   };
@@ -430,8 +436,8 @@ const roomSizer = () => {
   const resize = () => {
     msgMemContainer.style.height = `${findHeight() - 2}px`;
   };
-  resize();
   window.addEventListener("resize", resize);
+  resize();
 };
 
 const room = async () => {
@@ -442,15 +448,11 @@ const room = async () => {
   const { member, AddMember, RemoveMember } = memberHandler(roomID);
   const authorID = member?.User?.Name || "anonymous";
   const messages = messagesHandler(roomID, authorID);
-  const msgForm = document.getElementById("message-form");
   const sendMsgButton = document.querySelector(
     "#message-form button[type='submit']"
   );
+
   const members = document.getElementById("members");
-
-  roomSizer();
-  qrHandler(notifications);
-
   if (members) {
     members.addEventListener("click", () => {
       members.classList.toggle("active");
@@ -459,13 +461,6 @@ const room = async () => {
 
   messages.renderMessageTimestamps();
 
-  msgForm.onsubmit = () => {
-    if (!sendMsgButton.classList.contains("inactive")) {
-      messages.send();
-    }
-    return false;
-  };
-
   document.querySelectorAll(".pwa").forEach((el) => {
     const msg = `<a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing" target="_blank">Check how to install PWA</a>`;
     el.addEventListener("click", () => {
@@ -473,18 +468,27 @@ const room = async () => {
     });
   });
 
-  msgForm.addEventListener("keypress", (e) => {
-    // if shift+enter is pressed, submit
-    if (e.key === "Enter" && e.shiftKey) {
-      if (
-        document.getElementById("message").value.trim().startsWith("/clear")
-      ) {
-        messages.clear(roomID);
-      } else if (!sendMsgButton.classList.contains("inactive")) {
+  const msgForm = document.getElementById("message-form");
+  if (msgForm) {
+    msgForm.onsubmit = () => {
+      if (!sendMsgButton.classList.contains("inactive")) {
         messages.send();
       }
-    }
-  });
+      return false;
+    };
+    msgForm.addEventListener("keypress", (e) => {
+      // if shift+enter is pressed, submit
+      if (e.key === "Enter" && e.shiftKey) {
+        if (
+          document.getElementById("message").value.trim().startsWith("/clear")
+        ) {
+          messages.clear(roomID);
+        } else if (!sendMsgButton.classList.contains("inactive")) {
+          messages.send();
+        }
+      }
+    });
+  }
 
   SSE(
     roomID,
@@ -528,6 +532,9 @@ const room = async () => {
       messages.loadAll();
     }, 1000);
   });
+
+  roomSizer();
+  qrHandler(notifications);
 };
 
 room();

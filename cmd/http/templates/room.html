@@ -80,7 +80,7 @@
             {{end}}
         </div>
         {{end}}
-        <section class="room flex-container">
+        <section id="msgs-members" class="room flex-container">
             {{if .Requestor}}
             <section id="members">
                 <h5>
@@ -115,7 +115,8 @@
             </section>
         </section>
 
-        <section class="sending" style="{{if not .Requestor }}display: none;{{end}}">
+        {{if .Requestor }}
+        <section class="sending">
             <form id="leave-form" action="/rooms/{{.RoomID}}/leave" method="POST" style="display: none;">
                 <input type="hidden" name="username" value="{{.Requestor}}" />
                 <button id="leave-submit" type="submit" style="height:0; width:0"></button>
@@ -141,7 +142,7 @@
                 </button>
             </form>
         </section>
-        {{if not .Requestor}}
+        {{ else }}
         <div class="joinform-container flex-container">
             <form id="joinform" action="/rooms/{{.RoomID}}" method="POST">
                 <ul class="nolist">
@@ -157,6 +158,7 @@
             </form>
         </div>
         {{end}}
+
         <div id="qr-code-container">
             <div class="card">
                 <h4 class="title">Click / tap to copy</h4>
