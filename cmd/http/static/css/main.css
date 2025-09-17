@@ -72,7 +72,6 @@ main {
 main.room {
   margin: 0 auto;
   padding: 0;
-  position: relative;
 }
 
 input[type="text"],
@@ -408,6 +407,7 @@ span#room-name {
   -webkit-overflow-scrolling: touch;
   height: 100%;
   transform: translateZ(0);
+  z-index: 5;
 }
 
 .msg p {
@@ -564,12 +564,7 @@ span#room-name {
   }
 
   .sending {
-    position: absolute;
-    bottom: env(safe-area-inset-bottom, 1em);
-    left: 0.5em;
-    right: 0.5em;
-    padding: 1em 0.25em;
-    border-top: none;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   body.room {
@@ -617,8 +612,9 @@ span#room-name {
   #joinform .flex-container > label {
     flex: 11;
   }
+
   .sending {
-    padding: 1em 0.25em 0.5em;
+    padding: 1em 0.25em env(safe-area-inset-bottom, 0.5em);
   }
 
   @media all and (max-height: 520px) {
