@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -45,14 +46,16 @@ func (f templateExecutorFunc) Execute(wr io.Writer, data any) error {
 }
 
 type HTTP struct {
-	sse             *sse.SSE
-	api             *api.API
-	staticRoot      string
-	templateHome    templateExecutor
-	templateRoom    templateExecutor
-	templateErr     templateExecutor
-	roomLiveViewers sync.Map
-	broadcastDelay  time.Duration
+	sse               *sse.SSE
+	api               *api.API
+	manifestJSON      map[string]any
+	manifestJSONBytes []byte
+	staticRoot        string
+	templateHome      templateExecutor
+	templateRoom      templateExecutor
+	templateErr       templateExecutor
+	roomLiveViewers   sync.Map
+	broadcastDelay    time.Duration
 }
 
 func (h *HTTP) Sanitize() {
@@ -84,6 +87,39 @@ func (h *HTTP) StaticFilesHandler(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Cache-Control", "no-cache")
 	}
 	http.ServeFile(rw, r, fmt.Sprintf("%s/%s", h.staticRoot, path))
+}
+
+func (h *HTTP) PWAManifestHandler(rw http.ResponseWriter, r *http.Request) {
+
+	rw.Header().Set("Last-Modified", lastModified)
+	rw.Header().Set("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400")
+	rw.Header().Set("Content-Type", "application/manifest+json")
+
+	fromRoom := false
+	referer := r.Header.Get("Referer")
+
+	if strings.Contains(referer, "/rooms/") {
+		fromRoom = true
+	}
+
+	if !fromRoom {
+		_, _ = rw.Write(h.manifestJSONBytes)
+		return
+	}
+
+	manifestCopy := map[string]any{}
+	for k, v := range h.manifestJSON {
+		manifestCopy[k] = v
+	}
+
+	manifestCopy["start_url"] = referer
+	jb, err := json.Marshal(manifestCopy)
+	if err != nil {
+		errHandler(nil, rw, r, err)
+		return
+	}
+	_, _ = rw.Write(jb)
+
 }
 
 func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {

@@ -11,6 +11,7 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,6 +32,13 @@ import (
 
 func getRoutes(ht *HTTP) []*webgo.Route {
 	return []*webgo.Route{
+		{
+			Name:          "pwa-manifest",
+			Method:        http.MethodGet,
+			Pattern:       "/static/js/manifest.json",
+			Handlers:      []http.HandlerFunc{ht.PWAManifestHandler},
+			TrailingSlash: true,
+		},
 		{
 			Name:          "static",
 			Method:        http.MethodGet,
@@ -125,16 +133,29 @@ func initServices(cfg *configs.Config) (*rooms.Rooms, *HTTP) {
 		}
 	}
 
+	manifestBytes, err := os.ReadFile(fmt.Sprintf("%s/js/manifest.json", cfg.HTTP.StaticRoot)) // ignore error
+	if err != nil {
+		panic(err)
+	}
+
+	staticAssetManifest := map[string]any{}
+	err = json.Unmarshal(manifestBytes, &staticAssetManifest) // ignore error
+	if err != nil {
+		panic(err)
+	}
+
 	api := api.NewAPI(rms)
 	ht := &HTTP{
-		api:             api,
-		sse:             sse.New(),
-		staticRoot:      cfg.HTTP.StaticRoot,
-		templateHome:    loadTemplate(cfg.HTTP.TemplateHome, "home", cfg.HTTP.LiveReloadTemplate),
-		templateRoom:    loadTemplate(cfg.HTTP.TemplateRoom, "room", cfg.HTTP.LiveReloadTemplate),
-		templateErr:     loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate),
-		roomLiveViewers: sync.Map{},
-		broadcastDelay:  cfg.Rooms.LiveViewerBroadcastDelay,
+		api:               api,
+		sse:               sse.New(),
+		staticRoot:        cfg.HTTP.StaticRoot,
+		templateHome:      loadTemplate(cfg.HTTP.TemplateHome, "home", cfg.HTTP.LiveReloadTemplate),
+		templateRoom:      loadTemplate(cfg.HTTP.TemplateRoom, "room", cfg.HTTP.LiveReloadTemplate),
+		templateErr:       loadTemplate(cfg.HTTP.TemplateError, "error", cfg.HTTP.LiveReloadTemplate),
+		roomLiveViewers:   sync.Map{},
+		broadcastDelay:    cfg.Rooms.LiveViewerBroadcastDelay,
+		manifestJSON:      staticAssetManifest,
+		manifestJSONBytes: manifestBytes,
 	}
 	ht.Sanitize()
 
