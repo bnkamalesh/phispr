@@ -10,9 +10,9 @@
 
 body {
   background: var(--bg-body);
-  font-family: sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-size: var(--font-body-size);
+  line-height: var(--font-body-line-height);
   min-height: 100vh;
   min-width: 100vw;
   color: var(--text-normal);
@@ -48,7 +48,9 @@ a {
   }
 }
 
+pre,
 p {
+  font-family: inherit;
   margin: 0 0 1em;
 }
 
@@ -410,7 +412,7 @@ span#room-name {
   z-index: 5;
 }
 
-.msg p {
+.msg pre {
   font-size: 0.95em;
   line-height: 1.6;
 }

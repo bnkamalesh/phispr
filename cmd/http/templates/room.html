@@ -108,7 +108,7 @@
                     <li class="msg">
                         <span class="author {{if eq .Author.ID $.Requestor}}you{{end}}">{{.Author.Name}}</span>
                         <span class="datetime" data-datetime="{{ .ServerReceivedAt.UnixMilli }}"></span>
-                        <p>{{.Content}}</p>
+                        <pre class="content">{{ .Content }}</pre>
                     </li>
                     {{end}}
                 </ul>

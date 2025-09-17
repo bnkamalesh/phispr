@@ -86,16 +86,108 @@ const SSE = async (roomID, onMessage, setStatusCallback) => {
   }
 };
 
+const messageRenderer = (roomID, authorID) => {
+  const messageContainer = document.getElementById("messages");
+  const messagesList = document.getElementById("messages-list");
+
+  const li = document.createElement("li");
+  li.classList.add("msg");
+
+  const authorContainer = document.createElement("span");
+  authorContainer.classList.add("author");
+
+  const datetimeContainer = document.createElement("span");
+  datetimeContainer.classList.add("datetime");
+
+  const contentContainer = document.createElement("p");
+  contentContainer.classList.add("content");
+
+  messageContainer.scrollTop = messageContainer.scrollHeight;
+
+  const maxNewLinesAllowed = 5;
+  function replaceNewlines(str, replacement = " ") {
+    let seen = 0;
+    // Match LF or CRLF; preserve the first 5 matches, replace the rest
+    return str.replace(/\r?\n/g, (match) => {
+      seen += 1;
+      return seen <= maxNewLinesAllowed ? match : replacement;
+    });
+  }
+
+  return {
+    renderSingleMsg: function (message) {
+      if (!message || !message.content) return;
+
+      const msgLi = li.cloneNode();
+      const author = authorContainer.cloneNode();
+      author.classList.add(authorID === message?.author ? "you" : "other");
+      author.innerText = message?.author;
+
+      const at = datetimeContainer.cloneNode();
+
+      if (message?.at) {
+        const timestamp = new Date(message.at);
+        at.dataset.datetime = timestamp.getTime();
+        at.innerText = " " + timestamp.toLocaleString();
+      }
+
+      const content = contentContainer.cloneNode();
+      content.innerText = replaceNewlines(message?.content, " \\n ");
+
+      msgLi.appendChild(author);
+      msgLi.appendChild(at);
+      msgLi.appendChild(content);
+      messagesList.appendChild(msgLi);
+
+      /*
+      The minus 320 is a buffer zone to identify if the scroll top is close to 
+      the max possible, so that it auto scrolls when there are new messages and
+      is already close to the bottom.
+      */
+      const maxPossibleScrollTop =
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 320;
+
+      if (messageContainer.scrollTop >= maxPossibleScrollTop) {
+        messageContainer.scrollTo({
+          top: messageContainer.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+
+      // this feels silly, but I couldn't find an easier way to do it.
+      messagesList
+        .querySelector(".init")
+        .setAttribute("style", "display: none");
+    },
+    formatRenderedMsgs: function () {
+      messageContainer.querySelectorAll("li.msg").forEach((el) => {
+        const datecontainer = el.querySelector(".datetime");
+        const timestamp = new Date(parseInt(datecontainer.dataset.datetime));
+        datecontainer.innerText = timestamp.toLocaleString();
+
+        const contentContainer = el.querySelector(".content");
+        contentContainer.innerText = replaceNewlines(
+          contentContainer.innerText,
+          " \\n "
+        );
+      });
+    },
+  };
+};
+
 const messagesHandler = (roomID, authorID) => {
   const localstoreKey = "stored_messages";
   // TODO: implement local storage later
   const store = JSON.parse(localStorage.getItem(localstoreKey)) || {};
   const messagesList = document.getElementById("messages-list");
-  const messageContainer = document.getElementById("messages");
   const loading = document.getElementById("loading");
   const messageTextarea = document.getElementById("message");
 
-  messageContainer.scrollTop = messageContainer.scrollHeight;
+  const msgRenderer = messageRenderer(roomID, authorID);
+  msgRenderer.formatRenderedMsgs();
+
+  const msgForm = document.getElementById("message-form");
+  const sendMsgButton = msgForm?.querySelector("button[type='submit']");
 
   const sendMessage = async (message, callback) => {
     const formData = new FormData();
@@ -124,109 +216,66 @@ const messagesHandler = (roomID, authorID) => {
     }
   };
 
-  const maxNewLinesAllowed = 5;
-  function replaceNewlines(str, replacement = " ") {
-    let seen = 0;
-    // Match LF or CRLF; preserve the first 5 matches, replace the rest
-    return str.replace(/\r?\n/g, (match) => {
-      seen += 1;
-      return seen <= maxNewLinesAllowed ? match : replacement;
+  const clearTextArea = () => {
+    // clear container only if sendmessage was successful
+    // since the submission can be triggered by shift+enter, there's a new line
+    // entered after prepAndSendMessage is executed. Setting a timeout helps
+    // clear the text area properly. This can otherwise be handled using promises
+    // and such to async clear this whole thing.
+    window.setTimeout(() => {
+      messageTextarea.value = "";
+      messageTextarea.textContent = "";
+      messageTextarea.focus();
+    }, 5);
+  };
+  const send = (successCallback) => {
+    const message = messageTextarea.value.trim();
+    if (!message.length) return;
+
+    loading.classList.add("active");
+    sendMessage(message, (response) => {
+      loading.classList.remove("active");
+      if (response) {
+        alert(response);
+        return;
+      }
+      successCallback?.();
+    });
+  };
+
+  if (msgForm) {
+    const onMsgSubmit = () => {
+      if (sendMsgButton.classList.contains("inactive")) return;
+
+      send(clearTextArea);
+    };
+
+    msgForm.onsubmit = () => {
+      onMsgSubmit();
+      return false;
+    };
+    msgForm.addEventListener("keypress", (e) => {
+      // if shift+enter is pressed, submit
+      if (e.key === "Enter" && e.shiftKey) {
+        if (document.getElementById("message").value.trim() === "/clear") {
+          messages.clear(roomID);
+        } else if (!sendMsgButton.classList.contains("inactive")) {
+          send(clearTextArea);
+        }
+      }
     });
   }
-
-  const renderSingleMessage = function (message) {
-    if (!message || !message.content) return;
-
-    const msgLi = document.createElement("li");
-    msgLi.className = "msg";
-
-    const author = document.createElement("span");
-    author.classList.add(
-      "author",
-      authorID === message?.author ? "you" : "other"
-    );
-    author.innerText = message?.author;
-
-    const at = document.createElement("span");
-    at.className = "datetime";
-    if (message?.at) {
-      const timestamp = new Date(message.at);
-      at.dataset.datetime = timestamp.getTime();
-      at.innerText = " " + timestamp.toLocaleString();
-    }
-
-    const content = document.createElement("p");
-    content.className = "content";
-    content.innerText = replaceNewlines(message?.content, " \\n ");
-
-    msgLi.appendChild(author);
-    msgLi.appendChild(at);
-    msgLi.appendChild(content);
-    messagesList.appendChild(msgLi);
-
-    /*
-      The minus 320 is a buffer zone to identify if the scroll top is close to 
-      the max possible, so that it auto scrolls when there are new messages and
-      is already close to the bottom.
-      */
-    const maxPossibleScrollTop =
-      messageContainer.scrollHeight - messageContainer.offsetHeight - 320;
-
-    if (messageContainer.scrollTop >= maxPossibleScrollTop) {
-      messageContainer.scrollTo({
-        top: messageContainer.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-
-    // this feels silly, but I couldn't find an easier way to do it.
-    messagesList.querySelector(".init").setAttribute("style", "display: none");
-  };
 
   return {
     // push a message to the messages and render
     push: function (message, callback) {
-      renderSingleMessage(message);
+      msgRenderer.renderSingleMsg(message);
       callback?.();
-    },
-    renderMessageTimestamps: function () {
-      messageContainer.querySelectorAll("li.msg .datetime").forEach((el) => {
-        const timestamp = new Date(parseInt(el.dataset.datetime));
-        el.innerText = timestamp.toLocaleString();
-      });
-    },
-    clearTextArea: function () {
-      // clear container only if sendmessage was successful
-      // since the submission can be triggered by shift+enter, there's a new line
-      // entered after prepAndSendMessage is executed. Setting a timeout helps
-      // clear the text area properly. This can otherwise be handled using promises
-      // and such to async clear this whole thing.
-      window.setTimeout(() => {
-        messageTextarea.value = "";
-        messageTextarea.textContent = "";
-        messageTextarea.focus();
-        messageTextarea.click();
-      }, 5);
     },
     clear: function (roomID) {
       messagesList.querySelectorAll("li.msg").forEach((li) => li.remove());
       messagesList.querySelector(".init").setAttribute("style", "");
-      this.clearTextArea();
-    },
-    send: function () {
-      const message = messageTextarea.value.trim();
-      if (!message.length) return;
-
-      loading.classList.add("active");
-      sendMessage(message, (response) => {
-        loading.classList.remove("active");
-        if (response) {
-          alert(response);
-          return;
-        }
-        // clear container only if sendmessage was successful
-        this.clearTextArea();
-      });
+      clearTextArea();
     },
     loadAll: function () {
       const lastMsg = messagesList.querySelector("li.msg:last-child");
@@ -459,36 +508,12 @@ const room = async () => {
     });
   }
 
-  messages.renderMessageTimestamps();
-
   document.querySelectorAll(".pwa").forEach((el) => {
     const msg = `<a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing" target="_blank">Check how to install PWA</a>`;
     el.addEventListener("click", () => {
       notifications.notify(msg, 3000);
     });
   });
-
-  const msgForm = document.getElementById("message-form");
-  if (msgForm) {
-    msgForm.onsubmit = () => {
-      if (!sendMsgButton.classList.contains("inactive")) {
-        messages.send();
-      }
-      return false;
-    };
-    msgForm.addEventListener("keypress", (e) => {
-      // if shift+enter is pressed, submit
-      if (e.key === "Enter" && e.shiftKey) {
-        if (
-          document.getElementById("message").value.trim().startsWith("/clear")
-        ) {
-          messages.clear(roomID);
-        } else if (!sendMsgButton.classList.contains("inactive")) {
-          messages.send();
-        }
-      }
-    });
-  }
 
   SSE(
     roomID,

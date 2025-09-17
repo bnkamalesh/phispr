@@ -1,4 +1,9 @@
 .theme-gold {
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-body-size: 16px;
+  --font-body-line-height: 1.5;
+
   --bg-body: #efefef;
   --bg-main: #fff;
   --bg-members: #f9f9f9;
