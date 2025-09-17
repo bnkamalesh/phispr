@@ -500,6 +500,8 @@ const room = async () => {
   const sendMsgButton = document.querySelector(
     "#message-form button[type='submit']"
   );
+  const onlineViewers = document.getElementById("online-viewers");
+  const onlineCountText = onlineViewers?.querySelector("span");
 
   const members = document.getElementById("members");
   if (members) {
@@ -536,9 +538,12 @@ const room = async () => {
 
         case "room_viewers":
           if (data > 1) {
-            sendMsgButton?.setAttribute("title", `Send (live: ${data})`);
+            sendMsgButton?.setAttribute("title", `Send (online: ${data})`);
+            onlineViewers?.style?.setProperty("display", "unset");
+            onlineCountText.innerText = data;
           } else {
             sendMsgButton?.setAttribute("title", `Send`);
+            onlineViewers?.style?.setProperty("display", "none");
           }
           break;
       }

@@ -380,6 +380,13 @@ body.home main {
   color: var(--text-light);
   float: right;
 }
+#online-viewers {
+  display: none;
+  float: left;
+  color: var(--text-light);
+  font-size: 0.35em;
+  line-height: 1;
+}
 
 span#room-name {
   display: block;

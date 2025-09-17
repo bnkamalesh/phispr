@@ -67,6 +67,9 @@
                         title="phantom{{if not .Public}}, unlisted{{end}} room"></span>{{end}}
                     {{.RoomName}}
                 </span>
+                {{if .Requestor}}
+                <small id="online-viewers">online: <span></span></small>
+                {{end}}
             </h1>
         </header>
         {{if .Requestor}}
@@ -76,7 +79,7 @@
             {{else}}
             Note: Only the latest <strong>{{.MessageCapacity}}</strong> messages of the
             <em>room</em>
-            are stored.
+            are retained.
             {{end}}
         </div>
         {{end}}
