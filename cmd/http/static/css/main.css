@@ -72,6 +72,7 @@ main {
 main.room {
   margin: 0 auto;
   padding: 0;
+  position: relative;
 }
 
 input[type="text"],
@@ -563,7 +564,7 @@ span#room-name {
   }
 
   .sending {
-    position: fixed;
+    position: absolute;
     bottom: env(safe-area-inset-bottom, 1em);
     left: 0.5em;
     right: 0.5em;
