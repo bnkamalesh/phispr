@@ -1,4 +1,4 @@
-import { notifier, serviceWorkerSetup } from "./common.js";
+import { notifier, serviceWorkerSetup, reloadStaticAssets } from "./common.js";
 
 const SSE = async (roomID, onMessage, setStatusCallback) => {
   // lastMsgReceived is the timestamp of when the last *successful* message was received
@@ -524,6 +524,7 @@ const room = async () => {
     // loadAll is executed only after a delay, because looks like SSE itself works in the
     // background for a while. This causes double rendering of same messages
     window.setTimeout(() => {
+      reloadStaticAssets();
       messages.loadAll();
     }, 1000);
   });

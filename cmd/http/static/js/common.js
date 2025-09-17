@@ -15,14 +15,16 @@ export const serviceWorkerSetup = async () => {
     await Promise.all(unregisterPromises);
   };
 
-  await assetVersionChecker(unregister);
+  await assetVersionChecker(async () => {
+    await unregister();
 
-  navigator.serviceWorker
-    .register("/static/js/min/serviceworker.js", {
-      scope: "/",
-    })
-    .then(() => console.log("Service Worker registered"))
-    .catch((err) => console.error("Service Worker registration failed", err));
+    navigator.serviceWorker
+      .register("/static/js/min/serviceworker.js", {
+        scope: "/",
+      })
+      .then(() => console.log("Service Worker registered"))
+      .catch((err) => console.error("Service Worker registration failed", err));
+  });
 };
 
 export const assetVersionChecker = async (callback) => {
@@ -32,8 +34,9 @@ export const assetVersionChecker = async (callback) => {
     .then((latestVersion) => {
       if (latestVersion && latestVersion !== assetVersion) {
         localStorage.setItem("assetsVersion", latestVersion);
-        callback?.();
-        window.location.reload();
+        callback?.(latestVersion);
+        // not sure if reload is needed, as static assets are reloaded
+        // window.location.reload();
       }
     })
     .catch((err) => console.error("Asset version check failed", err));
@@ -65,4 +68,32 @@ export const notifier = () => {
       }, delay);
     },
   };
+};
+
+function reloadCSS() {
+  document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+    const newLink = link.cloneNode();
+    // Add a cache-busting query param
+    newLink.href = link.href.split("?")[0] + "?v=" + Date.now();
+    link.parentNode.insertBefore(newLink, link.nextSibling);
+    link.remove();
+  });
+}
+
+function reloadScript() {
+  document.querySelectorAll("script").forEach((script) => {
+    const newScript = document.createElement("script");
+    newScript.src = script.src.split("?")[0] + "?v=" + Date.now();
+    newScript.async = script.async; // maintain order if needed
+    newScript.type = script.type;
+    script.parentNode.insertBefore(newScript, script.nextSibling);
+    script.remove();
+  });
+}
+
+export const reloadStaticAssets = () => {
+  assetVersionChecker(() => {
+    reloadCSS();
+    reloadScript();
+  });
 };

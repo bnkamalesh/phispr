@@ -3,9 +3,9 @@ const NETWORK_TIMEOUT = 500; // milliseconds
 
 const ASSETS = [
   "/",
-  "/static/css/normalize.min.css",
-  "/static/css/main.min.css",
-  "/static/css/themes.css",
+  "/static/css/min/normalize.css",
+  "/static/css/min/main.css",
+  "/static/css/min/themes.css",
 
   "/static/images/boot.svg",
   "/static/images/github-dark.svg",
@@ -24,10 +24,10 @@ const ASSETS = [
   "/static/images/icon-192.png",
   "/static/images/icon-512.png",
 
-  "/static/js/home.min.js",
-  "/static/js/sse.min.js",
-  "/static/js/qr.min.js",
-  "/static/js/room.min.js",
+  "/static/js/min/home.js",
+  "/static/js/min/sse.js",
+  "/static/js/min/qr.js",
+  "/static/js/min/room.js",
 ];
 
 // Install: cache everything

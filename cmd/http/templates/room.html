@@ -31,7 +31,6 @@
     <meta name="twitter:image" content="https://phispr.space/static/images/phispr-active.svg" />
 
 
-    <link rel="stylesheet" href="/static/css/min/main.css">
     {{if .Phantom}}
     {{if .Public}}
     <link rel="icon" type="image/svg+xml" href="/static/images/phispr.svg">
@@ -44,9 +43,12 @@
     <link rel="apple-touch-icon" href="/static/images/icon-192.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <script type="module" src="/static/js/min/common.js"></script>
+    <link rel="stylesheet" href="/static/css/min/main.css?v={{.StaticAssetChecksum}}">
+    <script type="module" src="/static/js/min/common.js?v={{.StaticAssetChecksum}}"></script>
     <!-- loading this here so that room.js can use QRCode without waiting -->
     <script src="/static/js/min/qr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </head>
 
 <body class="room theme-gold">
@@ -170,6 +172,6 @@
     const jsCookieName = "{{.JSCookieName }}" || undefined;
     const isOwner = {{ if eq .Owner .Requestor }}true{{ else }}false{{ end }};
 </script>
-<script type="module" src="/static/js/min/room.js" async></script>
+<script type="module" src="/static/js/min/room.js?v={{.StaticAssetChecksum}}" async></script>
 
 </html>

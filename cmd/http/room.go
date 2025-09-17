@@ -64,19 +64,20 @@ func (h *HTTP) RoomHandler(w http.ResponseWriter, r *http.Request) {
 	val, _ := h.roomLiveViewers.Load(roomID)
 	liveUsers, _ := val.(int)
 	rp := &RoomPayload{
-		RoomID:           room.ID,
-		RoomName:         room.Name,
-		Capacity:         room.Capacity,
-		Live:             uint(liveUsers),
-		MessageCapacity:  room.MessageRetentionCapacity(),
-		Requestor:        requestor,
-		Messages:         room.Messages(),
-		Members:          room.MembersList(),
-		Owner:            owner,
-		Phantom:          room.Phantom,
-		Public:           room.Listed,
-		BroadcastDelayMs: uint(h.broadcastDelay.Milliseconds()),
-		JSCookieName:     cookieNameJS,
+		RoomID:              room.ID,
+		RoomName:            room.Name,
+		Capacity:            room.Capacity,
+		Live:                uint(liveUsers),
+		MessageCapacity:     room.MessageRetentionCapacity(),
+		Requestor:           requestor,
+		Messages:            room.Messages(),
+		Members:             room.MembersList(),
+		Owner:               owner,
+		Phantom:             room.Phantom,
+		Public:              room.Listed,
+		BroadcastDelayMs:    uint(h.broadcastDelay.Milliseconds()),
+		JSCookieName:        cookieNameJS,
+		StaticAssetChecksum: lastModified,
 	}
 
 	if strings.Contains(r.Header.Get("Content-type"), "application/json") {

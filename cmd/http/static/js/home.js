@@ -1,4 +1,4 @@
-import { notifier, serviceWorkerSetup } from "./common.js";
+import { notifier, serviceWorkerSetup, reloadStaticAssets } from "./common.js";
 
 const loadHomeDetails = () => {
   const icoPhantom = document.createElement("span");
@@ -135,6 +135,7 @@ const home = () => {
 
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) {
+      reloadStaticAssets();
       loadHomeDetails();
     }
   });

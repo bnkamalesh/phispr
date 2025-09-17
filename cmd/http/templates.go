@@ -94,31 +94,34 @@ func loadTemplate(path, name string, livereload bool) templateExecutor {
 }
 
 type HomePayload struct {
-	TotalRooms     uint          `json:"total_rooms"`
-	LiveRooms      uint          `json:"live_rooms"`
-	PublicRooms    uint          `json:"public_rooms"`
-	Rooms          []*rooms.Room `json:"rooms"`
-	UnlistedRooms  []*rooms.Room `json:"unlisted_rooms"`
-	CurrentRelease string        `json:"current_release"`
+	TotalRooms          uint          `json:"total_rooms"`
+	LiveRooms           uint          `json:"live_rooms"`
+	PublicRooms         uint          `json:"public_rooms"`
+	Rooms               []*rooms.Room `json:"rooms"`
+	UnlistedRooms       []*rooms.Room `json:"unlisted_rooms"`
+	CurrentRelease      string        `json:"current_release"`
+	StaticAssetChecksum string        `json:"static_asset_checksum"`
 }
 
 type RoomPayload struct {
-	RoomID           string             `json:"room_id"`
-	RoomName         string             `json:"room_name"`
-	Live             uint               `json:"live"`
-	Capacity         uint               `json:"capacity"`
-	MessageCapacity  uint               `json:"message_capacity"`
-	Requestor        string             `json:"requestor"`
-	Messages         []messages.Message `json:"messages"`
-	Members          []rooms.Member     `json:"members"`
-	Owner            string             `json:"owner"`
-	Phantom          bool               `json:"phantom"`
-	Public           bool               `json:"public"`
-	BroadcastDelayMs uint               `json:"broadcast_delay_ms"`
-	JSCookieName     string             `json:"js_cookie_name"`
+	RoomID              string             `json:"room_id"`
+	RoomName            string             `json:"room_name"`
+	Live                uint               `json:"live"`
+	Capacity            uint               `json:"capacity"`
+	MessageCapacity     uint               `json:"message_capacity"`
+	Requestor           string             `json:"requestor"`
+	Messages            []messages.Message `json:"messages"`
+	Members             []rooms.Member     `json:"members"`
+	Owner               string             `json:"owner"`
+	Phantom             bool               `json:"phantom"`
+	Public              bool               `json:"public"`
+	BroadcastDelayMs    uint               `json:"broadcast_delay_ms"`
+	JSCookieName        string             `json:"js_cookie_name"`
+	StaticAssetChecksum string             `json:"static_asset_checksum"`
 }
 
 type ErrorPayload struct {
-	Code    int    `json:"code,omitempty"`
-	Message string `json:"message,omitempty"`
+	Code                int    `json:"code,omitempty"`
+	Message             string `json:"message,omitempty"`
+	StaticAssetChecksum string `json:"static_asset_checksum"`
 }
