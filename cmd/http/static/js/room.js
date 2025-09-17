@@ -99,7 +99,7 @@ const messageRenderer = (roomID, authorID) => {
   const datetimeContainer = document.createElement("span");
   datetimeContainer.classList.add("datetime");
 
-  const contentContainer = document.createElement("p");
+  const contentContainer = document.createElement("pre");
   contentContainer.classList.add("content");
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
