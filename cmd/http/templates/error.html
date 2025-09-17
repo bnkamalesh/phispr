@@ -32,11 +32,6 @@
         container.innerHTML = text.replace(/^room "([^"]+)" already exists$/, (match, word) => {
             return `room <a href="/rooms/${encodeURIComponent(word)}"><strong>${word}</strong></a> already exists`;
         });
-
-        const body = document.querySelector("body");
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            body.classList.add("pwa")
-        }
     }());
 </script>
 
