@@ -1,4 +1,4 @@
-import { notifier, serviceWorkerSetup, reloadStaticAssets } from "./common.js";
+import { notifier, reloadStaticAssets } from "./common.js";
 
 const loadHomeDetails = () => {
   const icoPhantom = document.createElement("span");
@@ -121,7 +121,6 @@ const newRoomForm = () => {
 };
 
 const home = () => {
-  serviceWorkerSetup();
   newRoomForm();
 
   const notifications = notifier();

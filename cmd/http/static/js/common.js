@@ -97,3 +97,9 @@ export const reloadStaticAssets = () => {
     reloadScript();
   });
 };
+
+const init = () => {
+  serviceWorkerSetup();
+};
+
+init();

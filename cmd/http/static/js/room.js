@@ -1,4 +1,4 @@
-import { notifier, serviceWorkerSetup, reloadStaticAssets } from "./common.js";
+import { notifier, reloadStaticAssets } from "./common.js";
 
 const SSE = async (roomID, onMessage, setStatusCallback) => {
   // lastMsgReceived is the timestamp of when the last *successful* message was received
@@ -490,8 +490,6 @@ const roomSizer = () => {
 };
 
 const room = async () => {
-  serviceWorkerSetup();
-
   const notifications = notifier();
   const roomID = window.location.pathname.split("/").pop();
   const { member, AddMember, RemoveMember } = memberHandler(roomID);
