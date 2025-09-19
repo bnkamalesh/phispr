@@ -120,9 +120,27 @@ const newRoomForm = () => {
   chkBoxUnlisted.addEventListener("change", adjustTitle);
 };
 
+const visitroomForm = () => {
+  const input = document.getElementById("join-room-url");
+  if (!input) return;
+
+  document.getElementById("visit-room-form").onsubmit = (e) => {
+    e.preventDefault();
+    const roomId = input.value.trim();
+    if (!roomId) return;
+    if (roomId.startsWith("https://") || roomId.startsWith("http://")) {
+      window.location.href = roomId;
+    } else {
+      window.location.href = `/rooms/${roomId}`;
+      return;
+    }
+  };
+};
+
+let pageShowtimer = undefined;
 const home = () => {
   newRoomForm();
-
+  visitroomForm();
   const notifications = notifier();
 
   document.querySelectorAll(".pwa").forEach((el) => {
@@ -134,7 +152,6 @@ const home = () => {
 
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) {
-      reloadStaticAssets();
       loadHomeDetails();
     }
   });

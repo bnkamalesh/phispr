@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -95,31 +94,8 @@ func (h *HTTP) PWAManifestHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400")
 	rw.Header().Set("Content-Type", "application/manifest+json")
 
-	fromRoom := false
-	referer := r.Header.Get("Referer")
-
-	if strings.Contains(referer, "/rooms/") {
-		fromRoom = true
-	}
-
-	if !fromRoom {
-		_, _ = rw.Write(h.manifestJSONBytes)
-		return
-	}
-
-	manifestCopy := map[string]any{}
-	for k, v := range h.manifestJSON {
-		manifestCopy[k] = v
-	}
-
-	manifestCopy["start_url"] = referer
-	jb, err := json.Marshal(manifestCopy)
-	if err != nil {
-		errHandler(nil, rw, r, err)
-		return
-	}
-	_, _ = rw.Write(jb)
-
+	// dynamic start_url seems to be breaking Chrome PWA somehow
+	_, _ = rw.Write(h.manifestJSONBytes)
 }
 
 func (h *HTTP) HomeHandler(w http.ResponseWriter, r *http.Request) {

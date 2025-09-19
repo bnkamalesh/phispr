@@ -1,4 +1,4 @@
-import { notifier, reloadStaticAssets } from "./common.js";
+import { notifier } from "./common.js";
 
 const SSE = async (roomID, onMessage, setStatusCallback) => {
   // lastMsgReceived is the timestamp of when the last *successful* message was received
@@ -105,7 +105,19 @@ const messageRenderer = (roomID, authorID) => {
   messageContainer.scrollTop = messageContainer.scrollHeight;
 
   const maxNewLinesAllowed = 5;
+  // 10 here is an arbitrary number, trying to identify if the new lines
+  // are *justified* to be there. This is not a foolproof way, but should
+  // work in most cases.
+  // e.g. if a message has 50 new lines, but also has 500 characters, then
+  // it is justified to have that many new lines.
+  const charsPerLinebreak = 10;
+
   function replaceNewlines(str, replacement = " ") {
+    // find number of new lines
+    const newLineCount = (str.match(/\r?\n/g) || []).length;
+    if (newLineCount <= maxNewLinesAllowed) return str;
+    if (str.length / newLineCount > charsPerLinebreak) return str;
+
     let seen = 0;
     // Match LF or CRLF; preserve the first 5 matches, replace the rest
     return str.replace(/\r?\n/g, (match) => {
@@ -140,12 +152,12 @@ const messageRenderer = (roomID, authorID) => {
       messagesList.appendChild(msgLi);
 
       /*
-      The minus 320 is a buffer zone to identify if the scroll top is close to 
+      The minus 512 is a buffer zone to identify if the scroll top is close to 
       the max possible, so that it auto scrolls when there are new messages and
       is already close to the bottom.
       */
       const maxPossibleScrollTop =
-        messageContainer.scrollHeight - messageContainer.offsetHeight - 320;
+        messageContainer.scrollHeight - messageContainer.offsetHeight - 512;
 
       if (messageContainer.scrollTop >= maxPossibleScrollTop) {
         messageContainer.scrollTo({
@@ -483,6 +495,12 @@ const roomSizer = () => {
   };
 
   const resize = () => {
+    const vh = Math.max(
+      document.documentElement.clientHeight || 0,
+      window.innerHeight || 0
+    );
+    if (vh > 1020) return;
+
     msgMemContainer.style.height = `${findHeight() - 2}px`;
   };
   window.addEventListener("resize", resize);
@@ -556,7 +574,6 @@ const room = async () => {
     // loadAll is executed only after a delay, because looks like SSE itself works in the
     // background for a while. This causes double rendering of same messages
     window.setTimeout(() => {
-      reloadStaticAssets();
       messages.loadAll();
     }, 1000);
   });

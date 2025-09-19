@@ -70,32 +70,8 @@ export const notifier = () => {
   };
 };
 
-function reloadCSS() {
-  document.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
-    const newLink = link.cloneNode();
-    // Add a cache-busting query param
-    newLink.href = link.href.split("?")[0] + "?v=" + Date.now();
-    link.parentNode.insertBefore(newLink, link.nextSibling);
-    link.remove();
-  });
-}
-
-function reloadScript() {
-  document.querySelectorAll("script").forEach((script) => {
-    const newScript = document.createElement("script");
-    newScript.src = script.src.split("?")[0] + "?v=" + Date.now();
-    newScript.async = script.async; // maintain order if needed
-    newScript.type = script.type;
-    script.parentNode.insertBefore(newScript, script.nextSibling);
-    script.remove();
-  });
-}
-
 export const reloadStaticAssets = () => {
-  assetVersionChecker(() => {
-    reloadCSS();
-    reloadScript();
-  });
+  assetVersionChecker();
 };
 
 const init = () => {
