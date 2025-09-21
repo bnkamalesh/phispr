@@ -15,7 +15,6 @@
     <title>Phispr: {{.RoomName}}</title>
     {{end}}
 
-    <!-- Open Graph -->
     <meta property="og:title" content="Phispr – A Space of Phantom Whispers" />
     <meta property="og:description"
         content="Enter Phispr: a space of phantom whispers. Absolute anonymity, zero tracking, and ephemeral messages that vanish into the void." />
@@ -23,7 +22,6 @@
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://phispr.space/static/images/phispr-active.svg" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Phispr – A Space of Phantom Whispers" />
     <meta name="twitter:description"
@@ -68,7 +66,7 @@
                     {{.RoomName}}
                 </span>
                 {{if .Requestor}}
-                <small id="online-viewers">online: <span></span></small>
+                <small id="online-viewers"><span></span> online</small>
                 {{end}}
             </h1>
         </header>
