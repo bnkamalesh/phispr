@@ -13,8 +13,8 @@ body {
   font-family: var(--font-body);
   font-size: var(--font-body-size);
   line-height: var(--font-body-line-height);
-  min-height: 100vh;
-  min-width: 100vw;
+  min-height: 100dvh;
+  min-width: 100dvw;
   color: var(--text-normal);
   display: flex;
   justify-content: center; /* horizontal centering */
@@ -399,12 +399,15 @@ span#room-name {
 }
 
 .room.flex-container {
-  height: 60vh;
   gap: 0;
 }
 
 .room.flex-container > * {
   align-content: first baseline;
+}
+
+#msgs-members {
+  height: 80dvh;
 }
 
 #members,
@@ -527,7 +530,7 @@ span#room-name {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 100vh;
+  bottom: 100dvh;
   left: 0;
   background: var(--bg-overlay);
   z-index: -1;
@@ -543,7 +546,7 @@ span#room-name {
 #qr-code-container .card {
   background-color: var(--bg-main);
   max-width: 20em;
-  margin: 10vh auto 0;
+  margin: 10dvh auto 0;
   text-align: center;
   padding: 1em 1.5em;
   border-radius: var(--border-radius);
@@ -571,7 +574,7 @@ span#room-name {
   }
 
   main {
-    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .sending {

@@ -63,8 +63,6 @@ export const notifier = () => {
         window.setTimeout(() => {
           container.innerHTML = "";
         }, 1000);
-
-        timer = undefined;
       }, delay);
     },
   };

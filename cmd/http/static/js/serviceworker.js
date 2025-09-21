@@ -1,5 +1,5 @@
 const CACHE_NAME = "phispr-cache-v23";
-const NETWORK_TIMEOUT = 500; // milliseconds
+const NETWORK_TIMEOUT = 2000; // milliseconds
 
 const ASSETS = [
   "/",

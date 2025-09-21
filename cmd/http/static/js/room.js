@@ -499,7 +499,12 @@ const roomSizer = () => {
       document.documentElement.clientHeight || 0,
       window.innerHeight || 0
     );
-    if (vh > 1020) return;
+    if (vh > 1020) {
+      if (msgMemContainer.style.height) {
+        msgMemContainer.style.height = null;
+      }
+      return;
+    }
 
     msgMemContainer.style.height = `${findHeight() - 2}px`;
   };
@@ -569,11 +574,13 @@ const room = async () => {
     }
   );
 
+  let timer = undefined;
   window.addEventListener("pageshow", (event) => {
     if (!event.persisted) return;
     // loadAll is executed only after a delay, because looks like SSE itself works in the
     // background for a while. This causes double rendering of same messages
-    window.setTimeout(() => {
+    if (timer) clearTimeout(timer);
+    timer = window.setTimeout(() => {
       messages.loadAll();
     }, 1000);
   });
