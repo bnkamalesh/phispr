@@ -69,10 +69,11 @@ button {
 
 main {
   background: var(--bg-main);
+  width: 100%;
   max-width: 70em;
   padding: 1em 1.5em;
   border: 1px solid var(--border);
-
+  margin: 0 auto;
   flex: 1;
 }
 
@@ -332,6 +333,10 @@ h1 .phantom {
   float: right;
 }
 
+.spacer-bottom {
+  margin-bottom: 2em;
+}
+
 #notification {
   background-color: var(--theme-light);
   border-bottom: 1px solid var(--theme-hex);
@@ -562,7 +567,7 @@ span#room-name {
   }
 
   .only-pwa {
-    display: unset;
+    display: inherit;
   }
 
   main {
