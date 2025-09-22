@@ -391,7 +391,7 @@ h1 .phantom {
 
 span#room-name {
   display: block;
-  max-width: 50%;
+  max-width: 70%;
   overflow: hidden;
   height: 1.5em;
   text-overflow: ellipsis;
@@ -601,6 +601,10 @@ span#room-name {
     gap: 0;
   }
 
+  #room-name {
+    font-size: 18px;
+  }
+
   #members {
     max-width: unset;
     max-height: 3em;
@@ -616,6 +620,7 @@ span#room-name {
     overflow: auto;
   }
 
+  #visit-room-form .flex-container,
   #joinform .flex-container,
   .sub-header.flex-container,
   #message-form.flex-container {
