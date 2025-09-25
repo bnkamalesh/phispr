@@ -1,6 +1,10 @@
 import { notifier, reloadStaticAssets } from "./common.js";
 
-const loadHomeDetails = () => {
+let loadAllInprogress = false;
+const loadAll = () => {
+  if (loadAllInprogress) return;
+  loadAllInprogress = true;
+
   const icoPhantom = document.createElement("span");
   const icoUnlistedPhantom = document.createElement("span");
   icoPhantom.classList.add("ico", "phantom");
@@ -93,6 +97,7 @@ const loadHomeDetails = () => {
   };
 
   fetcher(renderRooms);
+  loadAllInprogress = false;
 };
 
 const newRoomForm = () => {
@@ -151,9 +156,8 @@ const home = () => {
   });
 
   window.addEventListener("pageshow", (event) => {
-    if (event.persisted) {
-      loadHomeDetails();
-    }
+    if (!event.persisted) return;
+    loadAll();
   });
 };
 

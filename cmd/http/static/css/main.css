@@ -382,7 +382,7 @@ h1 .phantom {
   float: right;
 }
 #online-viewers {
-  display: none;
+  opacity: 0;
   float: left;
   color: var(--text-light);
   font-size: 0.35em;

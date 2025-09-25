@@ -90,17 +90,17 @@ const messageRenderer = (roomID, authorID) => {
   const messageContainer = document.getElementById("messages");
   const messagesList = document.getElementById("messages-list");
 
-  const li = document.createElement("li");
-  li.classList.add("msg");
+  const nodeMsgLi = document.createElement("li");
+  nodeMsgLi.classList.add("msg");
 
-  const authorContainer = document.createElement("span");
-  authorContainer.classList.add("author");
+  const nodeAuthorSpan = document.createElement("span");
+  nodeAuthorSpan.classList.add("author");
 
-  const datetimeContainer = document.createElement("span");
-  datetimeContainer.classList.add("datetime");
+  const nodeDatetimeSpan = document.createElement("span");
+  nodeDatetimeSpan.classList.add("datetime");
 
-  const contentContainer = document.createElement("pre");
-  contentContainer.classList.add("content");
+  const nodeContentPre = document.createElement("pre");
+  nodeContentPre.classList.add("content");
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
 
@@ -130,12 +130,12 @@ const messageRenderer = (roomID, authorID) => {
     renderSingleMsg: function (message) {
       if (!message || !message.content) return;
 
-      const msgLi = li.cloneNode();
-      const author = authorContainer.cloneNode();
+      const msgLi = nodeMsgLi.cloneNode();
+      const author = nodeAuthorSpan.cloneNode();
       author.classList.add(authorID === message?.author ? "you" : "other");
       author.innerText = message?.author;
 
-      const at = datetimeContainer.cloneNode();
+      const at = nodeDatetimeSpan.cloneNode();
 
       if (message?.at) {
         const timestamp = new Date(message.at);
@@ -143,7 +143,7 @@ const messageRenderer = (roomID, authorID) => {
         at.innerText = " " + timestamp.toLocaleString();
       }
 
-      const content = contentContainer.cloneNode();
+      const content = nodeContentPre.cloneNode();
       content.innerText = replaceNewlines(message?.content, " \\n ");
 
       msgLi.appendChild(author);
@@ -289,7 +289,11 @@ const messagesHandler = (roomID, authorID) => {
       messagesList.querySelector(".init").setAttribute("style", "");
       clearTextArea();
     },
-    loadAll: function () {
+    // TODO: loadall should just render given list of messages, after checking for
+    // duplicates.
+    loadAll: function (messages) {
+      if (!messages || !messages.length) return;
+
       const lastMsg = messagesList.querySelector("li.msg:last-child");
       let lastUnixMilli = 0;
       const dt =
@@ -302,32 +306,17 @@ const messagesHandler = (roomID, authorID) => {
       }
 
       const lastTimestamp = lastUnixMilli || 0;
-      // this is a silly way of ignoring duplicate messages and prone to bugs.
-      // but is the simplest way of avoiding duplicates.
+      messages.forEach((message) => {
+        // timestamp based check can be buggy based on concurrent messages delivered at same time
+        const msgAt = new Date(message.ServerReceivedAt)?.getTime();
+        if (!msgAt || isNaN(msgAt) || lastTimestamp >= msgAt) return;
 
-      fetch(`/rooms/${roomID}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "GET",
-      })
-        .then((response) => response.json())
-        .then((payload) => {
-          if (!payload || !payload?.data) return;
-          const messages = payload?.data?.messages || [];
-
-          messages.forEach((message) => {
-            // timestamp based check can be buggy based on concurrent messages delivered at same time
-            const msgAt = new Date(message.ServerReceivedAt)?.getTime();
-            if (!msgAt || isNaN(msgAt) || lastTimestamp >= msgAt) return;
-
-            this.push({
-              content: message.Content,
-              at: message.ServerReceivedAt,
-              author: message.Author.Name,
-            });
-          });
+        this.push({
+          content: message.Content,
+          at: message.ServerReceivedAt,
+          author: message.Author.Name,
         });
+      });
     },
   };
 };
@@ -335,6 +324,14 @@ const messagesHandler = (roomID, authorID) => {
 const memberHandler = (roomID) => {
   const membersList = document.getElementById("members-list");
   const memberCount = document.getElementById("members-count");
+  const nodeLi = document.createElement("li");
+  nodeLi.classList.add("member");
+  const nodeAuthorSpan = document.createElement("span");
+  nodeAuthorSpan.classList.add("author");
+
+  const nodeBootButton = document.createElement("button");
+  nodeBootButton.classList.add("ico", "boot");
+
   // jsCookieName is declared outside of this file, directly in room.html
   const cookieParts = document?.cookie
     .split("; ")
@@ -397,43 +394,80 @@ const memberHandler = (roomID) => {
     });
   }
 
+  const addBootButton = (li, member) => {
+    const bootButton = nodeBootButton.cloneNode();
+    bootButton.title = `Boot '${member?.User?.Name}'`;
+    bootButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      bootMember(member?.User?.ID);
+    });
+    li.appendChild(bootButton);
+  };
+
   return {
     member: parsed,
     // AddMember is used to add a new member to the room
     AddMember: function (member) {
-      if (!membersList) return;
+      if (!membersList || !member) return;
       const authorName = member?.User?.Name;
-
-      const li = document.createElement("li");
+      const li = nodeLi.cloneNode();
       li.dataset.author = authorName;
-      const span = document.createElement("span");
-      span.innerText = authorName + " ";
-      span.setAttribute("title", span.innerText);
+      li.dataset.authorid = member?.User?.ID;
+
+      const span = nodeAuthorSpan.cloneNode();
+      if (member?.User?.ID === parsed?.User?.ID) {
+        span.classList.add("you");
+      }
+
+      span.innerText = authorName;
+      span.setAttribute("title", authorName);
       li.appendChild(span);
+
       // isOwner is declared outside of this file, directly in room.html
       if (isOwner) {
-        const bootButton = document.createElement("button");
-        bootButton.classList.add("ico", "boot");
-        bootButton.title = `Boot ${authorName}`;
-        bootButton.addEventListener("click", (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          bootMember(member?.User?.ID);
-        });
-        li.appendChild(bootButton);
+        addBootButton(li, member);
       }
       membersList.appendChild(li);
       memberCount.innerText = member.TotalMembers;
     },
     RemoveMember: function (member, currentUserID) {
       if (!membersList) return;
-      const authorName = member?.User?.Name;
-      membersList.querySelector(`[data-author="${authorName}"]`).remove();
+      const authorID = member?.User?.ID;
+      membersList.querySelector(`[data-authorid="${authorID}"]`).remove();
       memberCount.innerText = member.TotalMembers;
       if (currentUserID == member?.User?.ID) {
         alert(`You were booted from this room`);
         window.location.href = window.location.href;
       }
+    },
+    loadAll: function (members) {
+      if (!members || !members.length || !membersList) return;
+
+      const existingAuthIDs = {};
+      const allMemberIDs = {};
+      members.forEach((member) => {
+        allMemberIDs[member?.User?.ID] = true;
+      });
+
+      membersList.querySelectorAll(".member").forEach((memLi) => {
+        const authorID = memLi.dataset.authorid || null;
+        existingAuthIDs[authorID] = true;
+        if (!allMemberIDs[authorID]) {
+          if (authorID === parsed?.User?.ID) {
+            this.RemoveMember(parsed, parsed?.User?.ID);
+            return;
+          }
+          memLi.remove();
+        }
+      });
+
+      members.forEach((member) => {
+        if (existingAuthIDs[member?.User?.ID]) return;
+        this.AddMember(member);
+      });
+
+      memberCount.innerText = members.length;
     },
     BootMember: bootMember,
   };
@@ -515,19 +549,19 @@ const roomSizer = () => {
 const room = async () => {
   const notifications = notifier();
   const roomID = window.location.pathname.split("/").pop();
-  const { member, AddMember, RemoveMember } = memberHandler(roomID);
-  const authorID = member?.User?.Name || "anonymous";
-  const messages = messagesHandler(roomID, authorID);
+  const memHandler = memberHandler(roomID);
+  const authorID = memHandler.member?.User?.Name || "anonymous";
+  const msgHandler = messagesHandler(roomID, authorID);
   const sendMsgButton = document.querySelector(
     "#message-form button[type='submit']"
   );
   const onlineViewers = document.getElementById("online-viewers");
   const onlineCountText = onlineViewers?.querySelector("span");
 
-  const members = document.getElementById("members");
-  if (members) {
-    members.addEventListener("click", () => {
-      members.classList.toggle("active");
+  const membersContainer = document.getElementById("members");
+  if (membersContainer) {
+    membersContainer.addEventListener("click", () => {
+      membersContainer.classList.toggle("active");
     });
   }
 
@@ -538,19 +572,42 @@ const room = async () => {
     });
   });
 
+  let loadAllInprogress = false;
+  const loadAll = () => {
+    if (loadAllInprogress) return;
+    loadAllInprogress = true;
+
+    fetch(`/rooms/${roomID}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((payload) => {
+        if (!payload || !payload?.data) return;
+
+        msgHandler.loadAll(payload.data.messages || []);
+        memHandler.loadAll(payload.data.members || []);
+      })
+      .finally(() => {
+        loadAllInprogress = false;
+      });
+  };
+
   SSE(
     roomID,
     (type, data) => {
       switch (type) {
         case "room_join":
-          AddMember(data);
+          memHandler.AddMember(data);
           break;
         case "room_leave":
-          RemoveMember(data, authorID);
+          memHandler.RemoveMember(data, authorID);
           break;
 
         case "room_message":
-          messages.push({
+          msgHandler.push({
             content: data.Content,
             at: data.ServerReceivedAt,
             author: data.Author.Name,
@@ -558,19 +615,21 @@ const room = async () => {
           break;
 
         case "room_viewers":
+          onlineCountText.innerText = data;
+
           if (data > 1) {
-            sendMsgButton?.setAttribute("title", `Send (online: ${data})`);
-            onlineViewers?.style?.setProperty("display", "unset");
-            onlineCountText.innerText = data;
+            onlineViewers?.style?.setProperty("opacity", "1");
           } else {
-            sendMsgButton?.setAttribute("title", `Send`);
-            onlineViewers?.style?.setProperty("display", "none");
+            onlineViewers?.style?.setProperty("opacity", null);
           }
           break;
       }
     },
-    () => {
-      messages.loadAll();
+    (status) => {
+      if (status == "inactive") {
+        onlineViewers?.style?.setProperty("opacity", null);
+      }
+      loadAll();
     }
   );
 
@@ -578,11 +637,11 @@ const room = async () => {
   window.addEventListener("pageshow", (event) => {
     if (!event.persisted) return;
     // loadAll is executed only after a delay, because looks like SSE itself works in the
-    // background for a while. This causes double rendering of same messages
+    // background for a while. This causes double rendering of same messages, members etc.
     if (timer) clearTimeout(timer);
     timer = window.setTimeout(() => {
-      messages.loadAll();
-    }, 1000);
+      loadAll();
+    }, 2000);
   });
 
   roomSizer();
