@@ -239,9 +239,8 @@ func (rs *Rooms) NewMessage(roomID string, memberToken string, message string) (
 		room.msgs.Add(msg)
 	}
 
-	now := time.Now()
-	room.LastActivityAt = now
-	member.User.LastMessage = now
+	room.LastActivityAt = msg.ServerReceivedAt
+	member.User.LastMessage = msg.ServerReceivedAt
 
 	return msg, nil
 }
