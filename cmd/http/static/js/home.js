@@ -142,7 +142,6 @@ const visitroomForm = () => {
   };
 };
 
-let pageShowtimer = undefined;
 const home = () => {
   newRoomForm();
   visitroomForm();

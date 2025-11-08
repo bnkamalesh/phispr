@@ -404,7 +404,7 @@ const memberHandler = (roomID) => {
     });
     li.appendChild(bootButton);
   };
-
+  let bootAlertTimeout = undefined;
   return {
     member: parsed,
     // AddMember is used to add a new member to the room
@@ -437,8 +437,11 @@ const memberHandler = (roomID) => {
       membersList.querySelector(`[data-authorid="${authorID}"]`).remove();
       memberCount.innerText = member.TotalMembers;
       if (currentUserID == member?.User?.ID) {
-        alert(`You were booted from this room`);
-        window.location.href = window.location.href;
+        clearTimeout(bootAlertTimeout);
+        bootAlertTimeout = window.setTimeout(() => {
+          alert(`You were booted from this room`);
+          window.location.href = window.location.href;
+        }, 500);
       }
     },
     loadAll: function (members) {
